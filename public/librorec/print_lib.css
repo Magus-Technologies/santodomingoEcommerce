@@ -1,0 +1,18 @@
+@media print {
+    .container {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: initial;
+    }
+
+    .as_btn_save {
+        display: none;
+    }
+    .select2, #tienda, .select2-selection{width:100% !important;}
+    h1{font-size:30px}
+    button, .as_btn_print{display:none !important;}
+}

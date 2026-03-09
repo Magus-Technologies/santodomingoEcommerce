@@ -1,0 +1,32 @@
+[2026-02-21 20:08:55] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-21 20:08:55] ERROR en sopprod: Cannot add or update a child row: a foreign key constraint fails (`compuvision`.`sopprod`, CONSTRAINT `FK_SOPPROD_SOPLINEA` FOREIGN KEY (`cod_clasi`) REFERENCES `soplinea` (`cod_line`) ON UPDATE CASCADE)
+[2026-02-21 20:10:21] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-21 20:10:21] ERROR FINAL sopprod: Cannot add or update a child row: a foreign key constraint fails (`compuvision`.`sopprod`, CONSTRAINT `FK_SOPPROD_SOPLINEA` FOREIGN KEY (`cod_clasi`) REFERENCES `soplinea` (`cod_line`) ON UPDATE CASCADE) (L:01 S:1)
+[2026-02-21 20:11:52] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-21 20:11:52] ¡ÉXITO TOTAL! Registrado con Línea: INSERT INTO sopprod VALUES (
+                '0008',
+                '1', 
+                '1', 
+                '01',
+                '','','','dwqdqw','001','UND','1',
+                123,123,'0000-00-00',0,'','0000-00-00',1,1,1,'',0,0,3,
+                '','','','','','','','','','','','','','','',0,0,0,0,0,0,'',0,NOW(),
+                0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,''
+            )
+[2026-02-21 20:11:52] ERROR FINAL sopprod: Cannot add or update a child row: a foreign key constraint fails (`compuvision`.`sopprod`, CONSTRAINT `FK_SOPPROD_SOPLINEA` FOREIGN KEY (`cod_clasi`) REFERENCES `soplinea` (`cod_line`) ON UPDATE CASCADE) (L:01 S:1)
+[2026-02-21 20:15:09] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-21 20:15:09] ¡ÉXITO TOTAL! Registrado con Línea: 01 y Sub2: 1
+[2026-02-21 20:16:39] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-21 20:16:39] ¡ÉXITO TOTAL! Registrado con Línea: 01 y Sub2: 1
+[2026-02-21 20:43:41] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-21 20:43:41] ¡ÉXITO TOTAL! Registrado con Línea: 01 y Sub2: 1
+[2026-02-21 23:39:09] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-21 23:39:09] ¡ÉXITO TOTAL! Registrado con Línea: 01 y Sub2: 1
+[2026-02-22 14:28:59] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-22 14:28:59] ¡ÉXITO TOTAL! Registrado con Línea: 01 y Sub2: 1
+[2026-02-22 14:30:58] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-22 14:30:59] ¡ÉXITO TOTAL! Registrado con Línea: 01 y Sub2: 1
+[2026-02-25 15:31:16] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-02-25 15:31:16] ¡ÉXITO TOTAL! Registrado con Línea: 01 y Sub2: 1
+[2026-03-01 14:00:07] --- INICIO PROCESO AGREGAR PRODUCTO ---
+[2026-03-01 14:00:07] ¡ÉXITO TOTAL! Registrado con Línea: 01 y Sub2: 1

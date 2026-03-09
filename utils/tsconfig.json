@@ -1,0 +1,195 @@
+{
+    "banner_pricipal": [
+        {
+            "index": -1,
+            "imagen": "NBOwc6bPDezCK4SRPt0Yz3ob7FL7PZ8BPljSeYAewiONgPiMI1kMh43Qg76I0BtxvdXcbpgA6zWb7kB3.webp",
+            "titulo": "vinoypisco",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "url": "https:\/\/xn--viasantodomingo-zqb.com\/public_html\/CYM\/shop-list-ctg.php?ctg=002",
+            "estado": "1"
+        }
+    ],
+    "bannerprod1": {
+        "prod": "133",
+        "image": "n6uuP3VNPGMrmpnMBIyrsSGY8Ao5ZP0CLlwafIovP0c2gGEhP2O7KVVJWAFwP5yahl1Dufy9WR22Y6an.jpg"
+    },
+    "bannerprod2": {
+        "prod": "1415",
+        "image": "VfDg3bUaiOEyYfaWEKQCUVgyb6jDpLhArlhkC1AlGFZfk01pAHsUdOI4Ks703f1kGYLJPMuVRJ029sh9.jpg"
+    },
+    "banner1": {
+        "prod": "",
+        "image": "M7R48fHWGps4d0uvT8CXgcawyXShSdn2wRf3MiAe4vVtG7sURZ3qlkfj2GfLl89Tbot3uR3lXfRJxDW2.jpeg"
+    },
+    "banner2": {
+        "prod": "",
+        "image": "477AuND5t8tSLbU0XF3C5E4W6mMscIye5EwpwBFOzNQoZbrCSexomyxHWobHfNr7Ho7IInfePn9jAliq.jpeg"
+    },
+    "banercentarl1": {
+        "prod": "993",
+        "image": "eEpngrsS4fzbLPCgobhF2P16kyomosrIwWwTDem79cZLrcsV4PbxfStFHYrwGZ53vrMzMyxLQMX8pFUj.jpg"
+    },
+    "banercentarl2": {
+        "prod": "728",
+        "image": "tHdei93DiBMFDRyDzmiefd29Y5IKLTZ5a2Z91TCaUPgYhUbW691cctc1pkC14bwUTMTLfWm0mIOJdqga.jpg"
+    },
+    "banercentarl3": {
+        "prod": "1252",
+        "image": "VDTJafkQ1jolsXuX6qjPIfnQt7Y2FnAaqTkHzLXquCSdaC0WtZm14PHoNfgSJgtz0T7peUWPXpsxsjJb.jpg"
+    },
+    "redessociales": {
+        "id_facebook": "VI\u00d1ASANTODOMINGO | Tienda de Vino y Pisco",
+        "facebook": "https:\/\/www.facebook.com\/",
+        "twitter": "#",
+        "google_plus": "##",
+        "youtube": "#",
+        "instagram": "https:\/\/www.instagram.com\/",
+        "whatsapp": [
+            {
+                "numero": "51930570018",
+                "nombre": "ASESOR HECTOR",
+                "mensaje": "HOLA TE SALUDA VI\u00d1ASANTODOMINGO  EN QUE PUEDO AYUDARTE",
+                "dia1": "1",
+                "dia2": "0",
+                "hora1": "11",
+                "modo1": "AM",
+                "hora2": "8",
+                "modo2": "PM",
+                "estado": true
+            }
+        ]
+    },
+    "direccion": "Ub\u00edcanos en Fdo. Santa Adela - Nuevo Imperial - Ca\u00f1ete",
+    "email": "ventas@vi\u00f1asantodomingo.com",
+    "numero_central": "930 570 018",
+    "titulo": "VI\u00d1ASANTODOMINGO | Tienda de Vino y Pisco",
+    "descripcion": "VI\u00d1ASANTODOMINGO | Somos tu mejor opci\u00f3n en  Vino y Pisco",
+    "telefonos": [
+        {
+            "numero": "931372670",
+            "nombre": "HECTOR"
+        }
+    ],
+    "banner_inferior": [
+        {
+            "imagen": "YHgoyYlpxxrjzSVEcnuBFjxe4VCOAi3AA5eqn6LWdIrhCaQkPIbmGopWjQ3TSmAEvOTkYi6H4mfVQynv.png",
+            "titulo": "santodomingo",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        },
+        {
+            "imagen": "j6vLp6eaShUSiEy2SLeK4alRbIwPWKpeOXcVbuBU0EAfMBrjOjX6MGk0d5gslfejRADSJWFkKm1sP5dt.png",
+            "titulo": "vino5",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        },
+        {
+            "imagen": "EhCDtfVWEc88Fs8UNA4Dj2L40lJjn3ktkQOHVVKOwiZ8Jg9Y3zTfThDLypbvGH5FMOF2yaI1VrtxN0pq.png",
+            "titulo": "vino6",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        }
+    ],
+    "banner_menu_lateral_6": [
+        {
+            "imagen": "5Sa0R4oS1Ckwv27P0pZAWM5raHIod1etkDHY8hjxxKv4P6nBDWcSzFzpSF8oIrDFKqc7mYInA9Qn17EU.jpg",
+            "titulo": "PREMIO",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": "https:\/\/www.facebook.com\/photo.php?fbid=524757790062225&set=pb.100075840267685.-2207520000&type=3"
+        },
+        {
+            "titulo": "",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        },
+        {
+            "imagen": "PsHXCSDGdsBAYMwRqC5teyFF6Qmm9wW5ydTnCAyfSbJtK6ZhoavBrNpKgqKbWsLpfi0D9SXJSe7P413s.png",
+            "titulo": "ada dadada wd",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        },
+        {
+            "imagen": "yJ1pJl5HgtdpL21dV4dRpX7okzvVSYI32BX9tiEMfHyOAtrqFTVsomcfOazRFou32pVyAhJDVtgS9K6t.png",
+            "titulo": "ada dawdaw dawdawdawd",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        }
+    ],
+    "banner_extra": [
+        {
+            "imagen": "WJTD3mX8pJNpqR3Ftxcfw3Y61TRhGRuOMMxRjjqdKYWcX25KlTnt2xMPiqKkrl4cxHjDAGmA2XaSwDxN.png",
+            "titulo": "vino3",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        }
+    ],
+    "whatsapp": "https:\/\/api.whatsapp.com\/send?phone=51955081075&text=Hola%21%20Quisiera%20m%C3%A1s%20informaci%C3%B3n%20sobre%20Varela%202.",
+    "banner_extra_remate": [
+        {
+            "imagen": "mGfjZnPz5xBCrnJe5JlQoBUya5wbWRyjwAUgUtmRoA7bJvaUqAVB4f7jzfuUV7E3dJWrJAnvQAFpgFlO.png",
+            "titulo": "vino",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        },
+        {
+            "imagen": "dRYUUZBrUGqzerBsV8yVAOXai8mQ5Kuhv1FjCncfivQomumsIKhCotfSf9I1TIkIPxFKgTVnPTFcRX5b.png",
+            "titulo": "vino1",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
+        }
+    ]
+}

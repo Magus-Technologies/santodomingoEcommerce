@@ -1,0 +1,90 @@
+.panel-coolbox {
+    border-color: #ed1c24;
+}
+
+.panel-coolbox > .panel-heading {
+    color: #fff;
+    background-color: #ed1c24;
+    border-color: #ed1c24;
+}
+
+.panel-coolbox > .panel-heading + .panel-collapse > .panel-body {
+    border-top-color: #ed1c24;
+}
+
+.panel-coolbox > .panel-heading .badge {
+    color: #ed1c24;
+    background-color: #fff;
+}
+
+.panel-coolbox > .panel-footer + .panel-collapse > .panel-body {
+    border-bottom-color: #ed1c24;
+}
+
+.btn-coolbox {
+    color: #fff;
+    background-color: #ed1c24;
+    border-color: #c71c23;
+}
+
+.btn-coolbox:focus,
+.btn-coolbox.focus {
+    color: #fff;
+    background-color: #e0060e;
+    border-color: #c71c23;
+}
+
+.btn-coolbox:hover {
+    color: #fff;
+    background-color: #e0060e;
+    border-color: #c71c23;
+}
+
+.btn-coolbox:active,
+.btn-coolbox.active,
+.open > .dropdown-toggle.btn-coolbox {
+    color: #fff;
+    background-color: #e0060e;
+    border-color: #c71c23;
+}
+
+.btn-coolbox:active:hover,
+.btn-coolbox.active:hover,
+.open > .dropdown-toggle.btn-coolbox:hover,
+.btn-coolbox:active:focus,
+.btn-coolbox.active:focus,
+.open > .dropdown-toggle.btn-coolbox:focus,
+.btn-coolbox:active.focus,
+.btn-coolbox.active.focus,
+.open > .dropdown-toggle.btn-coolbox.focus {
+    color: #fff;
+    background-color: #204d74;
+    border-color: #122b40;
+}
+
+.btn-coolbox:active,
+.btn-coolbox.active,
+.open > .dropdown-toggle.btn-coolbox {
+    background-image: none;
+}
+
+.btn-coolbox.disabled:hover,
+.btn-coolbox[disabled]:hover,
+fieldset[disabled] .btn-coolbox:hover,
+.btn-coolbox.disabled:focus,
+.btn-coolbox[disabled]:focus,
+fieldset[disabled] .btn-coolbox:focus,
+.btn-coolbox.disabled.focus,
+.btn-coolbox[disabled].focus,
+fieldset[disabled] .btn-coolbox.focus {
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+
+/* LIBRO */
+
+.form-libro div, .form-libro label {
+    padding-top: 3px!important;
+    padding-bottom: 3px!important;
+
+}
