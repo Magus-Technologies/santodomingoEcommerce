@@ -118,6 +118,26 @@ $conexion = (new Conexion())->getConexion();
 
 
 $listaGrupos = $grupoCategoriaDao->getListaCate();
+
+// Intentar obtener categorías de la API de Laravel
+$apiCategorias = API_URL . '/api/public/categorias';
+$categoriasAPI = [];
+
+try {
+    $responseCat = @file_get_contents($apiCategorias);
+    if ($responseCat !== false) {
+        $dataCat = json_decode($responseCat, true);
+        if (isset($dataCat['success']) && $dataCat['success'] && isset($dataCat['data'])) {
+            $categoriasAPI = $dataCat['data'];
+            // Si la API retorna datos, usar esos en lugar de los locales
+            if (!empty($categoriasAPI)) {
+                $listaGrupos = $categoriasAPI;
+            }
+        }
+    }
+} catch (Exception $e) {
+    // Si falla la API, mantener $listaGrupos con datos locales (fallback automático)
+}
 //$listaNue = $nuevoImgresoDao->getLista();
 
 // PRODUCTOS EXCLUSIVOS CURADOS (Desde API)
@@ -243,7 +263,21 @@ die(); */
 die(); */
 /* print_r($listaRamByCat);
 die(); */
-$listaMarcas = $conexion->query("SELECT * FROM marcra_productos WHERE estado = 1 order by nombre_marca asc");
+// Cargar marcas desde API
+$listaMarcas = [];
+try {
+    $resMarcas = @file_get_contents(API_URL . '/api/public/marcas');
+    if ($resMarcas !== false) {
+        $dataMarcas = json_decode($resMarcas, true);
+        if (isset($dataMarcas['success']) && $dataMarcas['success']) {
+            $listaMarcas = $dataMarcas['data'];
+        }
+    }
+} catch (Exception $e) {}
+if (empty($listaMarcas)) {
+    $res = $conexion->query("SELECT cod_marca, nombre_marca, imagen FROM marcra_productos WHERE estado = 1 ORDER BY nombre_marca ASC");
+    while ($row = $res->fetch_assoc()) $listaMarcas[] = $row;
+}
 
 $ban1_nombre = '';
 if (isset($apiBannersPrincipales[3])) {
@@ -502,7 +536,7 @@ if ($body_class == 'desktop') { ?>
         </p>
     </div>
     <header class="header_wrap">
-        <?php include "../fragment/nav_bar_index.php" ?>
+        <?php include "../fragment/navbar.php" ?>
         <div style="background-color: #232323; height: 68px;margin-top:-2px;"
             class="bottom_header dark_skin main_menu_uppercase border-top border-bottom">
             <div class="custom-container">
@@ -712,11 +746,60 @@ if ($body_class == 'desktop') { ?>
                                 <a href="javascript:void(0);" style="color: white;" class="nav-link pr_search_trigger"><i class="linearicons-magnifier"></i></a>
                             </div>-->
                             <div class="collapse navbar-collapse mobile_side_menu" id="navbarSidetoggle">
-                                <ul class="navbar-nav" <?= $body_class == 'desktop' ? ' style="background:#232323;" ' : ' style="background:#232323;"' ?>>
-
-                                    <li class="dropdown dropdown-mega-menu nav-options-i">
+                                <ul class="navbar-nav" <?= $body_class == 'desktop' ? ' style="background:#232323; display: flex; align-items: center; margin: 0; padding: 0; list-style: none;" ' : ' style="background:#232323;"' ?>>
+                                    
+                                    <!-- NAVBAR SECUNDARIO DESDE API -->
+                                    <?php
+                                    $navItems = [];
+                                    try {
+                                        $responseNav = @file_get_contents(API_URL . '/api/public/nav-menu');
+                                        if ($responseNav !== false) {
+                                            $dataNav = json_decode($responseNav, true);
+                                            if (isset($dataNav['success']) && $dataNav['success']) {
+                                                $navItems = $dataNav['data'];
+                                            }
+                                        }
+                                    } catch (Exception $e) {}
+                                    
+                                    foreach ($navItems as $item):
+                                        $tieneHijos = !empty($item['hijos']);
+                                    ?>
+                                        <li class="nav-item <?= $tieneHijos ? 'dropdown' : '' ?>" style="display: inline-block; margin-right: 30px;">
+                                            <a
+                                                <?= $tieneHijos ? 'data-toggle="dropdown"' : '' ?>
+                                                class="nav-link"
+                                                href="<?= htmlspecialchars($item['url'] ?? '#') ?>"
+                                                target="<?= htmlspecialchars($item['target'] ?? '_self') ?>"
+                                                style="color: white; font-weight: 500; padding: 0; display: inline-block; text-decoration: none;"
+                                            >
+                                                <?= htmlspecialchars($item['label']) ?>
+                                            </a>
+                                            <?php if ($tieneHijos): ?>
+                                                <div class="dropdown-menu" style="background-color: #232323; border: none;">
+                                                    <ul style="list-style: none; padding: 0; margin: 0;">
+                                                        <?php foreach ($item['hijos'] as $hijo): ?>
+                                                            <li>
+                                                                <a class="dropdown-item"
+                                                                   href="<?= htmlspecialchars($hijo['url'] ?? '#') ?>"
+                                                                   target="<?= htmlspecialchars($hijo['target'] ?? '_self') ?>"
+                                                                   style="color: white; padding: 10px 20px; text-decoration: none;">
+                                                                    <?= htmlspecialchars($hijo['label']) ?>
+                                                                </a>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
+                                            <?php endif; ?>
+                                        </li>
+                                    <?php endforeach; ?>
+                                    
+                                    <!-- SEPARADOR -->
+                                    <li style="display: inline-block; margin: 0 20px; color: white; font-weight: 500;">|</li>
+                                    
+                                    <!-- MARCAS DROPDOWN -->
+                                    <li class="dropdown dropdown-mega-menu nav-options-i" style="display: inline-block;">
                                         <a class="dropdown-toggle nav-link menu-var" href="#"
-                                            data-toggle="dropdown">MARCAS</a>
+                                            data-toggle="dropdown" style="color: white; font-weight: 500;">MARCAS</a>
                                         <div class="dropdown-menu">
                                             <ul class="mega-menu d-lg-flex">
 
@@ -753,103 +836,6 @@ if ($body_class == 'desktop') { ?>
                                         </div>
                                     </li>
 
-                                    <li class="dropdown  nav-options-i">
-                                        <a class="nav-link " href="shop-list-ctg.php?ctg=002">VINO TINTO</a>
-
-                                    </li>
-
-
-                                    <li class="nav-options-i">
-                                        <a class="nav-link menu-var"
-                                            href="shop-list-ctg.php?ctg=002">VINO BLANCO</a>
-
-                                    </li>
-
-                                    <li class="dropdown  nav-options-i">
-                                        <a class="nav-link " href="shop-list-ctg.php?ctg=002">VINO ROSADO</a>
-
-                                    </li>
-                                    <li class="nav-options-i">
-                                        <a class="nav-link menu-var " href="shop-list-ctg.php?ctg=002">ESPUMANTE</a>
-                                    </li>
-                                    <li class="dropdown  nav-options-i">
-                                        <a class="nav-link " href="shop-list-ctg.php?ctg=002" data-toggle="dropdown">PISCO</a>
-                                        <div class="dropdown-menu">
-                                            <ul>
-                                                <?php
-
-                                                $vipUrl = '';
-                                                // Determinar si el usuario tiene acceso VIP
-                                                if ($isSesionUser && $perfilUser != 'usuario') {
-                                                    $vipUrl = 'shop-list-vip.php?search=+&type=last+&v=vp';
-                                                    $textLink = '';  // Texto alertas
-                                                } elseif ($isSesionUser == "") {
-                                                    $vipUrl = 'login.php?v=vp';
-                                                    $textLink = '';
-                                                } elseif (($perfilUser == 'usuario' || $perfilUser == 'Usuario') && $vip_status == 'SI') {
-                                                    $vipUrl = 'shop-list-vip.php?search=+&type=last+&v=vp';
-                                                    $textLink = '';     //
-                                                } else {
-                                                    $vipUrl = '#';
-                                                    $textLink = 'alertavip';
-                                                }
-                                                ?>
-
-                                                <li><a class="dropdown-item nav-item" href="<?= $vipUrl ?>"
-                                                        id="<?= $textLink ?>">Precio VIP </a></li>
-
-
-
-
-                                                <li><a class="dropdown-item nav-item"
-                                                        href="shop-list-distri.php?search=+&type=last+&v=dt">Precio
-                                                        Distribuci&oacute;n</a></li>
-                                            </ul>
-                                        </div>
-                                    </li>
-
-                                    <!--<li class="nav-options-i">
-                                        <a class="nav-link menu-var " href="./arma-tu-pc.php">ARMA TU PC</a>
-                                    </li>
-                                    <li class="  nav-options-i">
-                                        <a class="nav-link   " href="https://c/"></a>
-
-                                    </li>
-                                    <li class="">
-                                        <a class="nav-link  menu-var" href="./shop-list-prod-mac.php?marc=071">SILVER VOLT</a>
-                                    </li> -->
-                                    <li class="nav-options-i">
-                                        <a class="nav-link  menu-var" href="./contact.php">Contactanos</a>
-                                    </li>
-                                    <li class="nav-options-i nomobile">
-                                        <a class="nav-link  menu-var" href="./about.php">ACERCA DE NOSOTROS</a>
-                                    </li>
-                                    <li class="nav-options-i ifmobile">
-                                        <a class="nav-link  menu-var" href="./banks.php">METODOS DE PAGO</a>
-                                    </li>
-                                    <li class="nav-options-i ifmobile">
-                                        <a class="nav-link  menu-var" href="./delivery.php">ENVIOS A TODO EL PERU</a>
-                                    </li>
-                                    <li class="nav-options-i ifmobile">
-                                        <a class="nav-link  menu-var" href="./office.php">DELIVERY A CAÑETE</a>
-                                    </li>
-                                    <li class="nav-options-i ifmobile" style="background-color:red;">
-                                        <a class="nav-link  menu-var" style="color: white;" type="button"
-                                            data-toggle="collapse" data-target="#navbarSidetoggle"
-                                            aria-expanded="false">
-                                            <span class="fa fa-close"></span> CERRAR
-                                        </a>
-
-
-                                    </li>
-
-
-
-                                    <li class="nav-options-i">
-                                        <span class="nav-link"
-                                            style="color: #fff;font-size: 20px;padding-bottom: 7px;padding-top: 16px;">Tc:
-                                            <?= $tc ?></span>
-                                    </li>
                                 </ul>
                             </div>
                         </nav>
@@ -2429,12 +2415,13 @@ $rowHTMLPOR2 = $rowHTMLPOR2 . '<div class="product_wrap">
                             data-responsive='{"0":{"items": "2"}, "480":{"items": "3"}, "767":{"items": "4"}, "991":{"items": "5"}, "1199":{"items": "6"}}'>
                             <?php
                             foreach ($listaMarcas as $rowMarc) {
-                                if (strlen($rowMarc['imagen']) > 0) {
+                                $srcImagen = $rowMarc['imagen_url'] ?? (!empty($rowMarc['imagen']) ? '../public/img/marcas/' . $rowMarc['imagen'] : '');
+                                if (strlen($srcImagen) > 0) {
                             ?>
                                     <div class="item">
                                         <div class="cl_logo">
                                             <a href="shop-list-prod-mac.php?marc=<?= $rowMarc['cod_marca'] ?>"><img
-                                                    src="../public/img/marcas/<?= $rowMarc['imagen'] ?>" alt="cl_logo" /></a>
+                                                    src="<?= htmlspecialchars($srcImagen) ?>" alt="cl_logo" /></a>
                                         </div>
                                     </div>
                             <?php
