@@ -1,4 +1,7 @@
 <?php
+function imgProd($img) {
+    return (strpos($img, 'http') === 0) ? $img : '../public/img/productos/' . $img;
+}
 ini_set('display_errors', 0);
 ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
@@ -147,20 +150,69 @@ if (count($exclusivos_api['nuevos_ingresos']) > 0) {
     $listaNue = $productoDao->getLastRegister(15);
 }
 
-$listaRmaRema = $productoDao->getLastRegisterRemaRema(15);
-//var_dump($listaRmaRema);die;
+// Productos en Remate (Desde API)
+$listaRmaRema = [];
+$_resRemate = @file_get_contents(API_URL . '/api/public/productos-en-remate');
+if ($_resRemate !== false) {
+    $_dataRemate = json_decode($_resRemate, true);
+    if (isset($_dataRemate['success']) && $_dataRemate['success'] && count($_dataRemate['data']) > 0) {
+        foreach ($_dataRemate['data'] as $_r) {
+            $listaRmaRema[] = [
+                'prod_id'       => $_r['producto_id'] ?? 0,
+                'nombre'        => $_r['nombre'] ?? '',
+                'precio'        => $_r['precio'] ?? '0.00',
+                'precio_ofertaa'=> null,
+                'imagen1'       => $_r['imagen_url'] ?? '',
+                'imagen2'       => $_r['imagen_url'] ?? '',
+                'stock'         => number_format($_r['stock'] ?? 0, 3, '.', ''),
+                'stock_prod'    => $_r['stock'] ?? 0,
+                'tipo_pro'      => 1,
+                'estado'        => $_r['estado'] ?? '1',
+            ];
+        }
+    }
+}
+if (count($listaRmaRema) === 0) {
+    $listaRmaRema = $productoDao->getLastRegisterRemaRema(15);
+}
+/*DEBUG_REMATE*/ if(!empty($listaRmaRema)) { $__d=$listaRmaRema[0]; echo "<!--REMATE stock={$__d['stock']} stock_prod={$__d['stock_prod']} precio={$__d['precio']} estado={$__d['estado']}-->"; }
 /* echo "<pre>";
 base64_decode($listaNue);
 die(); */
 $listaNue2 = $productoDao->getLastRegisterSilver(7);
 $randonItemProdsss = $productoDao->getRandonRegister(46);
 
+// Productos de Tendencia (Desde API)
+$_tendenciaApi = [];
+$_resTendencia = @file_get_contents(API_URL . '/api/public/productos-de-tendencia');
+if ($_resTendencia !== false) {
+    $_dataTend = json_decode($_resTendencia, true);
+    if (isset($_dataTend['success']) && $_dataTend['success'] && count($_dataTend['data']) > 0) {
+        foreach ($_dataTend['data'] as $_t) {
+            $_tendenciaApi[] = [
+                'prod_id'       => $_t['producto_id'] ?? 0,
+                'nombre'        => $_t['nombre'] ?? '',
+                'precio'        => $_t['precio'] ?? '0.00',
+                'precio_ofertaa'=> null,
+                'imagen1'       => $_t['imagen_url'] ?? '',
+                'imagen2'       => $_t['imagen_url'] ?? '',
+                'stock'         => number_format($_t['stock'] ?? 0, 3, '.', ''),
+                'stock_prod'    => $_t['stock'] ?? 0,
+                'tipo_pro'      => 1,
+                'estado'        => $_t['estado'] ?? '1',
+            ];
+        }
+    }
+}
 $listaMVCurados = $exclusivos_api['mas_vendidos'];
 if (count($listaMVCurados) > 0) {
     $listaRamMasVen = $listaMVCurados;
 } else {
     $listaRamMasVen = array_slice($randonItemProdsss, 0, 29);
 }
+
+// Tendencia usa su propia variable
+$listaTendencia = count($_tendenciaApi) > 0 ? $_tendenciaApi : $listaRamMasVen;
 
 /* var_dump($listaRamMasVen);
 die();  */
@@ -203,6 +255,37 @@ $banner6Final = $nuevoArray[$randonIndex];
 
 ////////////// BANNER EXTRA//////////////////////////////////////////////////////////
 $dataConf = $tools->getConfiguracion();
+
+// Datos de empresa desde API (para footer)
+$_empresaApi = [];
+$_resEmpresa = @file_get_contents(API_URL . '/api/public/empresa');
+if ($_resEmpresa !== false) {
+    $_dataEmpresa = json_decode($_resEmpresa, true);
+    if (isset($_dataEmpresa['success']) && $_dataEmpresa['success']) {
+        $_empresaApi = $_dataEmpresa['data'];
+    }
+}
+$_empNombre      = !empty($_empresaApi['comercial'])   ? $_empresaApi['comercial']   : ($dataConf['titulo']    ?? '');
+$_empDescripcion = !empty($_empresaApi['descripcion']) ? $_empresaApi['descripcion'] : ($dataConf['descripcion'] ?? '');
+$_empDireccion   = !empty($_empresaApi['direccion'])   ? $_empresaApi['direccion']   : ($dataConf['direccion'] ?? '');
+$_empEmail       = !empty($_empresaApi['email'])       ? $_empresaApi['email']       : ($dataConf['email']     ?? '');
+$_empTelefonos   = !empty($_empresaApi['telefonos'])   ? $_empresaApi['telefonos']   : ($dataConf['telefonos'] ?? []);
+$_empLogo        = !empty($_empresaApi['logo_url'])    ? $_empresaApi['logo_url']    : null;
+
+// Footer config desde API (newsletter banner)
+$_footerApi = [];
+$_resFooter = @file_get_contents(API_URL . '/api/public/footer-config');
+if ($_resFooter !== false) {
+    $_dataFooter = json_decode($_resFooter, true);
+    if (isset($_dataFooter['success']) && $_dataFooter['success']) {
+        $_footerApi = $_dataFooter['data'];
+    }
+}
+$_footerSlogan    = $_footerApi['slogan']      ?? 'Somos tu mejor opción';
+$_footerSubtitulo = $_footerApi['subtitulo']   ?? 'Recibe las mejores Ofertas SUSCRÍBETE';
+$_footerBoton     = $_footerApi['boton_texto'] ?? 'Suscríbete';
+$_footerImagen    = $_footerApi['imagen_url']  ?? null;
+
 $usarBannerExtra = $dataConf['banner_extra'];
 $nuevoArrayExtra = [];
 foreach ($usarBannerExtra as $row) {
@@ -1735,7 +1818,7 @@ if ($body_class == 'desktop') { ?>
                         <div class="col-12">
                             <div class="heading_tab_header">
                                 <div class="heading_s2">
-                                    <h4><img src="../public/wineicon.png" class="iconotitulo">Productos En Remate</h4>
+                                    <h4><img src="../public/wineicon.png" class="iconotitulo">Productos En Rem</h4>
                                 </div>
                                 <div class="view_all">
 
@@ -1805,11 +1888,11 @@ if ($body_class == 'desktop') { ?>
                                                         ?>
                                                         <a href="<?= $url_detalle ?>">
                                                             <img style="max-width: 540px; max-height: 600px;"
-                                                                src="../public/img/productos/<?= $remate['imagen1'] ?>"
+                                                                src="<?= imgProd($remate['imagen1']) ?>"
                                                                 alt="el_img3">
                                                             <img style="max-width: 540px; max-height: 600px;"
                                                                 class="product_hover_img"
-                                                                src="../public/img/productos/<?= $remate['imagen2'] ?>"
+                                                                src="<?= imgProd($remate['imagen2']) ?>"
                                                                 alt="el_hover_img3">
                                                         </a>
                                                         <div class="product_action_box">
@@ -1932,7 +2015,7 @@ if ($body_class == 'desktop') { ?>
                                     data-responsive='{"0":{"items": "1"}, "481":{"items": "2"}, "768":{"items": "3"}, "991":{"items": "4"}}'>
 
                                     <?php
-                                    foreach ($listaRamMasVen as $itemMV) {
+                                    foreach ($listaTendencia as $itemMV) {
 
                                         if ((!is_null($itemMV['precio_ofertaa']))) {
                                             $ahorro = $itemMV['precio'] - $itemMV['precio_ofertaa'];
@@ -1953,10 +2036,10 @@ if ($body_class == 'desktop') { ?>
                                                 <div class="product_wrap">
                                                     <div class="product_img">
                                                         <a href="shop-product-detail.php?prod=<?= $itemMV['prod_id'] ?>">
-                                                            <img src="../public/img/productos/<?= $itemMV['imagen1'] ?>"
+                                                            <img src="<?= imgProd($itemMV['imagen1']) ?>"
                                                                 alt="el_img7">
                                                             <img class="product_hover_img"
-                                                                src="../public/img/productos/<?= $itemMV['imagen2'] ?>"
+                                                                src="<?= imgProd($itemMV['imagen2']) ?>"
                                                                 alt="el_hover_img7">
                                                         </a>
                                                         <div class="product_action_box">
@@ -2440,16 +2523,17 @@ $rowHTMLPOR2 = $rowHTMLPOR2 . '<div class="product_wrap">
 
         <!-- START SECTION SUBSCRIBE NEWSLETTER -->
         <div class="section bg_default small_pt small_pb" style="background-color:#880107 !important;">
-            <img class="d-none d-lg-block" src="../public/images/wine.png" alt="bg_newsletter" style="position: absolute;
-  width: 276px;
-  top: -110px;
-  left: 25px;" />
+            <?php if ($_footerImagen): ?>
+                <img class="d-none d-lg-block" src="<?= htmlspecialchars($_footerImagen) ?>" alt="bg_newsletter" style="position: absolute; width: 276px; top: -110px; left: 25px;" />
+            <?php else: ?>
+                <img class="d-none d-lg-block" src="../public/images/wine.png" alt="bg_newsletter" style="position: absolute; width: 276px; top: -110px; left: 25px;" />
+            <?php endif; ?>
             <div class="custom-container">
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <div class="newsletter_text text_white">
-                            <h3>Somos VIÑASANTODOMINGO los mejores en VINOS Y PISCO</h3>
-                            <p>Recibe las mejores Ofertas en Vino y Pisco SUSCR&Iacute;BETE</p>
+                            <h3>Somos <?= htmlspecialchars($_empNombre) ?> <?= $_footerSlogan ? htmlspecialchars($_footerSlogan) : '' ?></h3>
+                            <p><?= htmlspecialchars($_footerSubtitulo) ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -2459,7 +2543,7 @@ $rowHTMLPOR2 = $rowHTMLPOR2 . '<div class="product_wrap">
                                     class="form-control" placeholder="Ingresa tu Email">
                                 <button type="button" class="btn btn-dark btn-radius"
                                     style="background-color:#232323!important;"
-                                    id="btnRegistrar">Suscr&iacute;bete</button>
+                                    id="btnRegistrar"><?= htmlspecialchars($_footerBoton) ?></button>
                             </form>
                         </div>
                     </div>
@@ -2479,27 +2563,37 @@ $rowHTMLPOR2 = $rowHTMLPOR2 . '<div class="product_wrap">
                     <div class="col-lg-4 col-md-12 col-sm-12">
                         <div class="widget">
                             <div class="footer_logo">
-                                <a href="./"><img src="../public/logo.svg" alt="logo" style="width: 280px;" /></a>
+                                <a href="./">
+                                    <?php if ($_empLogo): ?>
+                                        <img src="<?= htmlspecialchars($_empLogo) ?>" alt="logo" style="width: 280px;" />
+                                    <?php else: ?>
+                                        <img src="../public/logo.svg" alt="logo" style="width: 280px;" />
+                                    <?php endif; ?>
+                                </a>
                             </div>
-                            <p class="mb-3">Los mejores en Vino y Pisco</p>
+                            <?php $_footerDesc = $_footerSlogan ?: $_empDescripcion; ?>
+                            <?php if ($_footerDesc): ?>
+                                <p class="mb-3"><?= htmlspecialchars($_footerDesc) ?></p>
+                            <?php endif; ?>
                             <ul class="contact_info">
+                                <?php if ($_empDireccion): ?>
                                 <li>
                                     <i class="ti-location-pin"></i>
-                                    <p><?= $dataConf['direccion'] ?></p>
+                                    <p><?= htmlspecialchars($_empDireccion) ?></p>
                                 </li>
+                                <?php endif; ?>
+                                <?php if ($_empEmail): ?>
                                 <li>
                                     <i class="ti-email"></i>
-                                    <a href="<?= $dataConf['email'] ?>"><?= $dataConf['email'] ?></a>
+                                    <a href="mailto:<?= htmlspecialchars($_empEmail) ?>"><?= htmlspecialchars($_empEmail) ?></a>
                                 </li>
-                                <?php
-                                foreach ($dataConf['telefonos'] as $telf) {
-                                    echo '<li>
-                                <i class="ti-mobile"></i>
-                                <p>' . $telf['numero'] . '</p>
-                            </li>';
-                                }
-                                ?>
-
+                                <?php endif; ?>
+                                <?php foreach ($_empTelefonos as $telf): ?>
+                                <li>
+                                    <i class="ti-mobile"></i>
+                                    <p><?= htmlspecialchars(is_array($telf) ? ($telf['numero'] ?? '') : $telf) ?></p>
+                                </li>
+                                <?php endforeach; ?>
                             </ul>
                         </div>
                     </div>
