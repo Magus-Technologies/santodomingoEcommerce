@@ -204,6 +204,53 @@ if ($_resTendencia !== false) {
         }
     }
 }
+
+// Cargar Productos Destacados desde API
+$listaDestacados = [];
+$_resDestacados = @file_get_contents(API_URL . '/api/public/productos-destacados');
+if ($_resDestacados !== false) {
+    $_dataDestacados = json_decode($_resDestacados, true);
+    if (isset($_dataDestacados['success']) && $_dataDestacados['success'] && count($_dataDestacados['data']) > 0) {
+        foreach ($_dataDestacados['data'] as $_d) {
+            $listaDestacados[] = [
+                'prod_id'       => $_d['id'] ?? 0,
+                'nombre'        => $_d['nombre'] ?? '',
+                'precio'        => $_d['precio'] ?? '0.00',
+                'precio_ofertaa'=> null,
+                'imagen1'       => $_d['imagen'] ?? '',
+                'imagen2'       => $_d['imagen'] ?? '',
+                'stock'         => number_format($_d['stock'] ?? 0, 3, '.', ''),
+                'stock_prod'    => $_d['stock'] ?? 0,
+                'tipo_pro'      => 1,
+                'estado'        => $_d['estado'] ?? '1',
+            ];
+        }
+    }
+}
+
+// Cargar Productos Mejor Valorados desde API
+$listaMejorValorados = [];
+$_resMejorValorados = @file_get_contents(API_URL . '/api/public/productos-mejor-valorados');
+if ($_resMejorValorados !== false) {
+    $_dataMejorValorados = json_decode($_resMejorValorados, true);
+    if (isset($_dataMejorValorados['success']) && $_dataMejorValorados['success'] && count($_dataMejorValorados['data']) > 0) {
+        foreach ($_dataMejorValorados['data'] as $_m) {
+            $listaMejorValorados[] = [
+                'prod_id'       => $_m['id'] ?? 0,
+                'nombre'        => $_m['nombre'] ?? '',
+                'precio'        => $_m['precio'] ?? '0.00',
+                'precio_ofertaa'=> null,
+                'imagen1'       => $_m['imagen'] ?? '',
+                'imagen2'       => $_m['imagen'] ?? '',
+                'stock'         => number_format($_m['stock'] ?? 0, 3, '.', ''),
+                'stock_prod'    => $_m['stock'] ?? 0,
+                'tipo_pro'      => 1,
+                'estado'        => $_m['estado'] ?? '1',
+                'valoracion'    => $_m['valoracion'] ?? 0,
+            ];
+        }
+    }
+}
 $listaMVCurados = $exclusivos_api['mas_vendidos'];
 if (count($listaMVCurados) > 0) {
     $listaRamMasVen = $listaMVCurados;
@@ -1999,7 +2046,7 @@ if ($body_class == 'desktop') { ?>
                             <div class="col-12">
                                 <div class="heading_tab_header">
                                     <div class="heading_s2">
-                                        <h4><img src="../public/wineicon.png" class="iconotitulo">Productos de Tendencia
+                                        <h4><img src="../public/wineicon.png" class="iconotitulo">Productos de Tendenc
                                         </h4>
                                     </div>
                                     <div class="view_all">

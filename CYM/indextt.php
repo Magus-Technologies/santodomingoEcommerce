@@ -2,6 +2,7 @@
 require "../utils/Tools.php";
 require "../dao/NuevoImgresoDao.php";
 require "../dao/GrupoCategoriaDao.php";
+require_once "../config.php";
 
 $grupoCategoriaDao = new GrupoCategoriaDao();
 $nuevoImgresoDao= new NuevoImgresoDao();
@@ -1754,34 +1755,36 @@ print_r($listaGrupos);
                 <div class="row">
                     <div class="col-12">
                         <div class="product_slider carousel_slider product_list owl-carousel owl-theme nav_style5" data-nav="true" data-dots="false" data-loop="true" data-margin="20" data-responsive='{"0":{"items": "1"}, "380":{"items": "1"}, "640":{"items": "2"}, "991":{"items": "1"}}'>
-                            <div class="item">
-                                <div class="product_wrap">
-                                    <div class="product_img">
-                                        <a href="shop-product-detail.php">
-                                            <img src="../public/images/el_img2.jpg" alt="el_img2">
-                                            <img class="product_hover_img" src="../public/images/el_hover_img2.jpg" alt="el_hover_img2">
-                                        </a>
-                                    </div>
-                                    <div class="product_info">
-                                        <h6 class="product_title"><a href="shop-product-detail.php">Smart Watch External</a></h6>
-                                        <div class="product_price">
-                                            <span class="price">$55.00</span>
-                                            <del>$95.00</del>
-                                            <div class="on_sale">
-                                                <span>25% Off</span>
+                            <?php if (count($listaDestacados) > 0): ?>
+                                <?php foreach ($listaDestacados as $prod): ?>
+                                    <div class="item">
+                                        <div class="product_wrap">
+                                            <div class="product_img">
+                                                <a href="shop-product-l.php?prod=<?= $prod['prod_id'] ?>">
+                                                    <img src="<?= $prod['imagen1'] ?>" alt="<?= $prod['nombre'] ?>">
+                                                    <img class="product_hover_img" src="<?= $prod['imagen2'] ?>" alt="<?= $prod['nombre'] ?>">
+                                                </a>
+                                            </div>
+                                            <div class="product_info">
+                                                <h6 class="product_title"><a href="shop-product-detail.php?prod=<?= $prod['prod_id'] ?>"><?= $prod['nombre'] ?></a></h6>
+                                                <div class="product_price">
+                                                    <span class="price">$<?= number_format($prod['precio'], 2) ?></span>
+                                                </div>
+                                                <div class="rating_wrap">
+                                                    <div class="rating">
+                                                        <div class="product_rate" style="width:75%"></div>
+                                                    </div>
+                                                    <span class="rating_num">(<?= rand(5, 50) ?>)</span>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="rating_wrap">
-                                            <div class="rating">
-                                                <div class="product_rate" style="width:68%"></div>
-                                            </div>
-                                            <span class="rating_num">(15)</span>
-                                        </div>
-                                        <div class="pr_desc">
-                                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus blandit massa enim. Nullam id varius nunc id varius nunc.</p>
-                                        </div>
                                     </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="item">
+                                    <p>No hay productos destacados disponibles</p>
                                 </div>
+                            <?php endif; ?>
                                 <div class="product_wrap">
                                     <div class="product_img">
                                         <a href="shop-product-detail.php">

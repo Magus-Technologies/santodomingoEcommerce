@@ -1,5 +1,6 @@
 <?php
 session_start();
+require "../config.php";
 require "../dao/ProductoDao.php";
 require "../dao/GrupoCategoriaDao.php";
 require "../utils/Tools.php";
@@ -204,7 +205,7 @@ $listaGrupos = $conexion->query($sql);
 
             <input value="<?= $palabra ?>" id="palabra" type="hidden">
 
-            <div class="custom-container">
+            <div class="custom-container" id="app_shop">
                 <div class="row">
                     <div class="col-md-3"></div>
                     <div class="col-md-9">
@@ -250,7 +251,7 @@ $listaGrupos = $conexion->query($sql);
                                 <div class="product">
                                     <div class="product_img">
                                         <a :href="'shop-product-detail.php?prod='+item.prod_id">
-                                            <img :src="'../public/img/productos/'+item.imagen1" :alt="item.nombre">
+                                            <img :src="item.imagen1 ? '<?= API_URL ?>/storage/'+item.imagen1 : ''" :alt="item.nombre">
                                         </a>
                                         <div class="product_action_box">
                                             <ul class="list_none pr_action_btn">
@@ -347,101 +348,75 @@ $listaGrupos = $conexion->query($sql);
 
                     <div class="col-lg-3 order-lg-first mt-4 pt-2 mt-lg-0 pt-lg-0">
                         <div class="sidebar">
-                            <div class="widget" style="    border: 1px solid #c7161d;">
-                                <div style="
-                            background-color: #c7161d;
-                            overflow: auto;
-                            padding-top: 4px;
-                            padding-left: 6px;
-                        ">
-                                    <h5 class="widget_title" style=" text-transform: uppercase;
-                                color: white;
-                                margin-bottom: 11px;
-                            ">Categorias</h5>
+
+                            <!-- CATEGORÍAS -->
+                            <div class="widget" style="border: 1px solid #c7161d;">
+                                <div style="background-color:#c7161d;overflow:auto;padding-top:4px;padding-left:6px;">
+                                    <h5 class="widget_title" style="text-transform:uppercase;color:white;margin-bottom:11px;">Categorias</h5>
                                 </div>
-                                <ul class="widget_categories" style=" padding-left: 16px; padding-right: 5px;">
-                                    <?php
-                                    $contadorCCc = 0;
-                                    foreach ($listaGrupos as $catRow) {
-                                        echo '<li><a style="font-weight: bold"  href="shop-list-ctg.php?ctg=' . $catRow['codi_categoria'] . '&v=' . $vripo . '"><span class="categories_name">' . $catRow['nombre'] . '</span><span class="categories_num"></span></a></li>';
-
-                                    }
-                                    ?>
-
+                                <ul class="widget_categories" style="padding-left:16px;padding-right:5px;max-height:220px;overflow-y:auto;">
+                                    <li>
+                                        <a style="font-weight:bold;cursor:pointer"
+                                            :style="categoriaActiva===null?'color:#c7161d':''"
+                                            @click.prevent="filtrarCategoria(null)">
+                                            <span class="categories_name">Todas</span>
+                                        </a>
+                                    </li>
+                                    <li v-for="cat in listaCategorias" :key="cat.id">
+                                        <a style="font-weight:bold;cursor:pointer"
+                                            :style="categoriaActiva===cat.id?'color:#c7161d':''"
+                                            @click.prevent="filtrarCategoria(cat.id)">
+                                            <span class="categories_name">{{cat.nombre}}</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
 
+                            <!-- FILTROS -->
                             <div class="widget">
-                                <div style="border: 1px solid #c7161d;">
-                                    <div style="
-                            background-color: #c7161d;
-                            overflow: auto;
-                            padding-top: 4px;
-                            padding-left: 6px;
-                            ">
-                                        <h5 style=" text-transform: uppercase;
-                                color: white;
-                                margin-bottom: 11px;
-                                " class="widget_title">Filtrar por</h5>
+                                <div style="border:1px solid #c7161d;">
+                                    <div style="background-color:#c7161d;overflow:auto;padding-top:4px;padding-left:6px;">
+                                        <h5 style="text-transform:uppercase;color:white;margin-bottom:11px;" class="widget_title">Filtrar por</h5>
                                     </div>
-                                    <div style="padding: 11px;">
+                                    <div style="padding:11px;">
+
+                                        <!-- Rango de Precio -->
                                         <div class="widget">
-                                            <h5 class="widget_title">Disponibilidad</h5>
-                                            <ul class="list_brand">
-                                                <li>
+                                            <h5 class="widget_title">Rango de Precio (S/.)</h5>
+                                            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                                                <input type="number" v-model.number="valueUSDMin" min="0" placeholder="Min"
+                                                    class="form-control form-control-sm" style="width:80px;">
+                                                <span>-</span>
+                                                <input type="number" v-model.number="valueUSDMax" min="0" placeholder="Max"
+                                                    class="form-control form-control-sm" style="width:80px;">
+                                                <button @click="getFiltrar()" class="btn btn-sm" style="background:#c7161d;color:white;">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Marcas -->
+                                        <div class="widget">
+                                            <h5 class="widget_title">Marcas</h5>
+                                            <ul class="list_brand" style="max-height:200px;overflow-y:auto;">
+                                                <li v-for="marca in listaMarcasApi" :key="marca.cod_marca">
                                                     <div class="custome-checkbox">
-                                                        <input checked class="form-check-input" type="checkbox"
-                                                            name="en-stock" id="en-stock" value="en-stock">
-                                                        <label class="form-check-label" for="en-stock">
-                                                            <span>EN STOCK</span></label>
+                                                        <input class="form-check-input" type="checkbox"
+                                                            :id="'marca-'+marca.cod_marca"
+                                                            :value="marca.cod_marca"
+                                                            v-model="marcasFiltro"
+                                                            @change="onMarcaChange()">
+                                                        <label class="form-check-label" :for="'marca-'+marca.cod_marca">
+                                                            <span>{{marca.nombre_marca}}</span>
+                                                        </label>
                                                     </div>
                                                 </li>
                                             </ul>
                                         </div>
-                                        <div class="widget">
-                                            <h5 class="widget_title">Rango de Precio</h5>
-                                            <div class="filter_price">
-                                                <span onclick="APP_PROD.getFiltrar()" class="on-click-cont"
-                                                    style="/* left: 115%; */padding-left: 8px;padding-top: 3px;/* top: -15px; */width: 30px;border-radius: 5px;height: 30px;float: right;background-color: #c7161d;/* margin-bottom: 200px; */color: white;bottom: 15px;position: relative;"><i
-                                                        class="fa fa-search"></i></span>
-                                                <div style="width: 80%" id="price_filter" data-min="0" data-max="5000"
-                                                    data-min-value="0" data-max-value="5000" data-price-sign="S/"
-                                                    class="ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content">
-                                                    <!--div class="ui-slider-range ui-corner-all ui-widget-header" style="left: 20.6%; width: 18.6%;"></div-->
-                                                    <span tabindex="0"
-                                                        class="ui-slider-handle ui-corner-all ui-state-default"
-                                                        style="left: 20.6%;"></span>
-                                                    <span tabindex="0"
-                                                        class="ui-slider-handle ui-corner-all ui-state-default"
-                                                        style="left: 39.2%;"></span>
 
-                                                </div>
-                                                <div class="price_range">
-                                                    <span>Price: <span id="flt_price">$103 - $196</span></span>
-                                                    <input type="hidden" id="price_first" value="103">
-                                                    <input type="hidden" id="price_second" value="196">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="widget">
-                                            <h5 class="widget_title">Filtrar por</h5>
-                                            <div class="product_size_switch">
-
-                                            </div>
-                                        </div>
-
-                                        <div class="widget">
-                                            <h5 class="widget_title">Otras Marcas</h5>
-                                            <ul id="listaMarcas" class="list_brand">
-
-
-                                            </ul>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-
 
                         </div>
                     </div>
@@ -539,7 +514,7 @@ $listaGrupos = $conexion->query($sql);
 
     var $container22;
     const APP_PROD = new Vue({
-        el: "#content_principal",
+        el: "#app_shop",
         data: {
             valueUSDMin: 0,
             valueUSDMax: 5000,
@@ -556,8 +531,11 @@ $listaGrupos = $conexion->query($sql);
             lasrId: 0,
             listaMarcaFiltro: [],
             tc: 1,
-            flista: ''
-
+            flista: '',
+            listaCategorias: [],
+            listaMarcasApi: [],
+            categoriaActiva: null,
+            marcasFiltro: [],
         },
         methods: {
             changePrecio(event) {
@@ -589,76 +567,68 @@ $listaGrupos = $conexion->query($sql);
                 var index = this.listaMarcaFiltro.indexOf(mar);
                 this.listaMarcaFiltro.splice(index, 1);
             },
-            getMArcasFiltro() {
+            cargarCategorias() {
                 const vue = this
                 $.ajax({
-                    type: "POST",
-                    data: { tipo: 'pag-search2PMarcas', pal: APP_PROD._data.palabra },
-                    url: "../ajax/ajs_productos.php",
+                    type: "GET",
+                    url: "<?= API_URL ?>/api/public/categorias",
                     success: function (resp) {
-                        resp = JSON.parse(resp);
-                        console.log(resp);
-                        vue.listaMarcar = resp;
-                        vue.setListaMarcas()
+                        if (resp.success) vue.listaCategorias = resp.data
                     }
                 })
             },
-            setListaMarcas() {
-                /*this.listaMarcar=[];
-                for (var i=1;i<this.listaProdGene.length;i++){
-                    this.listaMarcar.push(this.listaProdGene[i].marca);
-                }
-                this.listaMarcar = this.listaMarcar.filter(function (value, index, self) {
-                    return self.indexOf(value) === index;
-                })*/
-
-                this.listaMarcar.forEach(function (item, index) {
-                    $("#listaMarcas").append('<li>\n' +
-                        '                                <div class="custome-checkbox">\n' +
-                        '                                    <input class="form-check-input input-check-marc" type="checkbox" name="' + item.cod + '" id="' + item.cod + '" value="' + item.cod + '">\n' +
-                        '                                    <label class="form-check-label" for="' + item.cod + '"><span>' + item.nombre + '</span></label>\n' +
-                        '                                </div>\n' +
-                        '                            </li>');
+            cargarMarcas() {
+                const vue = this
+                $.ajax({
+                    type: "GET",
+                    url: "<?= API_URL ?>/api/public/marcas",
+                    success: function (resp) {
+                        if (resp.success) vue.listaMarcasApi = resp.data
+                    }
                 })
             },
+            filtrarCategoria(id) {
+                this.categoriaActiva = id
+                this.hojaActual = 1
+                this.paginadorListaServer()
+            },
+            onMarcaChange() {
+                this.hojaActual = 1
+                this.paginadorListaServer()
+            },
             getFiltrar() {
-                this.valueUSDMin = parseFloat($("#price_first").val());
-                this.valueUSDMax = parseFloat($("#price_second").val());
+                this.hojaActual = 1
                 this.paginadorListaServer()
             },
             paginadorListaServer() {
                 this.flista = $('#flista').val();
                 const vue = this
-                const dataS = {
-                    tipo: 'pag-search2P', pal: APP_PROD._data.palabra,
-                    forma: "<?= (isset($_GET['type']) && strlen($_GET['type']) > 0) ? $_GET['type'] : 'all' ?>",
-                    cntPH: this.cntItemPorHoja,
-                    hojaActual: this.hojaActual - 1,
-                    minUSD: this.valueUSDMin,
-                    maxUSD: this.valueUSDMax,
-                    marcasFilt: JSON.stringify(this.listaMarcaFiltro),
-                    filtro: this.flista
-                }
+
+                const params = new URLSearchParams({
+                    per_page: this.cntItemPorHoja,
+                    page: this.hojaActual,
+                });
+                if (APP_PROD._data.palabra) params.append('search', APP_PROD._data.palabra);
+                if (this.valueUSDMin > 0) params.append('min_precio', this.valueUSDMin);
+                if (this.valueUSDMax > 0 && this.valueUSDMax < 5000) params.append('max_precio', this.valueUSDMax);
+                if (this.ordenpres) params.append('sort', this.ordenpres);
+                if (this.categoriaActiva) params.append('categoria', this.categoriaActiva);
+                if (this.marcasFiltro.length > 0) params.append('marca', this.marcasFiltro[0]);
 
                 $("#loader-pre-prod").show();
                 $(".scrollup").click()
                 $.ajax({
-                    type: "POST",
-                    data: dataS,
-                    url: "../ajax/ajs_productos.php",
+                    type: "GET",
+                    url: "<?= API_URL ?>/api/public/shop-productos?" + params.toString(),
                     success: function (resp) {
                         $("#loader-pre-prod").hide()
-                        //console.log(resp);
-                        const listaPro = JSON.parse(resp)
-                        console.log(listaPro);
-                        vue.listaHoja = listaPro.datas
-                        listaPro.cnt = Math.ceil(listaPro.cnt / vue.cntItemPorHoja)
-                        if (options.totalPages != listaPro.cnt) {
-                            options.totalPages = listaPro.cnt
+                        console.log(resp);
+                        vue.listaHoja = resp.data
+                        const totalPages = resp.pagination.last_page
+                        if (options.totalPages != totalPages) {
+                            options.totalPages = totalPages
                             $('#example').bootstrapPaginator(options);
-
                         }
-
                     }
                 })
             },
@@ -848,7 +818,8 @@ $listaGrupos = $conexion->query($sql);
         APP_PROD._data.palabra = $("#palabra").val();
         APP_PROD.paginadorListaServer()
         //APP_PROD.getDataProdListaPag2()
-        APP_PROD.getMArcasFiltro()
+        APP_PROD.cargarCategorias()
+        APP_PROD.cargarMarcas()
         $('#price_first').on('input', function (e) {
             console.log("assss")
             APP_PROD.getFiltrar();
