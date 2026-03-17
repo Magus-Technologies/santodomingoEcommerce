@@ -66,14 +66,26 @@ try {
 
                     // Manejo de imágenes
                     if (!empty($rowEx['imagen'])) {
-                        // Usar la imagen personalizada de productos_exclusivos
-                        $rowEx['imagen1'] = API_URL . '/storage/' . $rowEx['imagen'];
+                        // Si ya es URL absoluta, usarla directamente; si no, construirla
+                        if (strpos($rowEx['imagen'], 'http') === 0) {
+                            $rowEx['imagen1'] = $rowEx['imagen'];
+                        } else {
+                            $rowEx['imagen1'] = API_URL . '/storage/' . $rowEx['imagen'];
+                        }
                         $rowEx['is_exclusive_img'] = true;
                     } else {
                         // Fallback a la imagen del producto
                         $prodImg = $rowEx['producto']['imagen'] ?? '';
-                        $rowEx['imagen1'] = (!empty($prodImg)) ? $prodImg : 'sinimagen_mtr_20sba.jpg';
-                        $rowEx['is_exclusive_img'] = false;
+                        if (!empty($prodImg) && strpos($prodImg, 'http') === 0) {
+                            $rowEx['imagen1'] = $prodImg;
+                            $rowEx['is_exclusive_img'] = true;
+                        } elseif (!empty($prodImg)) {
+                            $rowEx['imagen1'] = $prodImg;
+                            $rowEx['is_exclusive_img'] = false;
+                        } else {
+                            $rowEx['imagen1'] = 'sinimagen_mtr_20sba.jpg';
+                            $rowEx['is_exclusive_img'] = false;
+                        }
                     }
                     $rowEx['imagen2'] = $rowEx['imagen1'];
 
