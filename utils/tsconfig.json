@@ -1,16 +1,26 @@
 {
     "banner_pricipal": [
         {
-            "index": -1,
-            "imagen": "NBOwc6bPDezCK4SRPt0Yz3ob7FL7PZ8BPljSeYAewiONgPiMI1kMh43Qg76I0BtxvdXcbpgA6zWb7kB3.webp",
-            "titulo": "vinoypisco",
+            "imagen": "MHMnWzU8Hr028Gi5OEkkLSOIxNhWldZx5DUDRIgQ4BYp7sdKdtym40tFvhydVmWl4DJdtT2t5KEHMHxS.png",
+            "titulo": "",
             "titulo_peque": "",
             "parrafo": "",
             "enlazado": "",
             "prod": "",
             "pocision": 3,
-            "url": "https:\/\/xn--viasantodomingo-zqb.com\/public_html\/CYM\/shop-list-ctg.php?ctg=002",
-            "estado": "1"
+            "estado": "1",
+            "url": ""
+        },
+        {
+            "imagen": "UWV80QiZS0xMkBNTK6S33L517gdRjQt7g8gcqnEG7OkGSWxEVR9lrtdYWEWaxHnKK8oEUgu88NGzqRTu.png",
+            "titulo": "",
+            "titulo_peque": "",
+            "parrafo": "",
+            "enlazado": "",
+            "prod": "",
+            "pocision": 3,
+            "estado": "1",
+            "url": ""
         }
     ],
     "bannerprod1": {
@@ -22,12 +32,12 @@
         "image": "VfDg3bUaiOEyYfaWEKQCUVgyb6jDpLhArlhkC1AlGFZfk01pAHsUdOI4Ks703f1kGYLJPMuVRJ029sh9.jpg"
     },
     "banner1": {
-        "prod": "",
-        "image": "M7R48fHWGps4d0uvT8CXgcawyXShSdn2wRf3MiAe4vVtG7sURZ3qlkfj2GfLl89Tbot3uR3lXfRJxDW2.jpeg"
+        "prod": "5020",
+        "image": "GPQanDwoIntkSgfcJKZm2uUB5g4F6mh3qQPk83oEgRlrgZSqWJL7HWh3LRKVIiivfEyotgDt5fBM4Up6.png"
     },
     "banner2": {
         "prod": "",
-        "image": "477AuND5t8tSLbU0XF3C5E4W6mMscIye5EwpwBFOzNQoZbrCSexomyxHWobHfNr7Ho7IInfePn9jAliq.jpeg"
+        "image": "BoBjjpE4HmRdq7b0y6zFEq55cLvnU6Jd5bNzKA4oZ1o2Dtzt5Rs9LWoqsrRzbJc3O0UpPzsCBET1eguB.png"
     },
     "banercentarl1": {
         "prod": "993",
@@ -111,40 +121,8 @@
     ],
     "banner_menu_lateral_6": [
         {
-            "imagen": "5Sa0R4oS1Ckwv27P0pZAWM5raHIod1etkDHY8hjxxKv4P6nBDWcSzFzpSF8oIrDFKqc7mYInA9Qn17EU.jpg",
-            "titulo": "PREMIO",
-            "titulo_peque": "",
-            "parrafo": "",
-            "enlazado": "",
-            "prod": "",
-            "pocision": 3,
-            "estado": "1",
-            "url": "https:\/\/www.facebook.com\/photo.php?fbid=524757790062225&set=pb.100075840267685.-2207520000&type=3"
-        },
-        {
+            "imagen": "KraSBNAAiPHxkse1ADG9aFnfYnA0Ozgv5jIGlEs2tTxJQa2aAW70dh0v3SaCM9zLSY1kfP6iOljKnc8t.png",
             "titulo": "",
-            "titulo_peque": "",
-            "parrafo": "",
-            "enlazado": "",
-            "prod": "",
-            "pocision": 3,
-            "estado": "1",
-            "url": ""
-        },
-        {
-            "imagen": "PsHXCSDGdsBAYMwRqC5teyFF6Qmm9wW5ydTnCAyfSbJtK6ZhoavBrNpKgqKbWsLpfi0D9SXJSe7P413s.png",
-            "titulo": "ada dadada wd",
-            "titulo_peque": "",
-            "parrafo": "",
-            "enlazado": "",
-            "prod": "",
-            "pocision": 3,
-            "estado": "1",
-            "url": ""
-        },
-        {
-            "imagen": "yJ1pJl5HgtdpL21dV4dRpX7okzvVSYI32BX9tiEMfHyOAtrqFTVsomcfOazRFou32pVyAhJDVtgS9K6t.png",
-            "titulo": "ada dawdaw dawdawdawd",
             "titulo_peque": "",
             "parrafo": "",
             "enlazado": "",
@@ -168,6 +146,60 @@
         }
     ],
     "whatsapp": "https:\/\/api.whatsapp.com\/send?phone=51955081075&text=Hola%21%20Quisiera%20m%C3%A1s%20informaci%C3%B3n%20sobre%20Varela%202.",
+    "nuestra_seleccion": [
+        {
+            "titulo": "Vinos Tintos",
+            "imagen": "",
+            "url": "shop-list-ctg.php?ctg=001"
+        },
+        {
+            "titulo": "Vinos Blancos",
+            "imagen": "",
+            "url": "shop-list-ctg.php?ctg=002"
+        },
+        {
+            "titulo": "Vinos Rosados",
+            "imagen": "",
+            "url": "shop-list-ctg.php?ctg=003"
+        },
+        {
+            "titulo": "Espumantes",
+            "imagen": "",
+            "url": "shop-list-ctg.php?ctg=004"
+        }
+    ],
+    "seccion_tradicion": {
+        "imagen": "QLMKi0XFWh0CB5Mw5lNtNsOafe9ysXRhOHSPDca46z7YNOzy4FUUL7QlQHnH5cfp8JHNDqDGzaUpXNC5.png",
+        "titulo": "Novik",
+        "color": "#000000"
+    },
+    "menu_nav": [
+        {
+            "titulo": "PRODUCTOS",
+            "url": "shop-list-ctg.php?ctg=001",
+            "estado": "1"
+        },
+        {
+            "titulo": "VINO BLANCO",
+            "url": "shop-list-ctg.php?ctg=002",
+            "estado": "0"
+        },
+        {
+            "titulo": "VINO ROSADO",
+            "url": "shop-list-ctg.php?ctg=003",
+            "estado": "0"
+        },
+        {
+            "titulo": "ESPUMANTE",
+            "url": "shop-list-ctg.php?ctg=004",
+            "estado": "0"
+        },
+        {
+            "titulo": "PISCO",
+            "url": "shop-list-prod-exclu.php",
+            "estado": "0"
+        }
+    ],
     "banner_extra_remate": [
         {
             "imagen": "mGfjZnPz5xBCrnJe5JlQoBUya5wbWRyjwAUgUtmRoA7bJvaUqAVB4f7jzfuUV7E3dJWrJAnvQAFpgFlO.png",

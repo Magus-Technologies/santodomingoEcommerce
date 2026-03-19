@@ -221,6 +221,16 @@ if (strlen($dataConf['banercentarl3']['prod']) > 0) {
                     </div>
                     <div class="row" style="margin-top: 20px">
                         <div class="col-md-12">
+                            <h3>Nuestra Selecci&oacute;n</h3>
+                        </div>
+                        <div class="col-md-12">
+                            <a href="conf_seleccion.php" class="form-control btn btn-danger">
+                                <i class="fa fa-th-large"></i> &nbsp;Gestionar Categor&iacute;as
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 20px">
+                        <div class="col-md-12">
                             <h3>Banner Lateral</h3>
                         </div>
                         <div class="col-md-12">
@@ -392,6 +402,37 @@ if (strlen($dataConf['banercentarl3']['prod']) > 0) {
                 <div class="col-md-12">
                     <a href="banner_extra.php" class="form-control btn btn-primary">Editar Banner Extra</a>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Tradición -->
+    <div class="container" style="margin-top: 40px">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h3>Sección "Expertos en Vino"</h3>
+                <p class="text-muted" style="font-size:13px">Imagen de fondo y título de la sección parallax del inicio.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 mb-5">
+        <div class="row justify-content-md-center">
+            <div class="col-md-6 text-center">
+                <?php
+                $tradicion = $dataConf['seccion_tradicion'] ?? ['imagen' => '', 'titulo' => 'Expertos en Vino'];
+                if (!empty($tradicion['imagen'])): ?>
+                    <img src="../public/img/banner/<?= htmlspecialchars($tradicion['imagen']) ?>"
+                         style="max-width:300px; max-height:120px; object-fit:cover; border-radius:8px; margin-bottom:10px">
+                <?php else: ?>
+                    <div style="width:300px; height:100px; background:#eee; display:flex; align-items:center;
+                                justify-content:center; margin:0 auto 10px; border-radius:8px; color:#aaa;">
+                        Sin imagen de fondo
+                    </div>
+                <?php endif; ?>
+                <p><strong>Título actual:</strong> <?= htmlspecialchars($tradicion['titulo']) ?></p>
+                <button data-toggle="modal" data-target="#modal-tradicion" class="btn btn-primary">
+                    <i class="fa fa-edit"></i> Editar
+                </button>
             </div>
         </div>
     </div>
@@ -795,6 +836,55 @@ if (strlen($dataConf['banercentarl3']['prod']) > 0) {
     <script src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
     <input id="id_prod" type="hidden">
+
+<!-- ===== MODAL SECCIÓN TRADICIÓN ===== -->
+<div class="modal fade" id="modal-tradicion" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Sección "Expertos en Vino"</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="tradicion_titulo" class="form-control"
+                           value="<?= htmlspecialchars($tradicion['titulo'] ?? 'Expertos en Vino') ?>">
+                </div>
+                <div class="form-group">
+                    <label>Color del título</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="color" id="tradicion_color"
+                               value="<?= htmlspecialchars($tradicion['color'] ?? '#ffffff') ?>"
+                               style="width:50px; height:38px; padding:2px; border-radius:6px; cursor:pointer;">
+                        <span class="ml-2 text-muted" style="font-size:13px">Selecciona el color del texto</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Imagen de fondo</label>
+                    <div>
+                        <button type="button" onclick="$('#file_tradicion').click()" class="btn btn-success btn-sm">
+                            <i class="fa fa-image"></i> Seleccionar imagen
+                        </button>
+                        <small class="text-muted ml-2">Recomendado: 1920 × 600 px</small>
+                    </div>
+                    <input type="file" id="file_tradicion" accept="image/*" style="display:none">
+                    <img id="preview_tradicion"
+                         src="<?= !empty($tradicion['imagen']) ? '../public/img/banner/' . htmlspecialchars($tradicion['imagen']) : '' ?>"
+                         style="max-width:100%; max-height:150px; object-fit:cover; margin-top:10px;
+                                display:<?= !empty($tradicion['imagen']) ? 'block' : 'none' ?>; border-radius:6px;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" onclick="guardarTradicion()" class="btn btn-primary">
+                    <i class="fa fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 <script>
     function guardarBanerC1prod() {
@@ -1313,6 +1403,53 @@ if (strlen($dataConf['banercentarl3']['prod']) > 0) {
             }
         });
     });
+
+    // Preview imagen tradición
+    $('#file_tradicion').change(function() {
+        if (this.files && this.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#preview_tradicion').attr('src', e.target.result).show();
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+</script>
+
+<script>
+function guardarTradicion() {
+    var titulo = $('#tradicion_titulo').val();
+    var color  = $('#tradicion_color').val();
+    var fileInput = $('#file_tradicion')[0];
+
+    var doGuardar = function(imagen) {
+        $.ajax({
+            type: 'POST',
+            url: '../ajax/ajs_configuracione.php',
+            data: { tipo: 'seccion_tradicion', titulo: titulo, color: color, imagen: imagen },
+            success: function() {
+                $('#modal-tradicion').modal('hide');
+                alert('Guardado correctamente');
+                location.reload();
+            }
+        });
+    };
+
+    if (fileInput.files && fileInput.files[0]) {
+        var fd = new FormData();
+        fd.append('file', fileInput.files[0]);
+        $.ajax({
+            type: 'POST', url: '../ajax/upload_img_banner.php',
+            data: fd, contentType: false, cache: false, processData: false,
+            success: function(resp) {
+                resp = JSON.parse(resp);
+                doGuardar(resp.dstos);
+            }
+        });
+    } else {
+        doGuardar('');
+    }
+}
 </script>
 
 </html>

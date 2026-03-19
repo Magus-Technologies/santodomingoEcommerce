@@ -16,93 +16,11 @@ require "../dao/NuevoImgresoDao.php";
 require "../dao/GrupoCategoriaDao.php";
 require "../dao/ProductoDao.php";
 require_once "../extra/TasaCambioApi.php";
-require_once "../utils/Conexion.php";
-require_once "../config.php";
 
 
 $tasaCambioApi = new TasaCambioApi();
 $cambio = $tasaCambioApi->getTasaCambio();
 $tc = $cambio['cambio'] ?? 0;
-
-$categorias_home = [];
-$apiBannersUrlSeleccion = API_URL . '/api/public/grupo-seleccion';
-$apiBannersSeleccion = [];
-
-try {
-    $responseSel = @file_get_contents($apiBannersUrlSeleccion);
-    if ($responseSel !== false) {
-        $dataSel = json_decode($responseSel, true);
-        if (isset($dataSel['success']) && $dataSel['success']) {
-            $apiBannersSeleccion = $dataSel['data'];
-        }
-    }
-} catch (Exception $e) {
-    // Si falla la API seguimos vacíos para fallback
-}
-
-$apiExclusivosUrl = API_URL . '/api/public/productos-exclusivos';
-$exclusivos_api = ['nuevos_ingresos' => [], 'mas_vendidos' => [], 'ofertas_especiales' => []];
-$exclusiveIds = [];
-
-try {
-    $responseEx = @file_get_contents($apiExclusivosUrl);
-    if ($responseEx !== false) {
-        $dataEx = json_decode($responseEx, true);
-        if (isset($dataEx['success']) && $dataEx['success']) {
-            foreach ($dataEx['data'] as $rowEx) {
-                if (isset($rowEx['tab_name'])) {
-                    // Mapear campos para que coincidan con lo que espera el storefront
-                    $rowEx['nombre'] = $rowEx['producto']['nombre'] ?? 'Sin nombre';
-                    $rowEx['prod_cod'] = $rowEx['producto']['codigo'] ?? '';
-                    $rowEx['prod_id'] = $rowEx['producto_id'];
-                    $rowEx['precio'] = $rowEx['producto']['precio'] ?? 0;
-                    $rowEx['stock'] = $rowEx['producto']['cantidad'] ?? 0;
-                    $rowEx['stock_prod'] = 0;
-                    $rowEx['tipo_pro'] = 1;
-                    $rowEx['estado'] = $rowEx['estado'] ?? '1';
-
-                    // Manejo de imágenes
-                    if (!empty($rowEx['imagen'])) {
-                        // Usar la imagen personalizada de productos_exclusivos
-                        $rowEx['imagen1'] = API_URL . '/storage/' . $rowEx['imagen'];
-                        $rowEx['is_exclusive_img'] = true;
-                    } else {
-                        // Fallback a la imagen del producto
-                        $prodImg = $rowEx['producto']['imagen'] ?? '';
-                        $rowEx['imagen1'] = (!empty($prodImg)) ? $prodImg : 'sinimagen_mtr_20sba.jpg';
-                        $rowEx['is_exclusive_img'] = false;
-                    }
-                    $rowEx['imagen2'] = $rowEx['imagen1'];
-
-                    $exclusivos_api[$rowEx['tab_name']][] = $rowEx;
-                    $exclusiveIds[] = $rowEx['prod_id'];
-                }
-            }
-        }
-    }
-} catch (Exception $e) {}
-
-if (count($apiBannersSeleccion) > 0) {
-    foreach ($apiBannersSeleccion as $rowSel) {
-        if (isset($rowSel['estado']) && $rowSel['estado'] == '1') {
-            $rowSel['imagen'] = (isset($rowSel['imagen_url']) && strlen($rowSel['imagen_url']) > 5) 
-                ? $rowSel['imagen_url'] 
-                : ((isset($rowSel['imagen']) && strlen($rowSel['imagen']) > 5 && !str_starts_with($rowSel['imagen'], 'http')) ? '../public/img/banner/' . $rowSel['imagen'] : '../public/img/banner/sinimagen_menu_20sba.jpg');
-            $categorias_home[] = $rowSel;
-        }
-    }
-} else {
-    try {
-        $_conexionCat = (new Conexion())->getConexion();
-        $_resCat = $_conexionCat->query("SELECT nombre_cate, codi_categoria, imagen FROM grupo_seleccion WHERE estado='1' ORDER BY id_seleccion ASC");
-        while ($row = $_resCat->fetch_assoc()) {
-            $row['imagen'] = (strlen($row['imagen']) < 5) ? '../public/img/banner/sinimagen_menu_20sba.jpg' : '../public/img/banner/' . $row['imagen'];
-            $categorias_home[] = $row;
-        }
-    } catch (Exception $e) {
-        // Fallback final
-    }
-}
 $isSesionUser = isset($_SESSION['usuario']);
 $perfilUser = '';
 
@@ -120,27 +38,16 @@ $conexion = (new Conexion())->getConexion();
 $listaGrupos = $grupoCategoriaDao->getListaCate();
 //$listaNue = $nuevoImgresoDao->getLista();
 
-// PRODUCTOS EXCLUSIVOS CURADOS (Desde API)
-if (count($exclusivos_api['nuevos_ingresos']) > 0) {
-    $listaNue = $exclusivos_api['nuevos_ingresos'];
-} else {
-    $listaNue = $productoDao->getLastRegister(15);
-}
+$listaNue = $productoDao->getLastRegister(15);
 
 $listaRmaRema = $productoDao->getLastRegisterRemaRema(15);
 //var_dump($listaRmaRema);die;
 /* echo "<pre>";
-base64_decode($listaNue);
+var_dump($listaNue);
 die(); */
 $listaNue2 = $productoDao->getLastRegisterSilver(7);
 $randonItemProdsss = $productoDao->getRandonRegister(46);
-
-$listaMVCurados = $exclusivos_api['mas_vendidos'];
-if (count($listaMVCurados) > 0) {
-    $listaRamMasVen = $listaMVCurados;
-} else {
-    $listaRamMasVen = array_slice($randonItemProdsss, 0, 29);
-}
+$listaRamMasVen = array_slice($randonItemProdsss, 0, 29);
 
 /* var_dump($listaRamMasVen);
 die();  */
@@ -155,12 +62,7 @@ $listaRamByCat = $productoDao->getDataRandonE();
 /*  echo "<pre>";
 var_dump($listaRamByCat);
 die();  */
-
-if (count($exclusivos_api['ofertas_especiales']) > 0) {
-    $listaOfertas = $exclusivos_api['ofertas_especiales'];
-} else {
-    $listaOfertas = $productoDao->getDataofertas();
-}
+$listaOfertas = $productoDao->getDataofertas();
 /* echo "<pre>";
 var_dump($listaOfertas);
 die();
@@ -210,29 +112,31 @@ var_dump($banner6FinalExtra);
 die();
  */
 
-// Obtener banners principales desde la API
-$apiUrlBanner = API_URL . '/api/public/banners-promocionales';
-$apiBannersPrincipales = [];
-try {
-    $responseBb = @file_get_contents($apiUrlBanner);
-    if ($responseBb !== false) {
-        $dataBanner = json_decode($responseBb, true);
-        if (isset($dataBanner['success']) && $dataBanner['success']) {
-            $apiBannersPrincipales = $dataBanner['data'] ?? [];
-        }
-    }
-} catch (Exception $e) {
-    error_log("Error cargando banners principales: " . $e->getMessage());
-}
-
-if (empty($apiBannersPrincipales)) {
-    // Fallback: usar tsconfig.json si la API falla o está vacía
-    $apiBannersPrincipales = isset($dataConf['banner_pricipal']) ? $dataConf['banner_pricipal'] : [];
-}
-
 ////////////////// BANNER INFERIOR///////////
-// Ahora se carga dinámicamente desde la API de Laravel
-// Ver: banners-promocionales.php
+$usarBanner6 = $dataConf['banner_inferior'];
+$nuevoArrayInferior = [];
+foreach ($usarBanner6 as $row) {
+    if ($row['estado'] !== '0') {
+        $nuevoArrayInferior[] = $row;
+    }
+}
+$cantidadIndexInferior = count($nuevoArrayInferior);
+/* $numbers = range(0, $cantidadIndexInferior - 1); */
+shuffle($nuevoArrayInferior);
+/* $bannerInferiorOk = array_slice($numbers, 0, 1); */
+/* echo "<pre>"; */
+/* var_dump($bannerInferiorOk); */
+$arrayInferioFinal = [];
+foreach (array_slice($nuevoArrayInferior, 0, 3) as $article) {
+    $arrayInferioFinal[] = $article;
+}
+/* var_dump($arrayInferioFinal);
+die(); */
+/* $random = array();
+for ($i = 0; $i < 3; $i++) {
+    $random[$i] = rand(0, $cantidadIndexInferior - 1);
+}
+echo "<pre>"; */
 /* echo "<pre>";
 var_dump($rpta);
 die(); */
@@ -246,37 +150,33 @@ die(); */
 $listaMarcas = $conexion->query("SELECT * FROM marcra_productos WHERE estado = 1 order by nombre_marca asc");
 
 $ban1_nombre = '';
-if (isset($apiBannersPrincipales[3])) {
-    $ban1_url = $apiBannersPrincipales[3]['imagen_url'] ?? '../public/img/banner/' . $apiBannersPrincipales[3]['imagen'];
-    $ban1_ide = htmlspecialchars($apiBannersPrincipales[3]['url'] ?? 'javascript:void(0)');
-} else {
-    $ban1_url = '../public/img/banner/' . $dataConf['banner1']['image'];
-    $ban1_ide = 'javascript:void(0)';
-    if (strlen($dataConf['banner1']['prod']) > 0) {
-        $productoDao->setProdId($dataConf['banner1']['prod']);
-        $respPROB1 = $productoDao->getData2();
-        if (count($respPROB1) > 0) {
-            $ban1_nombre = $respPROB1['nombre'];
-            $ban1_ide = "shop-product-detail.php?prod=" . $dataConf['banner1']['prod'];
-        }
+$ban1_url = $dataConf['banner1']['image'];
+/* echo "<pre>"
+var_dump($dataConf);
+die(); */
+$ban1_ide = 'javascript:void(0)';
+
+//echo strlen($dataConf['banner1']['prod']);
+if (strlen($dataConf['banner1']['prod']) > 0) {
+    $productoDao->setProdId($dataConf['banner1']['prod']);
+    $respPROB1 = $productoDao->getData2();
+    //print_r($respPROB1);
+    if (count($respPROB1) > 0) {
+        $ban1_nombre = $respPROB1['nombre'];
+        $ban1_ide = "shop-product-detail.php?prod=" . $dataConf['banner1']['prod'];
     }
 }
 
 $ban2_nombre = '';
-if (isset($apiBannersPrincipales[4])) {
-    $ban2_url = $apiBannersPrincipales[4]['imagen_url'] ?? '../public/img/banner/' . $apiBannersPrincipales[4]['imagen'];
-    $ban2_ide = htmlspecialchars($apiBannersPrincipales[4]['url'] ?? 'javascript:void(0)');
-} else {
-    $ban2_url = '../public/img/banner/' . $dataConf['banner2']['image'];
-    $ban2_ide = 'javascript:void(0)';
-    if (strlen($dataConf['banner2']['prod']) > 0) {
-        $productoDao->setProdId($dataConf['banner2']['prod']);
-        $respPROB2 = $productoDao->getData2();
-        if (count($respPROB2) > 0) {
-            $ban2_nombre = $respPROB2['nombre'];
-            $ban2_ide = "shop-product-detail.php?prod=" . $dataConf['banner2']['prod'];
-        }
-    }
+$ban2_url = $dataConf['banner2']['image'];
+$ban2_ide = 'javascript:void(0)';
+
+if (strlen($dataConf['banner2']['prod']) > 0) {
+    $productoDao->setProdId($dataConf['banner2']['prod']);
+    $respPROB2 = $productoDao->getData2();
+    //print_r($respPROB1);
+    $ban2_nombre = $respPROB2['nombre'];
+    $ban2_ide = "shop-product-detail.php?prod=" . $dataConf['banner2']['prod'];
 }
 
 $banerCimg1 = $dataConf['banercentarl1']['image'];
@@ -464,7 +364,7 @@ if ($body_class == 'desktop') { ?>
     }
     ?>@media (max-width: 576px) {
 
-        /* Estilos para mvil */
+        /* Estilos para m�vil */
         ifmobile {
             display: block;
         }
@@ -753,77 +653,15 @@ if ($body_class == 'desktop') { ?>
                                         </div>
                                     </li>
 
-                                    <li class="dropdown  nav-options-i">
-                                        <a class="nav-link " href="shop-list-ctg.php?ctg=002">VINO TINTO</a>
-
-                                    </li>
-
-
+                                    <?php
+                                    $_menuNav2 = $dataConf['menu_nav'] ?? [];
+                                    foreach ($_menuNav2 as $_item2):
+                                        if (($_item2['estado'] ?? '1') !== '1') continue;
+                                    ?>
                                     <li class="nav-options-i">
-                                        <a class="nav-link menu-var"
-                                            href="shop-list-ctg.php?ctg=002">VINO BLANCO</a>
-
+                                        <a class="nav-link menu-var" href="<?= htmlspecialchars($_item2['url']) ?>"><?= htmlspecialchars($_item2['titulo']) ?></a>
                                     </li>
-
-                                    <li class="dropdown  nav-options-i">
-                                        <a class="nav-link " href="shop-list-ctg.php?ctg=002">VINO ROSADO</a>
-
-                                    </li>
-                                    <li class="nav-options-i">
-                                        <a class="nav-link menu-var " href="shop-list-ctg.php?ctg=002">ESPUMANTE</a>
-                                    </li>
-                                    <li class="dropdown  nav-options-i">
-                                        <a class="nav-link " href="shop-list-ctg.php?ctg=002" data-toggle="dropdown">PISCO</a>
-                                        <div class="dropdown-menu">
-                                            <ul>
-                                                <?php
-
-                                                $vipUrl = '';
-                                                // Determinar si el usuario tiene acceso VIP
-                                                if ($isSesionUser && $perfilUser != 'usuario') {
-                                                    $vipUrl = 'shop-list-vip.php?search=+&type=last+&v=vp';
-                                                    $textLink = '';  // Texto alertas
-                                                } elseif ($isSesionUser == "") {
-                                                    $vipUrl = 'login.php?v=vp';
-                                                    $textLink = '';
-                                                } elseif (($perfilUser == 'usuario' || $perfilUser == 'Usuario') && $vip_status == 'SI') {
-                                                    $vipUrl = 'shop-list-vip.php?search=+&type=last+&v=vp';
-                                                    $textLink = '';     //
-                                                } else {
-                                                    $vipUrl = '#';
-                                                    $textLink = 'alertavip';
-                                                }
-                                                ?>
-
-                                                <li><a class="dropdown-item nav-item" href="<?= $vipUrl ?>"
-                                                        id="<?= $textLink ?>">Precio VIP </a></li>
-
-
-
-
-                                                <li><a class="dropdown-item nav-item"
-                                                        href="shop-list-distri.php?search=+&type=last+&v=dt">Precio
-                                                        Distribuci&oacute;n</a></li>
-                                            </ul>
-                                        </div>
-                                    </li>
-
-                                    <!--<li class="nav-options-i">
-                                        <a class="nav-link menu-var " href="./arma-tu-pc.php">ARMA TU PC</a>
-                                    </li>
-                                    <li class="  nav-options-i">
-                                        <a class="nav-link   " href="https://c/"></a>
-
-                                    </li>
-                                    <li class="">
-                                        <a class="nav-link  menu-var" href="./shop-list-prod-mac.php?marc=071">SILVER VOLT</a>
-                                    </li> -->
-                                    <li class="nav-options-i">
-                                        <a class="nav-link  menu-var" href="./contact.php">Contactanos</a>
-                                    </li>
-                                    <li class="nav-options-i nomobile">
-                                        <a class="nav-link  menu-var" href="./about.php">ACERCA DE NOSOTROS</a>
-                                    </li>
+                                    <?php endforeach; ?>
                                     <li class="nav-options-i ifmobile">
                                         <a class="nav-link  menu-var" href="./banks.php">METODOS DE PAGO</a>
                                     </li>
@@ -906,7 +744,7 @@ if ($body_class == 'desktop') { ?>
                                 <?php
                                 $countBan = 1;
                                 $soloVisibles = [];
-                                foreach ($apiBannersPrincipales as $rowBan) {
+                                foreach ($dataConf['banner_pricipal'] as $rowBan) {
 
                                     if ($rowBan['estado'] == '1') {
                                         $soloVisibles[] = $rowBan;
@@ -914,7 +752,7 @@ if ($body_class == 'desktop') { ?>
                                         /*    echo "<pre>";
                                     var_dump($soloVisibles); */
                                         $dataExtraBann = '';
-                                        if (isset($rowBan['prod']) && strlen($rowBan['prod']) > 0) {
+                                        if (strlen($rowBan['prod']) > 0) {
 
                                             $PrecioProdBan = 0;
                                             $sql = "SELECT
@@ -933,12 +771,11 @@ if ($body_class == 'desktop') { ?>
                                             }
                                         }
 
-                                        $imgUrl = $rowBan['imagen_url'] ?? '../public/img/banner/' . $rowBan['imagen'];
                                 ?>
 
                                         <div class="carousel-item <?= ($countBan == 1) ? 'active' : '' ?>   background_bg"
-                                            style="cursor: pointer;" onclick="location.href='<?= htmlspecialchars($rowBan['url'] ?? '#') ?>';"
-                                            data-img-src="<?= htmlspecialchars($imgUrl) ?>" style="">
+                                            style="cursor: pointer;" onclick="location.href='<?= $rowBan['url'] ?>';"
+                                            data-img-src="../public/img/banner/<?= $rowBan['imagen'] ?> " style="">
                                             <div class="banner_slide_content banner_content_inner">
                                                 <div class="col-lg-7 col-10">
 
@@ -987,7 +824,7 @@ if ($body_class == 'desktop') { ?>
                     <div class="shop_banner2 el_banner1">
                         <a href="<?= $ban1_ide ?>" class="hover_effect1" style="padding: 0px;">
                             <div class="">
-                                <img src="<?= $ban1_url ?>" alt="shop_banner_img6">
+                                <img src="../public/img/banner/<?= $ban1_url ?>" alt="shop_banner_img6">
                             </div>
                         </a>
                     </div>
@@ -995,7 +832,7 @@ if ($body_class == 'desktop') { ?>
                         <a href="<?= $ban2_ide ?>" class="hover_effect1" style="padding: 0px;">
 
                             <div class="">
-                                <img src="<?= $ban2_url ?>" alt="shop_banner_img7">
+                                <img src="../public/img/banner/<?= $ban2_url ?>" alt="shop_banner_img7">
                             </div>
                         </a>
                     </div>
@@ -1022,24 +859,8 @@ if ($body_class == 'desktop') { ?>
                         </div>
                     </div>
                 </div>
-                <div class="owl-carousel owl-theme wine-cat-carousel mt-4">
-                    <?php foreach ($categorias_home as $cat): ?>
-                    <div class="item">
-                        <a href="shop-list-ctg.php?ctg=<?= htmlspecialchars($cat['codi_categoria']) ?>" class="wine-cat-card-wrapper">
-                            <div class="wine-card shadow-sm border-0">
-                                <div class="wine-img-container">
-                                    <img src="<?= htmlspecialchars($cat['imagen']) ?>"
-                                        class="img-fluid" alt="<?= htmlspecialchars($cat['nombre_cate']) ?>">
-                                    <div class="wine-overlay"></div>
-                                    <div class="wine-cat-label">
-                                        <h4 class="m-0"><?= htmlspecialchars($cat['nombre_cate']) ?></h4>
-                                        <p class="m-0 small text-uppercase">Explorar Colección <i class="ti-arrow-right"></i></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <?php endforeach; ?>
+                <div class="row mt-4" id="gridNuestraSeleccion">
+                    <!-- Cargado via JS para no bloquear la página -->
                 </div>
             </div>
         </div>
@@ -1133,32 +954,7 @@ if ($body_class == 'desktop') { ?>
 
             .wine-cat-card-wrapper:hover .wine-cat-label h4 {
                 color: #f3e5ab;
-            }
-
-            /* Carrusel */
-            .wine-cat-carousel .item {
-                padding: 0 10px;
-            }
-            .wine-cat-carousel .owl-nav button {
-                position: absolute;
-                top: 50%;
-                transform: translateY(-50%);
-                background: rgba(74,4,4,0.8) !important;
-                color: #fff !important;
-                border-radius: 50% !important;
-                width: 40px;
-                height: 40px;
-                font-size: 1.2rem !important;
-                line-height: 1 !important;
-            }
-            .wine-cat-carousel .owl-nav button.owl-prev { left: -15px; }
-            .wine-cat-carousel .owl-nav button.owl-next { right: -15px; }
-            .wine-cat-carousel .owl-nav button:hover {
-                background: #c7161d !important;
-            }
-            .wine-cat-carousel .owl-dots .owl-dot.active span,
-            .wine-cat-carousel .owl-dots .owl-dot:hover span {
-                background: #c7161d;
+                /* Gold accent */
             }
         </style>
         <!-- END CATEGORY CARDS SECTION -->
@@ -1224,18 +1020,14 @@ if ($body_class == 'desktop') { ?>
                                 <div class="tab_slider">
                                     <div class="tab-pane fade show active" id="arrival" role="tabpanel"
                                         aria-labelledby="arrival-tab">
-                                        <div class="product_slider carousel_slider owl-carousel owl-theme dot_style1"
+                                        <div class="product_slider owl-carousel owl-theme dot_style1"
+                                            id="owl-nuevos-ingresos"
                                             data-loop="true" data-margin="20"
                                             data-responsive='{"0":{"items": "1"}, "481":{"items": "2"}, "768":{"items": "3"}, "991":{"items": "4"}}'>
-
-                                            <?php
-
-                                            foreach ($listaNue as $proN) {
-                                                if (in_array($proN['prod_id'], $exclusiveIds) && !isset($proN['is_exclusive_img'])) {
-                                                     // Si no es el objeto de la API (que tiene is_exclusive_img) skip
-                                                     // para evitar duplicados en la misma lista si se mezclan
-                                                     continue;
-                                                }
+                                            <div class="item"><div class="text-center py-4"><div class="spinner-border text-danger"></div></div></div>
+                                        </div>
+                                    </div>
+                                    <?php /* LEGACY PHP LOOP — reemplazado por AJAX/API */ if(false) { foreach ($listaNue as $proN) { ?>
                                                 //var_dump($proN);
                                                 //die();
                                                 if (!is_null($proN['precio_ofertaa'])) {
@@ -1275,24 +1067,14 @@ if ($body_class == 'desktop') { ?>
                                                                     $url_detalle = 'shop-product-detail.php?prod=' . $proN['prod_id'];
                                                                 }
                                                                 ?>
-                                                                 <a href="<?= $url_detalle ?>">
-                                                                    <?php if (isset($proN['is_exclusive_img']) && $proN['is_exclusive_img']): ?>
-                                                                        <img style="max-width: 540px; max-height: 600px;"
-                                                                            src="<?= $proN['imagen1'] ?>"
-                                                                            alt="el_img3">
-                                                                        <img style="max-width: 540px; max-height: 600px;"
-                                                                            class="product_hover_img"
-                                                                            src="<?= $proN['imagen2'] ?>"
-                                                                            alt="el_hover_img3">
-                                                                    <?php else: ?>
-                                                                        <img style="max-width: 540px; max-height: 600px;"
-                                                                            src="../public/img/productos/<?= $proN['imagen1'] ?>"
-                                                                            alt="el_img3">
-                                                                        <img style="max-width: 540px; max-height: 600px;"
-                                                                            class="product_hover_img"
-                                                                            src="../public/img/productos/<?= $proN['imagen2'] ?>"
-                                                                            alt="el_hover_img3">
-                                                                    <?php endif; ?>
+                                                                <a href="<?= $url_detalle ?>">
+                                                                    <img style="max-width: 540px; max-height: 600px;"
+                                                                        src="../public/img/productos/<?= $proN['imagen1'] ?>"
+                                                                        alt="el_img3">
+                                                                    <img style="max-width: 540px; max-height: 600px;"
+                                                                        class="product_hover_img"
+                                                                        src="../public/img/productos/<?= $proN['imagen2'] ?>"
+                                                                        alt="el_hover_img3">
                                                                     <!--img style="max-width: 540px; max-height: 600px;" src="../public/images/Exclusivos/c_i7.jpg" alt="el_img3">
                                                         <img style="max-width: 540px; max-height: 600px;" class="product_hover_img" src="../public/images/Exclusivos/c_i72.jpg" alt="el_hover_img3"-->
                                                                 </a>
@@ -1381,19 +1163,17 @@ if ($body_class == 'desktop') { ?>
                                                     </div>
                                                 <?php endif;
                                                 ?>
-                                            <?php }
-                                            ?>
-
-
-                                        </div>
-                                    </div>
+                                            <?php } } ?>
                                     <div class="tab-pane fade" id="sellers" role="tabpanel"
                                         aria-labelledby="sellers-tab">
-                                        <div class="product_slider carousel_slider owl-carousel owl-theme dot_style1"
+                                        <div class="product_slider owl-carousel owl-theme dot_style1"
+                                            id="owl-mas-vendidos"
                                             data-loop="true" data-margin="20"
                                             data-responsive='{"0":{"items": "1"}, "481":{"items": "2"}, "768":{"items": "3"}, "991":{"items": "4"}}'>
-                                            <?php
-                                            foreach ($listaRamMasVen as $itemMV) {
+                                            <div class="item"><div class="text-center py-4"><div class="spinner-border text-danger"></div></div></div>
+                                        </div>
+                                    </div>
+                                    <?php /* LEGACY MAS VENDIDOS */ if(false) { foreach ($listaRamMasVen as $itemMV) { ?>
                                                 if ((!is_null($itemMV['precio_ofertaa']))) {
                                                     $ahorro = $itemMV['precio'] - $itemMV['precio_ofertaa'];
                                                     $precioProd = number_format($itemMV['precio'], 2, '.', ',');
@@ -1414,13 +1194,11 @@ if ($body_class == 'desktop') { ?>
                                                             <div class="product_img">
                                                                 <a
                                                                     href="shop-product-detail.php?prod=<?= $itemMV['prod_id'] ?>">
-                                                                    <?php if (isset($itemMV['is_exclusive_img']) && $itemMV['is_exclusive_img']): ?>
-                                                                        <img src="<?= $itemMV['imagen1'] ?>" alt="el_img7">
-                                                                        <img class="product_hover_img" src="<?= $itemMV['imagen2'] ?>" alt="el_hover_img7">
-                                                                    <?php else: ?>
-                                                                        <img src="../public/img/productos/<?= $itemMV['imagen1'] ?>" alt="el_img7">
-                                                                        <img class="product_hover_img" src="../public/img/productos/<?= $itemMV['imagen2'] ?>" alt="el_hover_img7">
-                                                                    <?php endif; ?>
+                                                                    <img src="../public/img/productos/<?= $itemMV['imagen1'] ?>"
+                                                                        alt="el_img7">
+                                                                    <img class="product_hover_img"
+                                                                        src="../public/img/productos/<?= $itemMV['imagen2'] ?>"
+                                                                        alt="el_hover_img7">
                                                                 </a>
                                                                 <div class="product_action_box">
                                                                     <ul class="list_none pr_action_btn">
@@ -1488,25 +1266,20 @@ if ($body_class == 'desktop') { ?>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
-                                            <?php }
-                                            ?>
-
-
-
-                                        </div>
-                                    </div>
+                                            <?php } } ?>
                                     <div class="tab-pane fade" id="featured__" role="tabpanel"
                                         aria-labelledby="sellers-tab">
-
                                     </div>
                                     <div class="tab-pane fade" id="special" role="tabpanel"
                                         aria-labelledby="special-tab">
-                                        <div class="product_slider carousel_slider owl-carousel owl-theme dot_style1"
+                                        <div class="product_slider owl-carousel owl-theme dot_style1"
+                                            id="owl-ofertas-especiales"
                                             data-loop="true" data-margin="20"
                                             data-responsive='{"0":{"items": "1"}, "481":{"items": "2"}, "768":{"items": "3"}, "991":{"items": "4"}}'>
-
-                                            <?php
-                                            foreach ($listaOfertas as $proN) {
+                                            <div class="item"><div class="text-center py-4"><div class="spinner-border text-danger"></div></div></div>
+                                        </div>
+                                    </div>
+                                    <?php /* LEGACY OFERTAS */ if(false) { foreach ($listaOfertas as $proN) { ?>
                                                 $ahorro = $proN['precio'] - $proN['precio_oferta'];
                                                 $precioProd = number_format($proN['precio'], 2, '.', ',');
                                                 $ahorro = number_format($ahorro, 2, '.', ',');
@@ -1530,13 +1303,13 @@ if ($body_class == 'desktop') { ?>
 
                                                             <div class="product_img">
                                                                 <a href="shop-product-detail.php?prod=<?= $proN['prod_id'] ?>">
-                                                                    <?php if (isset($proN['is_exclusive_img']) && $proN['is_exclusive_img']): ?>
-                                                                        <img style="max-width: 540px; max-height: 600px;" src="<?= $proN['imagen1'] ?>" alt="el_img3">
-                                                                        <img style="max-width: 540px; max-height: 600px;" class="product_hover_img" src="<?= $proN['imagen2'] ?>" alt="el_hover_img3">
-                                                                    <?php else: ?>
-                                                                        <img style="max-width: 540px; max-height: 600px;" src="../public/img/productos/<?= $proN['imagen1'] ?>" alt="el_img3">
-                                                                        <img style="max-width: 540px; max-height: 600px;" class="product_hover_img" src="../public/img/productos/<?= $proN['imagen2'] ?>" alt="el_hover_img3">
-                                                                    <?php endif; ?>
+                                                                    <img style="max-width: 540px; max-height: 600px;"
+                                                                        src="../public/img/productos/<?= $proN['imagen1'] ?>"
+                                                                        alt="el_img3">
+                                                                    <img style="max-width: 540px; max-height: 600px;"
+                                                                        class="product_hover_img"
+                                                                        src="../public/img/productos/<?= $proN['imagen2'] ?>"
+                                                                        alt="el_hover_img3">
                                                                     <!--img style="max-width: 540px; max-height: 600px;" src="../public/images/Exclusivos/c_i7.jpg" alt="el_img3">
                                                         <img style="max-width: 540px; max-height: 600px;" class="product_hover_img" src="../public/images/Exclusivos/c_i72.jpg" alt="el_hover_img3"-->
                                                                 </a>
@@ -1595,10 +1368,7 @@ if ($body_class == 'desktop') { ?>
                                                         </div>
                                                     </div>
                                                 <?php endif; ?>
-                                            <?php }
-                                            ?>
-                                        </div>
-                                    </div>
+                                            <?php } } ?>
                                 </div>
                             </div>
                         </div>
@@ -1612,7 +1382,15 @@ if ($body_class == 'desktop') { ?>
         <div class="section pb_20 small_pt">
             <div class="custom-container">
                 <div class="row">
-                    <?php include 'banners-promocionales.php'; ?>
+                    <?php foreach ($arrayInferioFinal as $row): ?>
+                        <div class="col-md-4">
+                            <div class="sale-banner mb-3 mb-md-4">
+                                <a class="hover_effect1" href="<?= $row['url'] ?>">
+                                    <img src="../public/img/banner/<?= $row['imagen'] ?>" alt="shop_banner_img7">
+                                </a>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>
@@ -1625,7 +1403,7 @@ if ($body_class == 'desktop') { ?>
                     <div class="col-md-12">
                         <div class="heading_tab_header">
                             <div class="heading_s2">
-                                <h4><img src="../public/wineicon.png" class="iconotitulo">Ofertas</h4>
+                                <h4><img src="../public/wineicon.png" class="iconotitulo">Descripcion de producto</h4>
                             </div>
                         </div>
                     </div>
@@ -1715,18 +1493,23 @@ if ($body_class == 'desktop') { ?>
         </div>
         <br />
         <!-- END SECTION SHOP -->
-        <div class="section tradicion" id="parallax-tradicion" style="padding-bottom: 90px;padding-top: 90px;">
+        <?php
+        $tradicion = $dataConf['seccion_tradicion'] ?? ['imagen' => '', 'titulo' => 'Expertos en Vino'];
+        $tradicionBg = !empty($tradicion['imagen'])
+            ? 'background-image: url(\'../public/img/banner/' . htmlspecialchars($tradicion['imagen']) . '\');'
+            : '';
+        ?>
+        <div class="section tradicion" id="parallax-tradicion"
+             style="padding-bottom: 90px;padding-top: 90px;<?= $tradicionBg ?>">
             <div class="custom-container">
                 <div class="row align-items-center">
                     <div class="col-md-6" style=" margin: auto;">
                         <div class="text_white text-center">
                             <img src="../public/wgicon.png" style="width: 100px; filter: brightness(0) invert();" /><br>
                             <span style="font-size: 14px;">TRADICIÓN</span><br>
-
-                            <span style="font-size: 43px;font-weight: bold;">Expertos en Vino</span>
+                            <span style="font-size: 43px;font-weight: bold; color:<?= htmlspecialchars($tradicion['color'] ?? '#ffffff') ?>;"><?= htmlspecialchars($tradicion['titulo']) ?></span>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -1758,40 +1541,21 @@ if ($body_class == 'desktop') { ?>
                         </div>
                         <div class="row">
                             <div class="col-12">
-                                <div class="product_slider carousel_slider owl-carousel owl-theme dot_style1"
+                                <div id="owl-productos-remate" class="product_slider carousel_slider owl-carousel owl-theme dot_style1"
                                     data-loop="true" data-margin="20"
                                     data-responsive='{"0":{"items": "1"}, "481":{"items": "2"}, "768":{"items": "3"}, "991":{"items": "4"}}'>
-                                    <?php
-                                    // Arreglo auxiliar para almacenar los IDs ya procesados
-                                    $rematesProcesados = [];
-
+                                    <?php if(false) { $rematesProcesados = [];
                                     foreach ($listaRmaRema as $remate) {
-                                        // Verificamos si el ID del remate ya fue procesado
-                                        if (in_array($remate['prod_id'], $rematesProcesados)) {
-                                            continue; // Si ya fue procesado, lo saltamos
-                                        }
-
-                                        // Agregamos el ID del remate al arreglo auxiliar
+                                        if (in_array($remate['prod_id'], $rematesProcesados)) { continue; }
                                         $rematesProcesados[] = $remate['prod_id'];
-
-                                        // Continuamos con el procesamiento del remate
                                         if (isset($remate['precio_ofertaa']) && !is_null($remate['precio_ofertaa'])) {
                                             $ahorro = $remate['precio'] - $remate['precio_ofertaa'];
                                             $precioProd = number_format($remate['precio'], 2, '.', ',');
-
                                             $ahorro = number_format($ahorro, 2, '.', ',');
                                             $precioCambio = number_format(1 * $remate['precio_ofertaa'], 2, '.', ',');
-
                                             $ahorroSol = 1 * $ahorro;
-
-                                            // Asegurarse de que $precioProd sea numérico
                                             $precioProdNumerico = floatval(str_replace(',', '', $precioProd));
-
-                                            // Si falla, devuelve un valor por defecto (0.2)
-                                            $precioProdSol = is_numeric($precioProdNumerico)
-                                                ? number_format(1 * $precioProdNumerico, 2, '.', ',')
-                                                : '0.2';
-
+                                            $precioProdSol = is_numeric($precioProdNumerico) ? number_format(1 * $precioProdNumerico, 2, '.', ',') : '0.2';
                                             $ahorroSol = number_format(1 * $ahorro, 2, '.', ',');
                                             $ahorroSol = number_format(floatval(0), 2);
                                         } else {
@@ -1803,7 +1567,6 @@ if ($body_class == 'desktop') { ?>
                                                 $precioCambio = number_format(1 * $remate['precio'], 2, '.', ',');
                                             }
                                         }
-
                                     ?>
                                         <?php if (($remate['stock'] !== '0.000' || $remate['stock_prod'] !== '0') && $remate['estado'] == '1'): ?>
                                             <div class="item">
@@ -1852,18 +1615,12 @@ if ($body_class == 'desktop') { ?>
                                                         </h6>
                                                         <?php if (!is_null($remate['precio_ofertaa'])): ?>
                                                             <div style="font-size: 13px;" class="product_price">
-                                                                <!--<span class="price">$<?= $remate['precio_ofertaa'] ?></span>
-                                                                <del>$<?= $precioProd ?></del>
-                                                                <div class="on_sale">
-                                                                    <span>Ahorre $<?= $ahorro ?></span>
-                                                                </div>-->
                                                                 <br>
                                                                 <span class="price">S/. <?= $precioCambio ?></span>
                                                                 <del><span>S/. <?php echo $precioProdSol; ?></span></del>
                                                             </div>
                                                         <?php else: ?>
                                                             <div style="font-size: 13px;" class="product_price">
-                                                                <!--<span class="price">$<?= $precioProd ?></span>-->
                                                                 <span><strong>S/. <?php echo $precioCambio; ?></strong></span>
                                                             </div>
                                                         <?php endif; ?>
@@ -1897,7 +1654,7 @@ if ($body_class == 'desktop') { ?>
                                                 </div>
                                             </div>
                                         <?php endif; ?>
-                                    <?php } ?>
+                                    <?php } } ?>
 
                                 </div>
                             </div>
@@ -1941,113 +1698,9 @@ if ($body_class == 'desktop') { ?>
                         </div>
                         <div class="row">
                             <div class="col-12">
-                                <div class="product_slider carousel_slider owl-carousel owl-theme dot_style1"
+                                <div id="owl-productos-tendencia" class="product_slider carousel_slider owl-carousel owl-theme dot_style1"
                                     data-loop="true" data-margin="20"
                                     data-responsive='{"0":{"items": "1"}, "481":{"items": "2"}, "768":{"items": "3"}, "991":{"items": "4"}}'>
-
-                                    <?php
-                                    foreach ($listaRamMasVen as $itemMV) {
-
-                                        if ((!is_null($itemMV['precio_ofertaa']))) {
-                                            $ahorro = $itemMV['precio'] - $itemMV['precio_ofertaa'];
-                                            $ahorroSol = 1 * $ahorro;
-                                            $precioProd = number_format($itemMV['precio'], 2, '.', ',');
-                                            $ahorro = number_format($ahorro, 2, '.', ',');
-                                            $precioCambio = number_format(1 * $itemMV['precio_ofertaa'], 2, '.', ',');
-                                            $precioProdSol = number_format(1 * $precioProd, 2, '.', ',');
-                                            $ahorroSol = number_format(1 * $ahorro, 2, '.', ',');
-                                            $ahorroSol = number_format(floatval(0), 2);
-                                        } else {
-                                            $precioProd = number_format($itemMV['precio'], 2, '.', ',');
-                                            $precioCambio = number_format(1 * $itemMV['precio'], 2, '.', ',');
-                                        }
-                                    ?>
-                                        <?php if ($itemMV['stock'] !== '0.000'): ?>
-                                            <div class="item">
-                                                <div class="product_wrap">
-                                                    <div class="product_img">
-                                                        <a href="shop-product-detail.php?prod=<?= $itemMV['prod_id'] ?>">
-                                                            <img src="../public/img/productos/<?= $itemMV['imagen1'] ?>"
-                                                                alt="el_img7">
-                                                            <img class="product_hover_img"
-                                                                src="../public/img/productos/<?= $itemMV['imagen2'] ?>"
-                                                                alt="el_hover_img7">
-                                                        </a>
-                                                        <div class="product_action_box">
-                                                            <ul class="list_none pr_action_btn">
-                                                                <li class="add-to-cart"><a
-                                                                        onclick="CARRITO.espe_prod_carr(<?= $itemMV['prod_id'] ?>)"
-                                                                        href="javascript:void(0)"><i
-                                                                            class="icon-basket-loaded"></i> A�adir al
-                                                                        carrito</a></li>
-                                                                <li><a href="shop-compare.php?prod=<?= $itemMV['prod_id'] ?>"
-                                                                        class="popup-ajax"><i class="icon-shuffle"></i></a></li>
-                                                                <li><a href="shop-quick-view.php?prod=<?= $itemMV['prod_id'] ?>"
-                                                                        class="popup-ajax"><i
-                                                                            class="icon-magnifier-add"></i></a></li>
-                                                                <li><a href="javascript:void(0)"><i class="icon-heart"></i></a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                    <div class="product_info">
-                                                        <h6 class="product_title" <?= $body_class == 'desktop' ? ' style="height: 40px;" ' : ' ' ?>><a style="white-space: normal"
-                                                                href="shop-product-detail.php?prod=<?= $itemMV['prod_id'] ?>"><?= $itemMV['nombre'] ?></a>
-                                                        </h6>
-                                                        <?php if ((!is_null($itemMV['precio_ofertaa']))): ?>
-                                                            <div style="font-size: 13px;" class="product_price">
-                                                                <!--<span class="price">$<?= $itemMV['precio_ofertaa'] ?></span>
-                                                                <del>$<?= $precioProd ?></del>
-                                                                <div class="on_sale">
-                                                                    <span>Ahorre $<?= $ahorro ?></span>
-                                                                </div>-->
-                                                                <br>
-                                                                <span class="price">S/. <?= $precioCambio ?></span>
-                                                                <del><span> S/. <?php echo $precioProdSol; ?></span></del>
-                                                            </div>
-
-
-
-
-
-
-
-                                                        <?php else: ?>
-                                                            <div class="product_price">
-                                                                <!--<span class="price">$<?= $precioProd ?></span>-->
-                                                                <span> <strong>S/. <?php echo $precioCambio; ?></strong></span>
-                                                                <!--div class="on_sale">
-                                                            <span>Ahorre $30.00</span>
-                                                        </div-->
-                                                            </div>
-                                                        <?php endif; ?>
-                                                        <div class="rating_wrap">
-
-                                                            <span class="rating_num"><strong>Stock: <a
-                                                                        href="javascript:void(0)"><?php
-                                                                                                    if ($itemMV['stock'] == 0) {
-                                                                                                        echo "<span style='font-weight: lighter;color: #d70000'>Sin Stock</span>";
-                                                                                                    } elseif ($itemMV['stock'] > 10) {
-                                                                                                        echo "<span style='font-weight: lighter;color: #03ad01'>+ de 10 en Stock</span>";
-                                                                                                    } else {
-                                                                                                        echo "<span style='font-weight: lighter;color: #03ad01'>" . number_format($itemMV['stock'], 0, '.', ',') . " en Stock</span>";
-                                                                                                    }
-                                                                                                    ?></a></strong>
-                                                            </span>
-                                                        </div>
-                                                        <div class="pr_desc">
-                                                            <p></p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?>
-                                    <?php }
-                                    ?>
-
-
-
-
                                 </div>
                             </div>
                         </div>
@@ -2064,345 +1717,48 @@ if ($body_class == 'desktop') { ?>
             <div class="custom-container">
                 <div class="row">
 
-                    <?php
-                    foreach ($listaRamByCat as $rowBC) {
-
-                        $contadorBC = 0;
-                        $rowHTMLPOR1 = "";
-                        $rowHTMLPOR2 = "";
-                        foreach ($rowBC['productos'] as $rowProBC) {
-
-                            $precioProd = number_format($rowProBC['precio'], 2, '.', ',');
-                            $ahorroPR = $rowProBC['precio'] - $rowProBC['precio_ofertaa'];
-                            $precioProdCambio = number_format($rowProBC['precio'] * 1, 2, '.', ',');
-
-
-                            $precioFRealSol = number_format($rowProBC['precio_ofertaa'] * 1, 2, '.', ',');
-                            $precioFormatSol = number_format($rowProBC['precio'] * 1, 2, '.', ',');
-                            $ahorroPRSol = number_format($ahorroPR * 1, 2, '.', ',');
-                            $temp_stock = "";
-                            if ($rowProBC['stock'] > 0) {
-                                if ($rowProBC['stock'] == 0) {
-                                    $temp_stock = "<span style='font-weight: lighter;color: #d70000'>Sin Stock</span>";
-                                }
-                                if ($rowProBC['stock'] > 10) {
-                                    $temp_stock = "<span style='font-weight: lighter;color: #03ad01'>+ de 10 en Stock</span>";
-                                } else {
-                                    $temp_stock = "<span style='font-weight: lighter;color: #03ad01'>" . number_format($rowProBC['stock'], 0, '.', ',') . " en Stock</span>";
-                                }
-                                $temp_stock = "<strong>Stock: <a href=\"javascript:void(0)\">" . $temp_stock . "</a></strong>";
-
-                                // echo $contadorBC."    ---------------------    ";
-
-                                if ($contadorBC < 3) {
-                                    /*  <h6 class="product_title titulo_prod"><a href="shop-product-detail.php?prod=' . $ofeItem['prod_id'] . '">' . $ofeItem['nombre'] . '</a></h6>
-                                                    <div class="product_price">
-                                                        <span class="price">$' . $ofeItem['precio_oferta'] . '</span>
-                                                        <del>$' . $precioFormat . '</del>
-                                                        <div class="on_sale">
-                                                            <span>Ahorra $' . $ahorroPR . '</span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="product_price">
-                                                        <span class="price">S/. ' . $precioFRealSol . '</span>
-                                                        <del>S/.' . $precioFormatSol . '</del>
-                                                        <div class="on_sale">
-                                                            <span>Ahorra S/. ' . $ahorroPRSol . '</span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="rating_wrap">
-
-                                                        <span class="rating_num">' . $temp_stock . '</span>
-                                                    </div>
-                                                    <div class="pr_desc">
-                                                        <p></p>
-                                                    </div>
-                                                </div> */
-                                    if (!is_null($rowProBC['precio_ofertaa'])) {
-                                        $rowHTMLPOR1 = $rowHTMLPOR1 . '<div class="product_wrap"> <div class="product_img">
-                                        <a href="shop-product-detail.php?prod=' . $rowProBC['prod_id'] . '">
-                                            <img src="../public/img/productos/' . $rowProBC['imagen1'] . '" alt="el_img7">
-                                            <img class="product_hover_img" src="../public/img/productos/' . $rowProBC['imagen2'] . '" alt="el_hover_img7">
-                                        </a>
-                                    </div>
-
-                                    <div class="product_info">
-                                    <h6 class="product_title titulo_prod" ><a href="shop-product-detail.php?prod=' . $rowProBC['prod_id'] . '">' . $rowProBC['nombre'] . '</a></h6>
-                                    <div class="product_price mt-4">
-                                        <!--<span class="price">$' . $rowProBC['precio_ofertaa'] . '</span>
-                                        <del>$' . $precioProd . '</del>
-                                        <div class="on_sale">
-                                         <span>Ahorra $' . $ahorroPR . '</span>
-                                        </div>-->
-                                    </div>
-                                    
-                                    <div class="product_price">
-                                            <span class="price">S/. ' . $precioFRealSol . '</span>
-                                            <del>S/.' . $precioFormatSol . '</del>
-                                        <div class="on_sale">
-                                            <span>Ahorra S/. ' . $ahorroPRSol . '</span>
-                                        </div>
-                                    </div>
-                                
-
-                                    <div class="rating_wrap">
-                                         
-                                        <span class="rating_num" style="margin-left:0">' . $temp_stock . '</span>
-                                    </div>
-                                    <div class="pr_desc">
-                                        <p></p>
-                                    </div>
-                                </div>
-                                </div>
-                                    ';
-                                    } else {
-                                        $rowHTMLPOR1 = $rowHTMLPOR1 . '<div class="product_wrap">
-                                        <div class="product_img">
-                                            <a href="shop-product-detail.php?prod=' . $rowProBC['prod_id'] . '">
-                                                <img src="../public/img/productos/' . $rowProBC['imagen1'] . '" alt="el_img7">
-                                                <img class="product_hover_img" src="../public/img/productos/' . $rowProBC['imagen2'] . '" alt="el_hover_img7">
-                                            </a>
-                                        </div>
-                                        <div class="product_info">
-                                            <h6 class="product_title titulo_prod" ><a href="shop-product-detail.php?prod=' . $rowProBC['prod_id'] . '">' . $rowProBC['nombre'] . '</a></h6>
-                                            <div class="product_price">
-                                                <!--<span class="price">$' . $precioProd . ' </span>-->
-                                                <span class=""><strong> S/. ' . $precioProdCambio . '</strong></span>
-                                                
-                                            </div>
-                                            <div class="rating_wrap">
-                                                 
-                                                <span class="rating_num">' . $temp_stock . '</span>
-                                            </div>
-                                            <div class="pr_desc">
-                                                <p></p>
-                                            </div>
-                                        </div>
-                                    </div>';
-                                    }
-                                }/*  else {
-$rowHTMLPOR2 = $rowHTMLPOR2 . '<div class="product_wrap">
-<div class="product_img">
-<a href="shop-product-detail.php?prod=' . $rowProBC['prod_id'] . '">
-<img src="../public/img/productos/' . $rowProBC['imagen1'] . '" alt="el_img7">
-<img class="product_hover_img" src="../public/img/productos/' . $rowProBC['imagen2'] . '" alt="el_hover_img7">
-</a>
-</div>
-<div class="product_info">
-<h6 class="product_title titulo_prod" ><a style= href="shop-product-detail.php?prod=' . $rowProBC['prod_id'] . '">' . $rowProBC['nombre'] . '</a></h6>
-<div class="product_price">
-<span class="price">$' . $precioProd . '</span>
-
-</div>
-<div class="rating_wrap">
-
-<span class="rating_num">' . $temp_stock . '</span>
-</div>
-<div class="pr_desc">
-<p></p>
-</div>
-</div>
-</div>';
-} */
-                                $contadorBC++;
-                            }
-                        }
-
-
-                    ?>
-                        <div class="col-lg-4">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="heading_tab_header">
-                                        <div class="heading_s2">
-                                            <h4><?= $rowBC['nombre'] ?></h4>
-                                        </div>
-                                        <div class="view_all">
-                                            <a href="./shop-list-prod.php?search=+" class="text_default"><span>Ver
-                                                    todo</span></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="product_slider carousel_slider product_list owl-carousel owl-theme nav_style5"
-                                        data-nav="true" data-dots="false" data-loop="true" data-margin="20"
-                                        data-responsive='{"0":{"items": "1"}, "380":{"items": "1"}, "640":{"items": "2"}, "991":{"items": "1"}}'>
-                                        <div class="item">
-                                            <?= $rowHTMLPOR1 ?>
-                                        </div>
-                                        <div class="item">
-                                            <?= $rowHTMLPOR2 ?>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <?php
-                    }
-                    ?>
-
+                    <!-- Columna 1: Productos Destacados -->
                     <div class="col-lg-4">
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="heading_tab_header">
-                                    <div class="heading_s2">
-                                        <h4>Productos en Oferta</h4>
-                                    </div>
-                                    <div class="view_all">
-                                        <a href="./shop-list-prod-ofertas.php" class="text_default"><span>Ver
-                                                Todo</span></a>
-                                    </div>
-                                </div>
+                        <div class="heading_tab_header mb-3">
+                            <div class="heading_s2"><h4>Productos Destacados</h4></div>
+                            <div class="view_all">
+                                <a href="./shop-list-prod.php?search=+" class="text_default"><span>Ver todo</span></a>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="product_slider carousel_slider product_list owl-carousel owl-theme nav_style5 owl-loaded owl-drag"
-                                    data-nav="true" data-dots="false" data-loop="true" data-margin="20"
-                                    data-responsive="{&quot;0&quot;:{&quot;items&quot;: &quot;1&quot;}, &quot;380&quot;:{&quot;items&quot;: &quot;1&quot;}, &quot;640&quot;:{&quot;items&quot;: &quot;2&quot;}, &quot;991&quot;:{&quot;items&quot;: &quot;1&quot;}}">
+                        <div id="owl-productos-destacados"
+                            class="owl-carousel owl-theme"
+                            data-loop="true" data-autoplay="true" data-margin="0" data-nav="true" data-dots="false">
+                            <div class="item"><div class="text-center py-4"><div class="spinner-border text-danger"></div></div></div>
+                        </div>
+                    </div>
 
-
-                                    <div class="owl-stage-outer">
-                                        <div class="owl-stage"
-                                            style="transform: translate3d(-1080px, 0px, 0px); transition: all 0s ease 0s; width: 3240px;">
-
-
-                                            <?php
-                                            $htmlEXOFER = '';
-
-                                            $contadorOFJSJD = 0;
-                                            foreach ($listaOfertas as $ofeItem) {
-                                                $ahorroPR = $ofeItem['precio'] - $ofeItem['precio_oferta'];
-                                                $precioFormat = number_format($ofeItem['precio'], 2, '.', ',');
-
-
-
-                                                $precioFRealSol = number_format($ofeItem['precio_oferta'] * 1, 2, '.', ',');
-                                                $precioFormatSol = number_format($ofeItem['precio'] * 1, 2, '.', ',');
-                                                $ahorroPRSol = number_format($ahorroPR * 1, 2, '.', ',');
-
-                                                $ahorroPR = number_format($ahorroPR, 2, '.', ',');
-
-
-                                                $temp_stock = "";
-                                                if ($ofeItem['stock'] == 0) {
-                                                    $temp_stock = "<span style='font-weight: lighter;color: #d70000'>Sin Stock</span>";
-                                                } elseif ($ofeItem['stock'] > 10) {
-                                                    $temp_stock = "<span style='font-weight: lighter;color: #03ad01'>+ de 10 en Stock</span>";
-                                                } else {
-                                                    $temp_stock = "<span style='font-weight: lighter;color: #03ad01'>" . number_format($ofeItem['stock'], 0, '.', ',') . " en Stock</span>";
-                                                }
-                                                $temp_stock = "<strong>Stock: <a href=\"javascript:void(0)\">" . $temp_stock . "</a></strong>";
-
-
-                                                if ($contadorOFJSJD == 0) {
-                                                    $htmlEXOFER = $htmlEXOFER . '<div class="owl-item cloned" style="width: 520px; margin-right: 20px;">
-                                        <div class="item">';
-                                                }
-
-
-                                                if ($contadorOFJSJD == 2) {
-                                                    $htmlEXOFER = $htmlEXOFER . '<div class="product_wrap">
-                                                <div class="product_img">
-                                                    <a href="shop-product-detail.php?prod=' . $ofeItem['prod_id'] . '">
-                                                       
-                                                        <img  style="" src="../public/img/productos/' . $ofeItem['imagen1'] . '" alt="el_img3">
-                                                        <img  class="product_hover_img" src="../public/img/productos/' . $ofeItem['imagen2'] . '" alt="el_hover_img3">
-                                                    </a>
-                                                </div>
-                                                <div class="product_info">
-                                                    <h6 class="product_title titulo_prod"><a href="shop-product-detail.php?prod=' . $ofeItem['prod_id'] . '">' . $ofeItem['nombre'] . '</a></h6>
-                                                    <!--<div class="product_price">
-                                                        <span class="price">$' . $ofeItem['precio_oferta'] . '</span>
-                                                        <del>$' . $precioFormat . '</del>
-                                                        <div class="on_sale">
-                                                            <span>Ahorra $' . $ahorroPR . '</span>
-                                                        </div>
-                                                    </div>-->
-                                                    
-                                                    <div class="product_price">
-                                                        <span class="price">S/. ' . $precioFRealSol . '</span>
-                                                        <del>S/.' . $precioFormatSol . '</del>
-                                                        <div class="on_sale">
-                                                            <span>Ahorra S/. ' . $ahorroPRSol . '</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="rating_wrap">
-                                                        
-                                                        <span class="rating_num">' . $temp_stock . '</span>
-                                                    </div>
-                                                    <div class="pr_desc">
-                                                        <p></p>
-                                                    </div>
-                                                </div>
-                                            </div>';
-                                                    $htmlEXOFER = $htmlEXOFER . '    </div> </div>';
-                                                    $contadorOFJSJD = 0;
-                                                } else {
-                                                    $htmlEXOFER = $htmlEXOFER . '<div class="product_wrap">
-                                                <div class="product_img">
-                                                    <a href="shop-product-detail.php?prod=' . $ofeItem['prod_id'] . '">
-                                                       
-                                                        <img  style="" src="../public/img/productos/' . $ofeItem['imagen1'] . '" alt="el_img3">
-                                                        <img  class="product_hover_img" src="../public/img/productos/' . $ofeItem['imagen2'] . '" alt="el_hover_img3">
-                                                    </a>
-                                                </div>
-                                                <div class="product_info">
-                                                    <h6 class="product_title titulo_prod"><a href="shop-product-detail.php?prod=' . $ofeItem['prod_id'] . '">' . $ofeItem['nombre'] . '</a></h6>
-                                                    <!--<div class="product_price">
-                                                        <span class="price">$' . $ofeItem['precio_oferta'] . '</span>
-                                                        <del>$' . $precioFormat . '</del>
-                                                        <div class="on_sale">
-                                                            <span>Ahorra $' . $ahorroPR . '</span>
-                                                        </div>
-                                                    </div>-->
-                                                     <div class="product_price">
-                                                        <span class="price">S/. ' . $precioFRealSol . '</span>
-                                                        <del>S/.' . $precioFormatSol . '</del>
-                                                        <div class="on_sale">
-                                                            <span>Ahorra S/. ' . $ahorroPRSol . '</span>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="rating_wrap">
-                                                       
-                                                        <span class="rating_num">' . $temp_stock . '</span>
-                                                    </div>
-                                                    <div class="pr_desc">
-                                                        <p></p>
-                                                    </div>
-                                                </div>
-                                            </div>';
-                                                    $contadorOFJSJD++;
-                                                }
-                                            }
-                                            if ($contadorOFJSJD > 0) {
-                                                $htmlEXOFER = $htmlEXOFER . '    </div> </div>';
-                                            }
-                                            ?>
-
-
-
-                                            <?= $htmlEXOFER ?>
-
-
-
-                                        </div>
-                                    </div>
-                                    <div class="owl-nav">
-                                        <button type="button" role="presentation" class="owl-prev"><i
-                                                class="ion-ios-arrow-left"></i></button>
-                                        <button type="button" role="presentation" class="owl-next"><i
-                                                class="ion-ios-arrow-right"></i></button>
-                                    </div>
-                                    <div class="owl-dots disabled"></div>
-                                </div>
+                    <!-- Columna 2: Productos Mejor Valorados -->
+                    <div class="col-lg-4">
+                        <div class="heading_tab_header mb-3">
+                            <div class="heading_s2"><h4>Productos Mejor Valorados</h4></div>
+                            <div class="view_all">
+                                <a href="./shop-list-prod.php?search=+" class="text_default"><span>Ver todo</span></a>
                             </div>
+                        </div>
+                        <div id="owl-mejor-valorados"
+                            class="owl-carousel owl-theme"
+                            data-loop="true" data-autoplay="true" data-margin="0" data-nav="true" data-dots="false">
+                            <div class="item"><div class="text-center py-4"><div class="spinner-border text-danger"></div></div></div>
+                        </div>
+                    </div>
+
+                    <!-- Columna 3: Productos En Oferta -->
+                    <div class="col-lg-4">
+                        <div class="heading_tab_header mb-3">
+                            <div class="heading_s2"><h4>Productos En Oferta</h4></div>
+                            <div class="view_all">
+                                <a href="./shop-list-prod-ofertas.php" class="text_default"><span>Ver Todo</span></a>
+                            </div>
+                        </div>
+                        <div id="owl-ofertas-vigentes"
+                            class="owl-carousel owl-theme"
+                            data-loop="true" data-autoplay="true" data-margin="0" data-nav="true" data-dots="false">
+                            <div class="item"><div class="text-center py-4"><div class="spinner-border text-danger"></div></div></div>
                         </div>
                     </div>
 
@@ -3022,23 +2378,6 @@ $rowHTMLPOR2 = $rowHTMLPOR2 . '<div class="product_wrap">
     <script src="../public/assets/js/jquery.elevatezoom.js"></script>
     <!-- scripts js -->
     <script src="../public/assets/js/scripts.js"></script>
-    <script>
-        $(document).ready(function(){
-            $('.wine-cat-carousel').owlCarousel({
-                loop: false,
-                margin: 0,
-                nav: true,
-                dots: true,
-                navText: ['<i class="fa fa-chevron-left"></i>','<i class="fa fa-chevron-right"></i>'],
-                responsive: {
-                    0:    { items: 1 },
-                    576:  { items: 2 },
-                    992:  { items: 3 },
-                    1200: { items: 4 }
-                }
-            });
-        });
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script src="../public/js/main.js?v=18.06"></script>
@@ -3176,6 +2515,330 @@ $rowHTMLPOR2 = $rowHTMLPOR2 . '<div class="product_wrap">
                 });
             }
         });
+    </script>
+
+    <script>
+    // ── Secciones Home: Nuevos Ingresos / Más Vendidos / Ofertas Especiales ──
+    $(document).ready(function() {
+        var PROXY = '../ajax/proxy_ecommerce_home.php';
+
+        function imgOrPlaceholder(url, nombre) {
+            if (url) {
+                return '<img src="' + url + '" style="width:100%;height:220px;object-fit:cover;" alt="' + nombre + '" ' +
+                    'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+                    '<div style="display:none;width:100%;height:220px;background:#f0f0f0;align-items:center;justify-content:center;flex-direction:column;">' +
+                        '<i class="fa fa-image fa-3x" style="color:#ccc;"></i>' +
+                        '<small style="color:#aaa;margin-top:6px;">' + nombre + '</small>' +
+                    '</div>';
+            }
+            return '<div style="width:100%;height:220px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;flex-direction:column;">' +
+                '<i class="fa fa-image fa-3x" style="color:#ccc;"></i>' +
+                '<small style="color:#aaa;margin-top:6px;text-align:center;padding:0 8px;">' + nombre + '</small>' +
+            '</div>';
+        }
+
+        function cardProducto(p) {
+            var precio = 'S/. ' + parseFloat(p.precio).toFixed(2);
+            return '<div class="item">' +
+                '<div class="product_wrap">' +
+                    '<div class="product_img">' +
+                        '<a href="javascript:void(0)">' + imgOrPlaceholder(p.imagen, p.nombre) + '</a>' +
+                    '</div>' +
+                    '<div class="product_info">' +
+                        '<h6 class="product_title"><a style="white-space:normal" href="javascript:void(0)">' + p.nombre + '</a></h6>' +
+                        '<div class="product_price" style="font-size:13px;"><strong>' + precio + '</strong></div>' +
+                        (p.categoria ? '<small class="text-muted">' + p.categoria + '</small>' : '') +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function cardOferta(o) {
+            var fechaFin = o.fecha_fin ? ' hasta ' + o.fecha_fin.substring(0,10) : '';
+            return '<div class="item">' +
+                '<div class="product_wrap">' +
+                    '<div class="product_img">' +
+                        '<a href="javascript:void(0)">' + imgOrPlaceholder(o.imagen, o.nombre) + '</a>' +
+                    '</div>' +
+                    '<div class="product_info">' +
+                        '<h6 class="product_title"><a style="white-space:normal" href="javascript:void(0)">' + o.nombre + '</a></h6>' +
+                        '<div class="product_price" style="font-size:13px;">' +
+                            '<span class="price">S/. ' + parseFloat(o.precio_oferta).toFixed(2) + '</span> ' +
+                            '<del>S/. ' + parseFloat(o.precio).toFixed(2) + '</del>' +
+                        '</div>' +
+                        '<small class="text-muted">' + o.descuento + ' de descuento' + fechaFin + '</small>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function initOwl(id) {
+            var $el = $('#' + id);
+            if ($el.hasClass('owl-loaded')) {
+                $el.trigger('destroy.owl.carousel').removeClass('owl-loaded');
+            }
+            $el.owlCarousel({
+                loop: true, margin: 20, dots: true,
+                responsive: { 0:{items:1}, 481:{items:2}, 768:{items:3}, 991:{items:4} }
+            });
+        }
+
+        function cargarSeccion(seccion, owlId, buildCard) {
+            $.get(PROXY, { seccion: seccion }, function(resp) {
+                if (!resp.success || !resp.data || !resp.data.length) {
+                    $('#' + owlId).html('<div class="item"><p class="text-muted text-center py-3">Sin datos disponibles.</p></div>');
+                } else {
+                    var html = '';
+                    $.each(resp.data, function(i, item) { html += buildCard(item); });
+                    $('#' + owlId).html(html);
+                }
+                initOwl(owlId);
+            }, 'json').fail(function() {
+                $('#' + owlId).html('<div class="item"><p class="text-muted text-center py-3">No se pudo conectar con la API.</p></div>');
+                initOwl(owlId);
+            });
+        }
+
+        function cardRemate(r) {
+            var moneda = (r.moneda === 'USD') ? '$' : 'S/.';
+            var precioHtml;
+            if (r.precio_remate) {
+                precioHtml = '<span class="price">' + moneda + ' ' + parseFloat(r.precio_remate).toFixed(2) + '</span> ' +
+                             '<del>' + moneda + ' ' + parseFloat(r.precio).toFixed(2) + '</del>';
+            } else {
+                precioHtml = '<strong>' + moneda + ' ' + parseFloat(r.precio).toFixed(2) + '</strong>';
+            }
+            var stockHtml;
+            var s = parseInt(r.stock);
+            if (s <= 0)      stockHtml = "<span style='color:#d70000'>Sin Stock</span>";
+            else if (s > 10) stockHtml = "<span style='color:#03ad01'>+ de 10 en Stock</span>";
+            else             stockHtml = "<span style='color:#03ad01'>" + s + " en Stock</span>";
+
+            return '<div class="item">' +
+                '<div class="product_wrap">' +
+                    '<div class="product_img">' +
+                        '<a href="javascript:void(0)">' + imgOrPlaceholder(r.imagen_url, r.nombre) + '</a>' +
+                    '</div>' +
+                    '<div class="product_info">' +
+                        '<h6 class="product_title"><a style="white-space:normal" href="javascript:void(0)">' + r.nombre + '</a></h6>' +
+                        '<div class="product_price" style="font-size:13px;">' + precioHtml + '</div>' +
+                        '<div class="rating_wrap"><span class="rating_num"><strong>Stock: ' + stockHtml + '</strong></span></div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function cargarRemate() {
+            $.get('../ajax/proxy_remate.php', { accion: 'listar' }, function(resp) {
+                var owlId = 'owl-productos-remate';
+                if (!resp.success || !resp.data || !resp.data.length) {
+                    $('#' + owlId).html('<div class="item"><p class="text-muted text-center py-3">Sin productos en remate.</p></div>');
+                } else {
+                    var html = '';
+                    $.each(resp.data, function(i, item) { html += cardRemate(item); });
+                    $('#' + owlId).html(html);
+                }
+                initOwl(owlId);
+            }, 'json').fail(function() {
+                var owlId = 'owl-productos-remate';
+                $('#' + owlId).html('<div class="item"><p class="text-muted text-center py-3">No se pudo cargar.</p></div>');
+                initOwl(owlId);
+            });
+        }
+
+        function cardTendencia(p) {
+            var moneda = (p.moneda === 'USD') ? '$' : 'S/.';
+            var precio = moneda + ' ' + parseFloat(p.precio).toFixed(2);
+            var s = parseInt(p.stock);
+            var stockHtml = s <= 0
+                ? "<span style='font-weight:lighter;color:#d70000'>Sin Stock</span>"
+                : s > 10
+                    ? "<span style='font-weight:lighter;color:#03ad01'>+ de 10 en Stock</span>"
+                    : "<span style='font-weight:lighter;color:#03ad01'>" + s + " en Stock</span>";
+
+            var imgHtml = p.imagen_url
+                ? '<img src="' + p.imagen_url + '" alt="' + p.nombre + '" style="max-width:540px;max-height:600px;"' +
+                  ' onerror="this.style.display=\'none\'">' +
+                  '<img class="product_hover_img" src="' + p.imagen_url + '" alt="' + p.nombre + '" style="max-width:540px;max-height:600px;">'
+                : '<div style="height:220px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;">' +
+                  '<i class="fa fa-image fa-3x" style="color:#ccc;"></i></div>';
+
+            return '<div class="item">' +
+                '<div class="product_wrap">' +
+                    '<div class="product_img">' +
+                        '<a href="javascript:void(0)">' + imgHtml + '</a>' +
+                        '<div class="product_action_box">' +
+                            '<ul class="list_none pr_action_btn">' +
+                                '<li class="add-to-cart"><a href="javascript:void(0)"><i class="icon-basket-loaded"></i> A&ntilde;adir al carrito</a></li>' +
+                                '<li><a href="javascript:void(0)"><i class="icon-shuffle"></i></a></li>' +
+                                '<li><a href="javascript:void(0)"><i class="icon-magnifier-add"></i></a></li>' +
+                                '<li><a href="javascript:void(0)"><i class="icon-heart"></i></a></li>' +
+                            '</ul>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="product_info">' +
+                        '<h6 class="product_title" style="height:40px;"><a style="white-space:normal" href="javascript:void(0)">' + p.nombre + '</a></h6>' +
+                        '<div class="product_price" style="font-size:13px;"><strong>' + precio + '</strong></div>' +
+                        '<div class="rating_wrap"><span class="rating_num"><strong>Stock: <a href="javascript:void(0)">' + stockHtml + '</a></strong></span></div>' +
+                        '<div class="pr_desc"><p></p></div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        cargarSeccion('nuevos-ingresos',         'owl-nuevos-ingresos',       cardProducto);
+        cargarSeccion('mas-vendidos',             'owl-mas-vendidos',          cardProducto);
+        cargarSeccion('ofertas-especiales',       'owl-ofertas-especiales',    cardOferta);
+        cargarSeccion('productos-de-tendencia',   'owl-productos-tendencia',   cardTendencia);
+        cargarRemate();
+
+        // ── Secciones: Destacados / Mejor Valorados / En Oferta ──
+        function getStockLabel(s) {
+            s = parseInt(s);
+            if (!s || s <= 0) return "<span style='color:#d70000'>Sin Stock</span>";
+            return "<span style='color:#03ad01'>" + s + " en Stock</span>";
+        }
+
+        function starsHtml(rating) {
+            var html = '';
+            for (var i = 1; i <= 5; i++) {
+                html += (i <= Math.round(rating)) ? '&#9733;' : '&#9734;';
+            }
+            return '<span style="color:#f5a623;font-size:14px;">' + html + '</span>';
+        }
+
+        // Card estilo lista horizontal: imagen izq + info der (igual al screenshot)
+        function cardLista(imagen, nombre, precioHtml, stockHtml2) {
+            var imgHtml = imagen
+                ? '<img src="' + imagen + '" alt="' + nombre + '" style="width:90px;height:90px;object-fit:cover;" onerror="this.src=\'\';">'
+                : '<div style="width:90px;height:90px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;"><i class="fa fa-camera fa-2x" style="color:#ccc;"></i></div>';
+            return '<div class="item">' +
+                '<div style="display:flex;align-items:center;gap:14px;padding:12px;border:1px solid #eee;border-radius:4px;background:#fff;">' +
+                    '<div style="flex-shrink:0;">' + imgHtml + '</div>' +
+                    '<div style="flex:1;">' +
+                        '<h6 style="font-size:13px;font-weight:600;margin-bottom:6px;white-space:normal;line-height:1.3;">' + nombre + '</h6>' +
+                        '<div style="font-size:13px;color:#c8232c;margin-bottom:4px;">' + precioHtml + '</div>' +
+                        '<div style="font-size:12px;">' + stockHtml2 + '</div>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function cardDestacado(p) {
+            return cardLista(p.imagen, p.nombre,
+                '<strong>S/. ' + parseFloat(p.precio).toFixed(2) + '</strong>',
+                '<strong>Stock: ' + getStockLabel(p.stock) + '</strong>'
+            );
+        }
+
+        function cardMejorValorado(p) {
+            return cardLista(p.imagen, p.nombre,
+                '<strong>S/. ' + parseFloat(p.precio).toFixed(2) + '</strong>',
+                '<strong>Stock: ' + getStockLabel(p.stock) + '</strong>'
+            );
+        }
+
+        function cardOfertaCol(o) {
+            var precioHtml2 = '<strong>S/. ' + parseFloat(o.precio_oferta || o.precio).toFixed(2) + '</strong>' +
+                (o.precio_oferta ? ' <del style="color:#999;">S/. ' + parseFloat(o.precio).toFixed(2) + '</del>' : '');
+            return cardLista(o.imagen, o.nombre, precioHtml2, '<strong>Stock: ' + getStockLabel(o.stock) + '</strong>');
+        }
+
+        // Agrupa array en páginas de N elementos
+        function paginar(arr, n) {
+            var pages = [];
+            for (var i = 0; i < arr.length; i += n) {
+                pages.push(arr.slice(i, i + n));
+            }
+            return pages;
+        }
+
+        // Construye HTML del owl: cada .item contiene 3 cards apiladas verticalmente
+        function buildPages(data, buildCard, pageSize) {
+            var pages = paginar(data, pageSize);
+            var html = '';
+            $.each(pages, function(i, page) {
+                html += '<div class="item">';
+                $.each(page, function(j, item) {
+                    html += buildCard(item);
+                });
+                html += '</div>';
+            });
+            return html;
+        }
+
+        function initOwlCol(id, timeout) {
+            var $el = $('#' + id);
+            if ($el.hasClass('owl-loaded')) {
+                $el.trigger('destroy.owl.carousel').removeClass('owl-loaded');
+            }
+            $el.owlCarousel({
+                items: 1, loop: true, margin: 0, dots: false, nav: true,
+                autoplay: true, autoplayTimeout: timeout, autoplayHoverPause: true
+            });
+        }
+
+        function cargarColumna(seccion, owlId, buildCard, timeout) {
+            $.get(PROXY, { seccion: seccion }, function(resp) {
+                var data = (resp.success && resp.data && resp.data.length) ? resp.data : null;
+                var html = '';
+                if (data) {
+                    html = buildPages(data, buildCard, 3);
+                } else {
+                    $.get(PROXY, { seccion: 'nuevos-ingresos' }, function(r2) {
+                        if (r2.success && r2.data && r2.data.length) {
+                            var fallback = r2.data.sort(function() { return 0.5 - Math.random(); });
+                            html = buildPages(fallback, cardDestacado, 3);
+                        } else {
+                            html = '<div class="item"><p class="text-muted text-center py-3">Sin datos.</p></div>';
+                        }
+                        $('#' + owlId).html(html);
+                        initOwlCol(owlId, timeout);
+                    }, 'json');
+                    return;
+                }
+                $('#' + owlId).html(html);
+                initOwlCol(owlId, timeout);
+            }, 'json').fail(function() {
+                $('#' + owlId).html('<div class="item"><p class="text-muted text-center py-3">No se pudo conectar.</p></div>');
+                initOwlCol(owlId, timeout);
+            });
+        }
+
+        cargarColumna('productos-mas-rentables',       'owl-productos-destacados', cardDestacado,     3500);
+        cargarColumna('productos-mejor-valorados-mes', 'owl-mejor-valorados',      cardMejorValorado, 4000);
+        cargarColumna('ofertas-especiales',            'owl-ofertas-vigentes',     cardOfertaCol,     4500);
+    });
+    </script>
+
+    <script>
+    // Nuestra Selección — carga después de Vue y main.js para evitar conflictos
+    $(document).ready(function() {
+        $.post('../ajax/proxy_seleccion.php', { tipo: 'lista' }, function(resp) {
+            if (!resp.success || !resp.data || !resp.data.length) return;
+            var html = '';
+            $.each(resp.data, function(i, cat) {
+                if (cat.estado != '1') return;
+                var img = cat.imagen_url || '../public/img/banner/sinimagen_menu_20sba.jpg';
+                var url = cat.codi_categoria ? 'shop-list-ctg.php?ctg=' + encodeURIComponent(cat.codi_categoria) : '#';
+                html += '<div class="col-lg-3 col-md-6 col-sm-6 mb-4">' +
+                    '<a href="' + url + '" class="wine-cat-card-wrapper">' +
+                        '<div class="wine-card shadow-sm border-0">' +
+                            '<div class="wine-img-container">' +
+                                '<img src="' + img + '" class="img-fluid" alt="' + cat.nombre_cate + '" onerror="this.src=\'../public/img/banner/sinimagen_menu_20sba.jpg\'">' +
+                                '<div class="wine-overlay"></div>' +
+                                '<div class="wine-cat-label">' +
+                                    '<h4 class="m-0">' + cat.nombre_cate + '</h4>' +
+                                    '<p class="m-0 small text-uppercase">Explorar Colecci&oacute;n <i class="ti-arrow-right"></i></p>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</a>' +
+                '</div>';
+            });
+            $('#gridNuestraSeleccion').html(html);
+        }, 'json');
+    });
     </script>
 
 </body>
