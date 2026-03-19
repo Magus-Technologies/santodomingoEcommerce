@@ -5,6 +5,7 @@
     $dataAdmin = "admin@gmail.com";
 
     if (isset($_POST['vr'])) {
+        session_start();
         $usuario = $_POST['user'];
         $clave = $_POST['clave'];
 
@@ -23,10 +24,28 @@
                         $sql = "INSERT INTO carrito_compra SET usuario_id='{$row['use_id']}',prod_id='{$car['prod']}',cantidad='{$car['cantidad']}'";
                         $usuarioDao->exeSQL($sql);
                     }
-
                 }
-                $respuesta['res'] = true;
-                $respuesta['msg'] = "";
+                // Crear sesión
+                $_SESSION['usuario'] = $row['use_id'];
+                $_SESSION['perfil']  = $row['perfil'];
+                $_SESSION['nombres'] = $row['nombres'];
+                $_SESSION['email']   = $row['email'];
+                $_SESSION['idrol']   = $row['idrol'] ?? '';
+
+                // Determinar URL de redirección según perfil
+                if ($row['perfil'] == 'admin') {
+                    $redirect = '../admin/';
+                } elseif ($row['perfil'] == 'vendedor') {
+                    $redirect = '../admin/pedidos.php';
+                } elseif ($row['perfil'] == 'usuarios digital') {
+                    $redirect = '../admin/usuarios_digitales_cotizaciones.php';
+                } else {
+                    $redirect = isset($_POST['ruta']) && $_POST['ruta'] == 'checkout' ? '../CYM/checkout.php' : '../CYM/';
+                }
+
+                $respuesta['res']      = true;
+                $respuesta['msg']      = "";
+                $respuesta['redirect'] = $redirect;
             } else {
                 $respuesta['res'] = false;
                 $respuesta['msg'] = "Clave incorrecta";
@@ -34,7 +53,6 @@
         } else {
             $respuesta['res'] = false;
             $respuesta['msg'] = "Email no registrado";
-
         }
         echo json_encode($respuesta);
     } else {
@@ -52,7 +70,7 @@
                 $_SESSION['perfil'] = $row['perfil'];
                 $_SESSION['nombres'] = $row['nombres'];
                 $_SESSION['email'] = $row['email'];
-                $_SESSION['idrol'] = $row['idrol'];
+                $_SESSION['idrol'] = $row['idrol'] ?? '';
 
                 if ('admin' == $row['perfil']) {
                     header("Location: ../admin/");

@@ -11,14 +11,9 @@ if (isset($_SESSION['usuario']) && $validate['perfil'] == 'admin' || $validate['
 
 
     require "../utils/Tools.php";
-    require "../dao/ProductoDao.php";
 
     $tools = new Tools();
-    $productoDao = new ProductoDao();
-
     $dataConf = $tools->getConfiguracion();
-    $listaProd = $productoDao->getListaProdRemate();
-    //print_r($listaProd);
 
 ?>
     <!DOCTYPE html>
@@ -102,45 +97,52 @@ if (isset($_SESSION['usuario']) && $validate['perfil'] == 'admin' || $validate['
                         <h2>Productos Registrados como Remate</h2>
                     </div>
                 </div>
-                <div class="row" style="margin-bottom: 20px">
-                    <div class="col-md-12 text-right">
-                        <a href="productos_remate_add.php" class="btn btn-success"><i class="fa fa-plus"></i> Agregar</a>
-                    </div>
-                </div>
                 <div>
                     <table id="example" class="table table-striped table-bordered" style="width:100%">
                         <thead>
                             <tr>
                                 <th>Producto</th>
-                                <th>Marca</th>
+                                <th>Precio Normal</th>
+                                <th>Precio Remate</th>
                                 <th>Stock</th>
-                                <th>Precio</th>
-                                <th></th>
-                                <th></th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php
-                            foreach ($listaProd as $row) {       ?>
-                                <tr>
-                                    <td><?= $row['nombre'] ?></td>
-                                    <td><?= $row['marca'] ?></td>
-                                    <td><?= $row['stock_prod'] ?></td>
-                                    <td><?= $row['precio_prod'] ?></td>
-                                    <td>
-                                        <a href="productos_remate_edit.php?prod=<?= $row['prod_id'] ?>" style="padding: 10px;padding-left: 15px;" class="btn btn-info"><i class="fa fa-edit"></i></a>
-                                    </td>
-                                    <td>
-                                        <button onclick="eliminarProd(<?= $row['prod_id'] ?>)" style="padding: 10px;padding-left: 15px;" class="btn btn-danger"><i class="fa fa-times"></i></button>
-                                    </td>
-                                </tr>
-                            <?php    }
-
-                            ?>
-
-
+                        <tbody id="tbodyRemate">
+                            <tr><td colspan="5" class="text-center">Cargando...</td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Modal Ajustar Precio -->
+                <div class="modal fade" id="modalAjustarPrecio" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Ajustar Precio de Remate</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <input type="hidden" id="ajustarId">
+                                <p id="ajustarNombre" class="font-weight-bold mb-2"></p>
+                                <div class="form-group">
+                                    <label>Precio Normal: <strong id="ajustarPrecioNormal"></strong></label>
+                                </div>
+                                <div class="form-group">
+                                    <label>Costo: <strong id="ajustarCosto" class="text-muted"></strong></label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inputPrecioRemate">Precio de Remate (S/.)</label>
+                                    <input type="number" id="inputPrecioRemate" class="form-control" step="0.01" min="0" placeholder="Ej: 18.00">
+                                    <small class="text-muted">Se recomienda igual o menor al costo.</small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-primary" onclick="guardarPrecioRemate()">Guardar</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -207,32 +209,101 @@ if (isset($_SESSION['usuario']) && $validate['perfil'] == 'admin' || $validate['
     </body>
 
     <script>
-        function eliminarProd(prod) {
+        var dataTable;
+
+        function cargarRemate() {
             $.ajax({
-                type: "POST",
-                url: "../ajax/ajs_productos.php",
-                data: {
-                    tipo: 'del_prod_admin',
-                    prod
+                url: "../ajax/proxy_remate.php?accion=listar",
+                type: "GET",
+                dataType: "json",
+                success: function(resp) {
+                    var tbody = $('#tbodyRemate');
+                    tbody.empty();
+                    if (!resp.success || !resp.data || resp.data.length === 0) {
+                        tbody.html('<tr><td colspan="5" class="text-center">No hay productos en remate.</td></tr>');
+                        return;
+                    }
+                    $.each(resp.data, function(i, row) {
+                        var precioNormal = row.precio ? 'S/ ' + parseFloat(row.precio).toFixed(2) : '-';
+                        var precioRem    = row.precio_remate ? '<span class="badge badge-danger">S/ ' + parseFloat(row.precio_remate).toFixed(2) + '</span>' : '<span class="text-muted">Sin ajuste</span>';
+                        var stock        = row.stock !== undefined ? row.stock : '-';
+                        var tr = '<tr>' +
+                            '<td>' + (row.nombre || '') + '</td>' +
+                            '<td>' + precioNormal + '</td>' +
+                            '<td>' + precioRem + '</td>' +
+                            '<td>' + stock + '</td>' +
+                            '<td>' +
+                            '<button onclick="abrirAjuste(' + row.id + ',\'' + (row.nombre||'').replace(/'/g,"\\'") + '\',' + (row.precio||0) + ',' + (row.costo||0) + ',' + (row.precio_remate||0) + ')" class="btn btn-info btn-sm mr-1"><i class="fa fa-edit"></i> Ajustar Precio</button>' +
+                            '<button onclick="quitarRemate(' + row.id + ')" class="btn btn-danger btn-sm"><i class="fa fa-times"></i> Quitar</button>' +
+                            '</td>' +
+                            '</tr>';
+                        tbody.append(tr);
+                    });
+                    if (dataTable) { dataTable.destroy(); }
+                    dataTable = $('#example').DataTable({ language: { url: '../utils/Spanish.json' } });
                 },
-                success: function() {
-                    location.reload();
+                error: function() {
+                    $('#tbodyRemate').html('<tr><td colspan="5" class="text-center text-danger">Error al cargar productos.</td></tr>');
                 }
             });
+        }
 
+        function abrirAjuste(id, nombre, precio, costo, precioRemate) {
+            $('#ajustarId').val(id);
+            $('#ajustarNombre').text(nombre);
+            $('#ajustarPrecioNormal').text('S/ ' + parseFloat(precio).toFixed(2));
+            $('#ajustarCosto').text('S/ ' + parseFloat(costo).toFixed(2));
+            $('#inputPrecioRemate').val(precioRemate > 0 ? parseFloat(precioRemate).toFixed(2) : '');
+            $('#modalAjustarPrecio').modal('show');
+        }
+
+        function guardarPrecioRemate() {
+            var id           = $('#ajustarId').val();
+            var precioRemate = $('#inputPrecioRemate').val();
+            if (!precioRemate || isNaN(precioRemate) || parseFloat(precioRemate) < 0) {
+                alert('Ingrese un precio válido');
+                return;
+            }
+            $.ajax({
+                url: "../ajax/proxy_remate.php",
+                type: "POST",
+                data: { accion: 'actualizar', id: id, precio_remate: precioRemate },
+                dataType: "json",
+                success: function(resp) {
+                    if (resp.success) {
+                        $('#modalAjustarPrecio').modal('hide');
+                        if (dataTable) { dataTable.destroy(); dataTable = null; }
+                        cargarRemate();
+                    } else {
+                        alert(resp.message || 'Error al guardar');
+                    }
+                },
+                error: function() { alert('Error de conexión'); }
+            });
+        }
+
+        function quitarRemate(id) {
+            if (!confirm('¿Quitar este producto del remate?')) return;
+            $.ajax({
+                url: "../ajax/proxy_remate.php",
+                type: "POST",
+                data: { accion: 'quitar', id: id },
+                dataType: "json",
+                success: function(resp) {
+                    if (resp.success) {
+                        if (dataTable) { dataTable.destroy(); dataTable = null; }
+                        cargarRemate();
+                    } else {
+                        alert(resp.message || 'Error al quitar del remate');
+                    }
+                },
+                error: function() { alert('Error de conexión'); }
+            });
         }
 
         $(document).ready(function() {
-            //APP_PROD.getInfoProduc()
-
-            $('#example').DataTable({
-                language: {
-                    url: '../utils/Spanish.json'
-                }
-            });
-
-
-        })
+            cargarRemate();
+        });
     </script>
 
     </html>

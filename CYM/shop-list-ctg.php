@@ -19,10 +19,13 @@ $listaRamByCat = $productoDao->getDataRandonE();
 
 $listProdBan = $productoDao->getRandomInfo(1);
 
-$categoria = $_GET['ctg'];
+$categoria = $_GET['ctg'] ?? '';
 
-$sql = "SELECT nombre_cate FROM grupo_seleccion WHERE codi_categoria='$categoria'";
-$caterogoria_nom = $conexion->query($sql)->fetch_assoc()['nombre_cate'];
+// Nombre de categoría desde factura_santod3
+$catId = (int)$categoria;
+$sqlCat = "SELECT nombre FROM factura_santod3.categorias WHERE id=$catId AND estado='1'";
+$resCat = $conexion->query($sqlCat);
+$caterogoria_nom = ($resCat && $row = $resCat->fetch_assoc()) ? $row['nombre'] : 'Productos';
 
 $subC = '';
 if (isset($_GET['sub'])) {
@@ -42,7 +45,8 @@ $vripo = $_GET['v'] ?? '';
 
 
 
-$sql = "SELECT cod_sub1 as codi_categoria, nom_sub1 as nombre FROM sopsub1 WHERE cod_sub1 != '000' ORDER BY cod_sub1";
+// Categorías desde factura_santod3
+$sql = "SELECT id as codi_categoria, nombre FROM factura_santod3.categorias WHERE estado='1' ORDER BY nombre";
 $listaGrupos = $conexion->query($sql);
 
 ?><!DOCTYPE html>
@@ -177,12 +181,11 @@ $listaGrupos = $conexion->query($sql);
                 <div class="row">
                     <div class="col-md-3"></div>
                     <div class="col-md-9">
-                        <form action="shop-list-prod.php" method="GET"
+                        <form onsubmit="buscarProducto(); return false;"
                             style="padding-bottom: 20px;display: block;margin: auto;" class="col-md-12">
                             <div class="search-container">
-                                <input value="<?= $vripo ?>" name="v" id="flista" type="hidden">
-                                <input class="rounded-left-input" name="search"
-                                    placeholder="Buscar producto en COMPUTER." required="" type="text">
+                                <input id="input_search" class="rounded-left-input"
+                                    placeholder="Buscar producto en COMPUTER." type="text">
                                 <button type="submit" class="search-btn"><i class="fa fa-search"></i></button>
                             </div>
                         </form>
@@ -210,9 +213,9 @@ $listaGrupos = $conexion->query($sql);
                         <div class="row shop_container grid">
                             <div v-for="(item, index) in listaHoja" class="col-md-4 col-6 col-lg-3">
                                 <div class="product">
-                                    <div class="product_img">
+                                    <div class="product_img" style="height:200px;overflow:hidden;">
                                         <a :href="'shop-product-detail.php?prod='+item.prod_id">
-                                            <img :src="'../public/img/productos/'+item.imagen1" :alt="item.nombre">
+                                            <img :src="item.imagen1 || '../public/img/productos/sinimagen_mtr_20sba.jpg'" :alt="item.nombre" style="width:100%;height:200px;object-fit:cover;">
                                         </a>
                                         <div class="product_action_box">
                                             <ul class="list_none pr_action_btn">
@@ -254,15 +257,10 @@ $listaGrupos = $conexion->query($sql);
                                             <span class="rating_num">
                                                 <strong>Stock: <a href="javascript:void(0)">
                                                         <span v-if="formartNumberStock(item.stock)==0"
-                                                            style="color: #d70000;font-weight: lighter;"> Sin
-                                                            Stock</span>
-                                                        <span
-                                                            v-if="formartNumberStock(item.stock)<=10&&formartNumberStock(item.stock)>0"
+                                                            style="color: #d70000;font-weight: lighter;"> Sin Stock</span>
+                                                        <span v-else
                                                             style="font-weight: lighter;color: #03ad01">
                                                             {{formartNumberStock(item.stock)}} en Stock</span>
-                                                        <span v-if="formartNumberStock(item.stock)>10"
-                                                            style="font-weight: lighter;color: #03ad01">+ de 10 en
-                                                            Stock</span>
                                                     </a></strong>
                                             </span>
 
@@ -326,15 +324,13 @@ $listaGrupos = $conexion->query($sql);
                                 margin-bottom: 11px;
                             ">Categorias</h5>
                                 </div>
-                                <ul class="widget_categories" style=" padding-left: 16px; padding-right: 5px;">
+                                <ul class="widget_categories" style="padding-left:16px; padding-right:5px; max-height:220px; overflow-y:auto;">
                                     <?php
-                                    $contadorCCc = 0;
                                     foreach ($listaGrupos as $catRow) {
-                                        echo '<li><a style="font-weight: bold" href="shop-list-ctg.php?ctg=' . $catRow['codi_categoria'] . '&v=' . $vripo . '"><span class="categories_name">' . $catRow['nombre'] . '</span><span class="categories_num"></span></a></li>';
-
+                                        $activa = ((int)$catRow['codi_categoria'] === (int)$categoria) ? 'color:#c7161d;' : '';
+                                        echo '<li><a style="font-weight:bold;' . $activa . '" href="shop-list-ctg.php?ctg=' . $catRow['codi_categoria'] . '&v=' . $vripo . '"><span class="categories_name">' . htmlspecialchars($catRow['nombre']) . '</span></a></li>';
                                     }
                                     ?>
-
                                 </ul>
                             </div>
                             <div class="widget">
@@ -384,8 +380,8 @@ $listaGrupos = $conexion->query($sql);
 
                                                 </div>
                                                 <div class="price_range">
-                                                    <span>Price: <span id="flt_price">$103 - $196</span></span>
-                                                    <input type="hidden" id="price_first" value="103">
+                                                    <span>Price: <span id="flt_price">$0 - $5000</span></span>
+                                                    <input type="hidden" id="price_first" value="0">
                                                     <input type="hidden" id="price_second" value="5000">
                                                 </div>
                                             </div>
@@ -399,10 +395,8 @@ $listaGrupos = $conexion->query($sql);
                                         </div>
 
                                         <div class="widget">
-                                            <h5 class="widget_title">Otras Marcas</h5>
-                                            <ul id="listaMarcas" class="list_brand">
-
-
+                                            <h5 class="widget_title">Marcas</h5>
+                                            <ul id="listaMarcas" class="list_brand" style="max-height:220px; overflow-y:auto; padding-right:4px;">
                                             </ul>
                                         </div>
                                     </div>
@@ -525,22 +519,30 @@ $listaGrupos = $conexion->query($sql);
                 this.listaMarcaFiltro.splice(index, 1);
             },
             setListaMarcas() {
-                this.listaMarcar = [];
-                for (var i = 1; i < this.listaProdGene.length; i++) {
-                    this.listaMarcar.push(this.listaProdGene[i].marca);
-                }
-                this.listaMarcar = this.listaMarcar.filter(function (value, index, self) {
-                    return self.indexOf(value) === index;
-                })
-
-                this.listaMarcar.forEach(function (item, index) {
-                    $("#listaMarcas").append('<li>\n' +
-                        '                                <div class="custome-checkbox">\n' +
-                        '                                    <input class="form-check-input input-check-marc" type="checkbox" name="' + item + '" id="' + item + '" value="' + item + '">\n' +
-                        '                                    <label class="form-check-label" for="' + item + '"><span>' + item + '</span></label>\n' +
-                        '                                </div>\n' +
-                        '                            </li>');
-                })
+                $("#listaMarcas").empty();
+                $.post('../ajax/ajs_shop_factura.php', { tipo: 'marcas' }, function(res) {
+                    if (!res || !res.success || !res.data) return;
+                    res.data.forEach(function(m) {
+                        var nombre = m.nombre_marca || m.nombre || '';
+                        if (!nombre) return;
+                        var id = 'marc_' + (m.cod_marca || nombre).replace(/\s/g, '_');
+                        $("#listaMarcas").append(
+                            '<li><div class="custome-checkbox">' +
+                            '<input class="form-check-input input-check-marc" type="checkbox" id="' + id + '" value="' + nombre + '">' +
+                            '<label class="form-check-label" for="' + id + '"><span>' + nombre + '</span></label>' +
+                            '</div></li>'
+                        );
+                    });
+                    // Re-bind handlers tras insertar los checkboxes
+                    $('.input-check-marc').off('click').on('click', function() {
+                        if ($(this).is(':checked')) {
+                            APP_PROD.agregarFiltroMarca($(this).val());
+                        } else {
+                            APP_PROD.eliminarFiltroMarca($(this).val());
+                        }
+                        APP_PROD.resetFiter();
+                    });
+                }, 'json');
             },
             getFiltrar() {
                 this.valueUSDMin = parseFloat($("#price_first").val());
@@ -548,53 +550,28 @@ $listaGrupos = $conexion->query($sql);
                 this.resetFiter()
             },
             getDataProdListaPag2() {
-                const cnt = this.cntItemPorHoja;
-                const min = this.lasrId;
-                const filtro = $('#flista').val();
                 $.ajax({
                     type: "POST",
-                    url: "../ajax/ajs_productos.php",
-                    data: { tipo: 'pag-ctg', ctg, 'filtro': filtro },
+                    url: "../ajax/ajs_shop_factura.php",
+                    data: { tipo: 'productos' },
                     success: function (resq) {
-                        //console.log(resq);
-                        resq = JSON.parse(resq);
-                        resq = resq.reverse();
-                        // APP_PROD._data.listaHoja= resq
-                        console.log(resq);
-                        APP_PROD._data.listaProdGene = resq
-                        APP_PROD._data.listaBusquedaE = resq
-                        console.log(resq);
+                        if (typeof resq === 'string') resq = JSON.parse(resq);
+                        APP_PROD._data.listaProdGene = resq;
+                        APP_PROD._data.listaBusquedaE = resq;
                         APP_PROD.getPreparePagination2();
                         if (APP_PROD._data.filterSubC != -1) {
-                            APP_PROD.resetFiter()
+                            APP_PROD.resetFiter();
                         }
                         APP_PROD.setListaMarcas();
-                        // console.log(resq);
-                        $(".scrollup").click()
                     }
                 });
-
-                $.ajax({
-                    type: "POST",
-                    url: "../ajax/ajs_categoria.php",
-                    data: { tipo: 'sub_c', cat: ctg },
-                    success: function (resp) {
-                        //console.log("aaaaaaaaaaaaa")
-                        resp = JSON.parse(resp);
-                        resp.forEach(function (item, index) {
-                            $(".product_size_switch").append(' <span onclick="selecSubC(' + item.sub_id + ')">' + item.nombre + '</span>')
-                            $("#fitrarPor").append(' <div class="box-fil-por" onclick="selecSubC(' + item.sub_id + ')">' + item.nombre + '</div>')
-                        })
-                        //console.log(resp)
-                    }
-                });
-
-
             },
             resetFiter() {
                 this.listaBusquedaE = [];
+                const pal = this.palabra.toLowerCase().trim();
                 for (var i = 0; i < this.listaProdGene.length; i++) {
                     const precioProd = parseFloat(this.listaProdGene[i].precio + "");
+                    if (pal && !(this.listaProdGene[i].nombre || '').toLowerCase().includes(pal)) continue;
                     if (precioProd >= this.valueUSDMin && precioProd <= this.valueUSDMax) {
                         if (this.listaMarcaFiltro.length > 0) {
                             var valueDE = true;
@@ -663,7 +640,6 @@ $listaGrupos = $conexion->query($sql);
                         break;
                     }
                 }
-                $(".scrollup").click()
             },
             agregarCarritoProd(index) {
                 // swal('Opción no habilitada',"","warning")
@@ -765,6 +741,11 @@ $listaGrupos = $conexion->query($sql);
         APP_PROD._data.filterSubC = idSc;
         APP_PROD.resetFiter()
     }
+    function buscarProducto() {
+        APP_PROD._data.palabra = $("#input_search").val();
+        APP_PROD._data.hojaActual = 1;
+        APP_PROD.resetFiter();
+    }
     var en_stock_filtro = false
     $(document).ready(function () {
 
@@ -777,18 +758,7 @@ $listaGrupos = $conexion->query($sql);
             APP_PROD._data.filterSubC = parseInt(subC + "");
         }
 
-        setTimeout(function () {
-            $('.input-check-marc').on('click', function () {
-                if ($(this).is(':checked')) {
-                    // Hacer algo si el checkbox ha sido seleccionado
-                    APP_PROD.agregarFiltroMarca($(this).val());
-                } else {
-                    // Hacer algo si el checkbox ha sido deseleccionado
-                    APP_PROD.eliminarFiltroMarca($(this).val());
-                }
-                APP_PROD.resetFiter();
-            });
-        }, 1500)
+        // Los checkboxes de marcas se bindean dentro de setListaMarcas() tras la carga de la API
         //APP_PROD.getDataCountProd()
         APP_PROD.getDataProdListaPag2()
         /*setTimeout(function () {

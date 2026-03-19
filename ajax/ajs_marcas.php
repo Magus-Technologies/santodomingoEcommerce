@@ -6,104 +6,71 @@ $conexion = (new Conexion())->getConexion();
 
 $respuesta = array("res" => false);
 $tipo = $_POST['tipo'];
-/*$marcaSeleccionDao = new MarcaSeleccionDao();
-
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "http://computer.brunoas.com/marcas.php" );
-curl_setopt($ch, CURLOPT_POST, 1);// set post data to true
-curl_setopt($ch, CURLOPT_POSTFIELDS,"tipo=lista");   // post data
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$json = curl_exec($ch);
-curl_close($ch);
-
-//echo $json;
-
-$respuesta =[];
-$listaJSON = json_decode($json);
-
-foreach ($listaJSON as $mar){
-    $marcaSeleccionDao->setCodMarca($mar->cod_sub2);
-    $marTem=array("cod_mar"=>$mar->cod_sub2,"marca"=>$mar->nom_sub2,"imagen"=>'');
-    if ($row = $marcaSeleccionDao->getDataImagen()->fetch_assoc()){
-        $marTem['imagen'] =$row['imagen'];
-
-    }
-    $respuesta[]=$marTem;
-}*/
 
 if ($tipo == "s") {
-    $sql = "SELECT
-  marca_id,
-  nombre_marca as 'nombre',
-  cod_marca,
-  imagen
-FROM marcra_productos WHERE estado ='1' ";
+    $sql = "SELECT marca_id, nombre_marca as 'nombre', cod_marca, imagen
+            FROM marcra_productos WHERE estado ='1' ORDER BY nombre_marca";
     $res = $conexion->query($sql);
     $respuesta = [];
     foreach ($res as $re) {
-        /*  $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://computer.brunoas.com/marcas.php" );
-        curl_setopt($ch, CURLOPT_POST, 1);// set post data to true
-        curl_setopt($ch, CURLOPT_POSTFIELDS,"tipo=data&cod=". $re['cod_marca']);   // post data
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $json = curl_exec($ch);
-       // echo $json;
-        curl_close($ch);
-        $arr = json_decode($json);*/
         $re['imagen'] = strlen($re['imagen']) < 5 ? 'sin_imagen.png' : $re['imagen'];
-        //$re['nombre']=$arr->nom_sub2;
         $respuesta[] = $re;
     }
-} elseif ($tipo == 'lis') {
-    $sql = "SELECT * FROM sopsub2";
+} elseif ($tipo == 'all') {
+    // Todas las marcas (activas e inactivas) para el admin
+    $sql = "SELECT marca_id, nombre_marca as 'nombre', cod_marca, imagen, estado
+            FROM marcra_productos ORDER BY nombre_marca";
     $res = $conexion->query($sql);
     $respuesta = [];
-    foreach ($res as $value) {
-        $respuesta[] = $value;
+    foreach ($res as $re) {
+        $re['imagen'] = strlen($re['imagen']) < 5 ? '' : $re['imagen'];
+        $respuesta[] = $re;
     }
-    /* $array = $res->fetch_assoc(); */
-    /* $respuesta = $array; */
-} elseif ($tipo == 'in') {
-     $codigoM = $_POST['cod'];	
-
-     if($codigoM==0) {
-	$sqlc = "SELECT CAST(TRIM(cod_marca) AS UNSIGNED) + 1 AS codigo 
-FROM marcra_productos 
-WHERE cod_marca IS NOT NULL 
-ORDER BY CAST(TRIM(cod_marca) AS UNSIGNED) DESC 
-LIMIT 1";
-      $resc = $conexion->query($sqlc);
-		while ($fila = $resc->fetch_array(MYSQLI_ASSOC)) {
-	    	$codigoM= $fila['codigo']; 
-		}
-     }
-
-    $sql = "INSERT INTO marcra_productos VALUES (null,'{$_POST['nom']}',$codigoM,'{$_POST['imagen']}','1');";
-
+} elseif ($tipo == 'marcas_facturacion') {
+    // Marcas del sistema de facturación (misma BD en el mismo servidor)
+    $sql = "SELECT cod_marca, nombre_marca FROM factura_santod3.marcra_productos ORDER BY nombre_marca";
+    $res = $conexion->query($sql);
+    $respuesta = [];
+    if ($res) {
+        foreach ($res as $re) {
+            $respuesta[] = $re;
+        }
+    }
+} elseif ($tipo == 'show') {
+    // Mostrar marca en ecommerce (reactivar)
+    $sql = "UPDATE marcra_productos SET estado='1' WHERE marca_id='{$_POST['del_id']}'";
     if ($conexion->query($sql)) {
         $respuesta['res'] = true;
-    } /*
-	else { 
-    $respuesta['res'] = $sql;
-   } */
+    }
+} elseif ($tipo == 'delImg') {
+    // Eliminar solo la imagen
+    $sql = "UPDATE marcra_productos SET imagen='' WHERE marca_id='{$_POST['marc']}'";
+    if ($conexion->query($sql)) {
+        $respuesta['res'] = true;
+    }
+} elseif ($tipo == 'in') {
+    $codMarca  = $conexion->real_escape_string($_POST['cod']);
+    $nombre    = $conexion->real_escape_string($_POST['nom']);
+    $imagen    = $conexion->real_escape_string($_POST['imagen']);
+    $sql = "INSERT INTO marcra_productos (nombre_marca, cod_marca, imagen, estado)
+            VALUES ('$nombre', '$codMarca', '$imagen', '1')";
+    if ($conexion->query($sql)) {
+        $respuesta['res'] = true;
+    } else {
+        $respuesta['error'] = $conexion->error;
+    }
 } elseif ($tipo == 'up') {
     $sql = "UPDATE marcra_productos SET imagen = '{$_POST['imagen']}' WHERE marca_id = '{$_POST['marc']}'";
-
     if ($conexion->query($sql)) {
         $respuesta['res'] = true;
     }
 } elseif ($tipo == 'delM') {
-
+    // Ocultar marca del ecommerce (soft delete)
     $idmarca = $_POST['del_id'];
-    $sql = "UPDATE marcra_productos SET estado ='0' WHERE marca_id ='{$_POST['del_id']}'";
-
+    $sql = "UPDATE marcra_productos SET estado='0' WHERE marca_id='{$idmarca}'";
     if ($conexion->query($sql)) {
         $respuesta['res'] = true;
- 	  $sqlu = "UPDATE producto SET marca ='205' WHERE marca ='$idmarca'";
-		$resu = $conexion->query($sqlu);
-
     }
 }
-
 
 echo json_encode($respuesta);

@@ -207,6 +207,11 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
     //$listaMarcas = $conexion->query("SELECT * FROM marcra_productos");
     $listaOfertas = $productoDao->getDataofertas();
     $listaMarcas = $conexion->query("SELECT * FROM marcra_productos WHERE estado='1' order by nombre_marca asc ");
+    if (!isset($dataConf)) {
+        if (!class_exists('Tools')) { require __DIR__ . '/../utils/Tools.php'; }
+        $dataConf = (new Tools())->getConfiguracion();
+    }
+    $_menuNav = $dataConf['menu_nav'] ?? [];
     ?>
     <div class="bottom_header main_menu_uppercase" style="background:#c7161d;">
         <div class="container">
@@ -229,22 +234,13 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
                             <a class="nav-link nav-options" href="index.php"><span><span>INICIO</span></a>
                         </li>
 
-                        <li class="dropdown  nav-options-i">
-                            <a class="nav-link " href="shop-list-prod-remate.php">VINO TINTO</a>
-
+                        <?php foreach ($_menuNav as $_item): ?>
+                        <?php if (($_item['estado'] ?? '1') === '1'): ?>
+                        <li class="nav-options-i">
+                            <a class="nav-link nav-options" href="<?= htmlspecialchars($_item['url']) ?>"><?= htmlspecialchars($_item['titulo']) ?></a>
                         </li>
-
-                        <li>
-                            <a class="nav-link nav-options" href="shop-list-prod.php?search=+&type=last">VINO BLANCO</a>
-
-                        </li>
-                        <li class="dropdown  nav-options-i">
-                            <a class="nav-link  " href="shop-list-prod-ofertas.php">VINO ROSADO</a>
-
-                        </li>
-                        <li class="">
-                            <a class="nav-link nav-options" href="./shop-list-prod-exclu.php">PISCO</a>
-                        </li>
+                        <?php endif; ?>
+                        <?php endforeach; ?>
                         <li class="dropdown  nav-options-i">
                             <a class="nav-link   " href="#">DISTRIBUCION</a>
                             <div class="dropdown-menu">
@@ -315,7 +311,7 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
                                     <a href="#" @click="eliminarProdCarrito(index)" class="item_remove"><i
                                             class="ion-close"></i></a>
                                     <a href="#"><img style="max-width: 80px;max-height: 80px"
-                                            :src="'../public/img/productos/'+item.imagen"
+                                            :src="item.imagen && (item.imagen.startsWith('http') || item.imagen.indexOf('/') !== -1) ? item.imagen : '../public/img/productos/'+item.imagen"
                                             alt="cart_thumb1">{{item.nombre_prod}}</a>
                                     <span class="cart_quantity" style="color:#fff;"> {{item.cantidad}} x <span
                                             class="cart_amount"> <span

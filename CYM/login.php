@@ -2,7 +2,6 @@
 session_start();
 require "../dao/ProductoDao.php";
 require "../utils/Tools.php";
-require "../config.php";
 
 $conexion = (new Conexion())->getConexion();
 $productoDao = new ProductoDao();
@@ -155,6 +154,11 @@ if ($tipolink != '') {
                                         <button type="submit" class="btn btn-block" name="login"
                                             style="background-color:#232323; color:#fff;">Iniciar sesi&oacute;n</button>
                                     </div>
+                                </form>
+                                <form id="login" method="post" action="../auth/login.php" style="display: none">
+                                    <input name="user" v-model="user">
+                                    <input name="clave" v-model="clave">
+                                    <input name="ruta" value="index">
                                 </form>
 
                                 <div class="different_login">
@@ -311,62 +315,24 @@ if ($tipolink != '') {
                 location.href = "order-completed.php";
             },
             verificar() {
-                console.log("Iniciando login con API del backend...");
-                
-                // Mostrar loader
-                $(".preloader").show();
+                console.log("dddddddd")
 
                 $.ajax({
                     type: "POST",
-                    url: "<?php echo API_URL; ?>/api/login",
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        user: this.user,
-                        password: this.clave
-                    }),
-                    success: (resp) => {
-                        $(".preloader").hide();
-                        console.log("Respuesta del servidor:", resp);
-                        
-                        if (resp.success) {
-                            // Guardar token en localStorage
-                            localStorage.setItem('auth_token', resp.token);
-                            localStorage.setItem('user_data', JSON.stringify(resp.user));
-                            localStorage.setItem('empresas', JSON.stringify(resp.empresas));
-                            
-                            swal({
-                                title: "Éxito",
-                                text: "Login exitoso",
-                                icon: "success",
-                            }).then(() => {
-                                // Redirigir al dashboard del backend con token en query
-                                window.location.href = "<?php echo API_URL; ?>/dashboard?token=" + resp.token;
-                            });
+                    url: "../auth/login.php",
+                    data: { user: this.user, clave: this.clave, vr: 'org', carrito: JSON.stringify(CARRITO._data.listaCarrito) },
+                    success: function (resp) {
+                        resp = JSON.parse(resp);
+                        console.log(resp);
+                        if (resp.res) {
+                            $("#login").submit();
                         } else {
-                            swal({
-                                title: "Error",
-                                text: resp.message || "Error en el login",
-                                icon: "error",
-                            });
+                            swal(resp.msg, "", "error")
                         }
-                    },
-                    error: (xhr, status, error) => {
-                        $(".preloader").hide();
-                        console.error("Error en la solicitud:", error);
-                        console.error("Respuesta:", xhr.responseJSON);
-                        
-                        let mensaje = "Error al conectar con el servidor";
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            mensaje = xhr.responseJSON.message;
-                        }
-                        
-                        swal({
-                            title: "Error",
-                            text: mensaje,
-                            icon: "error",
-                        });
                     }
                 });
+
+                // $("#login").submit()
             }
         },
         computed: {

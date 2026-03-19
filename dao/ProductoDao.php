@@ -1520,17 +1520,11 @@ SUM(prod2.stock_act) AS suma_stock,prob1.nombre,op.precio_oferta, ROUND(RAND() *
 
     public function getListRandonIndex($cnt)
     {
-
-        $sql = "SELECT  pf.imagen_url,prod2.stock_act,prob1.prod_id,propre.precio_cuatro,SUM(prod2.stock_act) AS suma_stock,prob1.nombre,op.precio_oferta FROM $this->web.producto AS prob1 
-        LEFT JOIN $this->web.ofertas_productos AS op ON prob1.prod_id=op.producto_id
-        INNER JOIN $this->web.producto_foto AS pf ON prob1.prod_id=pf.prod_id
-        INNER JOIN $this->compuvision.stocks AS prod2 ON prob1.prod_cod = prod2.cod_prod 
-        INNER JOIN $this->compuvision.precios AS propre ON prod2.cod_prod=propre.cod_prod
-        WHERE  prod2.stock_act > 0 AND propre.cod_suc=1 AND prod2.cod_suc=1  AND pf.orden='1' GROUP BY prod2.cod_prod order by rand() LIMIT " . $cnt;
-        //echo $sql;
-        $respu = $this->conexion->query($sql);
-        /* $result = $respu->fetch_assoc(); */
-        return $respu;
+        // Método legacy — requiere $this->web y $this->compuvision (actualmente deshabilitados)
+        return [];
+        // $sql = "SELECT pf.imagen_url ... FROM $this->web.producto ...";
+        // $respu = $this->conexion->query($sql);
+        // return $respu;
         /*  $listaArr = [];
         $codConsulta = "";
         foreach ($respu as $row) {

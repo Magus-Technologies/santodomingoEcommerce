@@ -132,6 +132,44 @@ elseif ($tipo=='banner_extra_IN'){
     $configuracion['banner_extra']=json_decode($banners);
     $tools->guardarConfiguarion($configuracion);
 
+}elseif ($tipo=='seccion_tradicion'){
+    $configuracion['seccion_tradicion']['titulo'] = $_POST['titulo'];
+    $configuracion['seccion_tradicion']['color']  = $_POST['color'] ?? '#ffffff';
+    if (!empty($_POST['imagen'])) {
+        $configuracion['seccion_tradicion']['imagen'] = $_POST['imagen'];
+    }
+    $tools->guardarConfiguarion($configuracion);
+    echo json_encode(['res' => true]);
+
+}elseif ($tipo=='menu_nav_s'){
+    if (!isset($configuracion['menu_nav'])) {
+        $configuracion['menu_nav'] = [];
+    }
+    echo json_encode($configuracion['menu_nav']);
+
+}elseif ($tipo=='menu_nav_IN'){
+    $items = json_decode($_POST['data'], true);
+    $configuracion['menu_nav'] = $items;
+    $tools->guardarConfiguarion($configuracion);
+    echo json_encode(['res' => true]);
+
+}elseif ($tipo=='seleccion_save'){
+    $indice = (int)$_POST['indice'];
+    if ($indice >= 0 && $indice <= 3) {
+        if (!isset($configuracion['nuestra_seleccion'])) {
+            $configuracion['nuestra_seleccion'] = [
+                ["titulo" => "Vinos Tintos",  "imagen" => "", "url" => "shop-list-ctg.php?ctg=001"],
+                ["titulo" => "Vinos Blancos", "imagen" => "", "url" => "shop-list-ctg.php?ctg=002"],
+                ["titulo" => "Vinos Rosados", "imagen" => "", "url" => "shop-list-ctg.php?ctg=003"],
+                ["titulo" => "Espumantes",    "imagen" => "", "url" => "shop-list-ctg.php?ctg=004"]
+            ];
+        }
+        $configuracion['nuestra_seleccion'][$indice]['titulo'] = $_POST['titulo'];
+        $configuracion['nuestra_seleccion'][$indice]['url']    = $_POST['url'];
+        $configuracion['nuestra_seleccion'][$indice]['imagen'] = $_POST['imagen'];
+        $tools->guardarConfiguarion($configuracion);
+        echo 'ok';
+    }
 }
 
 

@@ -21,8 +21,7 @@ if ($isSesionUser) {
         <div class="container">
             <nav class="navbar navbar-expand-lg">
                 <a class="navbar-brand" href="javascript:void(0)">
-                    <img class="logo_light" src="../public/images/cym.png" alt="logo" />
-                    <img class="logo_dark" src="../public/images/cym.png" alt="logo" />
+                    <img src="../public/images/cym.png" alt="logo" style="height:50px;" />
                 </a>
                 <!--button style="padding: 5px;padding-left: 12px;margin-left: 5px;}" class="btn btn-info"><i class="fa fa-edit"></i></button-->
                 <button class="navbar-toggler" type="button" data-toggle="collapse"
@@ -90,6 +89,10 @@ if ($isSesionUser) {
                                         <li><a class="dropdown-item nav-link nav_item" href="./">Principal</a></li>
                                         <li><a class="dropdown-item nav-link nav_item" href="./confBaner.php">Banners</a>
                                         </li>
+                                        <li><a class="dropdown-item nav-link nav_item" href="./menu.php">Men&uacute; de Navegaci&oacute;n</a>
+                                        </li>
+                                        <li><a class="dropdown-item nav-link nav_item" href="./conf_seleccion.php">Nuestra Selecci&oacute;n</a>
+                                        </li>
                                         <li><a class="dropdown-item nav-link nav_item" href="./usuarios.php">Usuarios
                                                 Vendedores</a>
                                         </li>
@@ -120,6 +123,8 @@ if ($isSesionUser) {
                                         <li><a class="dropdown-item nav-link nav_item"
                                                 href="./categorias.php">Categorias</a></li>
                                         <li><a class="dropdown-item nav-link nav_item" href="./marcas.php">Marcas</a>
+                                        </li>
+                                        <li><a class="dropdown-item nav-link nav_item" href="./productos_remate.php">Productos en Remate</a>
                                         </li>
 
 

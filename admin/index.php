@@ -686,6 +686,108 @@ if (strlen($dataConf['banercentarl3']['prod']) > 0) {
                 </div>
             </div>
 
+            <!-- ── SUSCRIPCIÓN ────────────────────────────── -->
+            <hr>
+            <div class="col-md-12 text-center"><h4>Sección Suscripción</h4></div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Título</label>
+                <div class="col-sm-10">
+                    <input type="text" v-model="dataConf.suscripcion_titulo" class="form-control">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Párrafo</label>
+                <div class="col-sm-10">
+                    <input type="text" v-model="dataConf.suscripcion_parrafo" class="form-control">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Imagen</label>
+                <div class="col-sm-10">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input accept="image/*" id="fill_suscripcion_img" type="file" style="display:none" onchange="previewSuscImg(this)">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="$('#fill_suscripcion_img').click()"><i class="fa fa-upload"></i> Subir Imagen</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="guardarSuscImg()"><i class="fa fa-save"></i> Guardar</button>
+                        </div>
+                        <div class="col-md-6">
+                            <img id="preview_suscripcion_img" style="max-height:100px;display:block;" :src="dataConf.suscripcion_imagen ? (dataConf.suscripcion_imagen.startsWith('http') ? dataConf.suscripcion_imagen : '../public/img/banner/'+dataConf.suscripcion_imagen) : '../public/images/wine.png'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── FOOTER ──────────────────────────────────── -->
+            <hr>
+            <div class="col-md-12 text-center"><h4>Footer</h4></div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Tagline</label>
+                <div class="col-sm-10">
+                    <input type="text" v-model="dataConf.footer_tagline" class="form-control" placeholder="Los mejores en Vino y Pisco">
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Logo</label>
+                <div class="col-sm-10">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input accept="image/*" id="fill_footer_logo" type="file" style="display:none" onchange="previewFooterLogo(this)">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="$('#fill_footer_logo').click()"><i class="fa fa-upload"></i> Subir Logo</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="guardarFooterLogo()"><i class="fa fa-save"></i> Guardar Logo</button>
+                        </div>
+                        <div class="col-md-6">
+                            <img id="preview_footer_logo" style="max-height:80px;display:block;" :src="dataConf.footer_logo ? (dataConf.footer_logo.startsWith('http') ? dataConf.footer_logo : '../public/img/banner/'+dataConf.footer_logo) : '../public/logo.svg'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Imagen Footer</label>
+                <div class="col-sm-10">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input accept="image/*" id="fill_footer_imagen" type="file" style="display:none" onchange="previewFooterImg(this)">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="$('#fill_footer_imagen').click()"><i class="fa fa-upload"></i> Subir Imagen</button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="guardarFooterImagen()"><i class="fa fa-save"></i> Guardar Imagen</button>
+                            <br><small class="text-muted">O pega una URL:</small>
+                            <input type="text" v-model="dataConf.footer_imagen" class="form-control mt-1" placeholder="https://...">
+                        </div>
+                        <div class="col-md-6">
+                            <img id="preview_footer_img" style="max-height:120px;display:block;" :src="dataConf.footer_imagen ? (dataConf.footer_imagen.startsWith('http') ? dataConf.footer_imagen : '../public/img/banner/'+dataConf.footer_imagen) : ''">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Links Productos</label>
+                <div class="col-sm-10">
+                    <table class="table table-sm" style="width:100%">
+                        <tr><th>Nombre</th><th>URL</th></tr>
+                        <tr v-for="(item, i) in dataConf.footer_productos">
+                            <td><input type="text" v-model="item.nombre" class="form-control form-control-sm"></td>
+                            <td><input type="text" v-model="item.url"    class="form-control form-control-sm" placeholder="shop-list-ctg.php?ctg=001"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Servicios (3 cajas)</label>
+                <div class="col-sm-10">
+                    <table class="table table-sm" style="width:100%">
+                        <tr><th>Título</th><th>Descripción</th></tr>
+                        <tr v-for="(item, i) in dataConf.footer_servicios">
+                            <td><input type="text" v-model="item.titulo"      class="form-control form-control-sm"></td>
+                            <td><input type="text" v-model="item.descripcion" class="form-control form-control-sm"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
 
         </div>
 
