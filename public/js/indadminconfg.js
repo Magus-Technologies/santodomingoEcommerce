@@ -164,6 +164,13 @@ const APP = new Vue({
                 success: function (resp) {
                     resp = JSON.parse(resp);
                     console.log(resp);
+                    // Merge para no perder valores por defecto si faltan claves en el JSON
+                    var defaults = APP._data.dataConf;
+                    Object.keys(defaults).forEach(function(key) {
+                        if (resp[key] === undefined || resp[key] === null) {
+                            resp[key] = defaults[key];
+                        }
+                    });
                     APP._data.dataConf = resp;
                 }
             });
