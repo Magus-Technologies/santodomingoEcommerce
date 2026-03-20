@@ -15,60 +15,73 @@ if ($isSesionUser) {
 
 ?>
 <style>
-    .dropdown-menu {
+    /* ── Navbar principal ── */
+    .header_wrap { box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
+
+    /* Barra superior */
+    .top-header { background: #8a0009 !important; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .header_list { list-style: none; margin: 0; padding: 0; display: flex; gap: 16px; justify-content: flex-end; align-items: center; }
+    .header_list li a { color: rgba(255,255,255,0.82); font-size: 12px; text-decoration: none; letter-spacing: 0.3px; transition: color 0.2s; }
+    .header_list li a:hover { color: #ece6a3; }
+    .header_list li a i { margin-right: 4px; }
+
+    /* Barra de menú */
+    .bottom_header { background: #c7161d !important; }
+    .bottom_header .navbar { padding: 0; }
+    .navbar-brand img { max-height: 40px; width: auto !important; }
+
+    /* Items del menú */
+    .nav-options {
+        color: #fff !important;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0.6px;
+        padding: 16px 13px !important;
+        transition: color 0.2s, background 0.2s;
+        text-decoration: none;
+    }
+    .nav-options:hover { color: #ece6a3 !important; background: rgba(0,0,0,0.12) !important; }
+
+    /* Dropdown */
+    .nav-options-i { position: relative; }
+    .nav-options-i .dropdown-menu {
         position: absolute;
         top: 100%;
         left: 0;
-        min-width: 160px;
-        background-color: #fff;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        min-width: 180px;
+        background: #fff;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.13);
+        border: none;
+        border-radius: 0 0 6px 6px;
         display: none;
-        z-index: 1000;
+        z-index: 1050;
+        padding: 6px 0;
     }
-
-    .dropdown:hover .dropdown-menu,
-    .dropdown:focus-within .dropdown-menu {
-        display: block;
-    }
-
-    .nav-options-i {
-        position: relative;
-    }
-
-    .dropdown-item {
-        padding: 8px 20px 8px 20px;
+    .nav-options-i:hover .dropdown-menu,
+    .nav-options-i:focus-within .dropdown-menu { display: block; }
+    .nav-options-i .dropdown-menu .dropdown-item {
         color: #333;
-        font-size: 14px;
-        text-transform: capitalize;
+        font-size: 13px;
+        padding: 9px 18px;
+        font-weight: 500;
     }
+    .nav-options-i .dropdown-menu .dropdown-item:hover { background: #f5f5f5; color: #c7161d; }
+    .nav-options-i .dropdown-menu ul { list-style: none; padding: 0; margin: 0; }
+    .nav-options-i .dropdown-menu li { list-style: none; }
 
-    .dropdown-item:hover {
-        background-color: #f5f5f5;
+    /* Dirección en top bar */
+    .top-address { color: rgba(255,255,255,0.82); font-size: 12px; display: flex; align-items: center; gap: 5px; }
+    .top-address i { color: #ece6a3; }
+
+    /* Mobile */
+    @media (max-width: 991px) {
+        .ifmobile { display: block !important; }
+        .mobile_side_menu { background: #232323 !important; }
+        .mobile_side_menu .nav-options { padding: 12px 18px !important; border-bottom: 1px solid rgba(255,255,255,0.07); }
+        .navbar-brand img { max-height: 32px; }
     }
-
-    .dropdown-menu ul {
-        list-style-type: none;
-        padding-left: 0;
-        margin: 0;
-    }
-
-    .dropdown-menu li {
-        list-style: none;
-    }
-
-    @media (max-width: 576px) {
-
-        /* Estilos para m�vil */
-        ifmobile {
-            display: block;
-            color: #fff;
-        }
-    }
-
-    @media (min-width: 577px) {
-        .ifmobile {
-            display: none;
-        }
+    @media (min-width: 992px) {
+        .ifmobile { display: none !important; }
     }
 </style>
 
@@ -143,61 +156,31 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
 ?>
 <input type="hidden" value="<?= $tc ?>" id="tasa_cambio">
 <header class="header_wrap fixed-top header_with_topbar">
-    <div class="top-header" style="background: #880107;border:none">
+    <div class="top-header">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-9">
-                    <div class="d-flex align-items-center justify-content-center justify-content-md-start">
-                        <div class="lng_dropdown mr-2">
-                            <!--
-                            <select name="countries" class="custome_select">
-                                <option value='en' data-image="../public/assets/images/eng.png" data-title="English">English</option>
-                                <option value='fn' data-image="../public/assets/images/fn.png" data-title="France">France</option>
-                                <option value='us' data-image="../public/assets/images/us.png" data-title="United States">United States</option>
-                            </select> -->
-                            <i class="ti-location-pin"
-                                style="float: left; color: #fff;font-size: 19px;transform: translateY(4px);"></i>&nbsp;
-                            <p style="float: left; margin: 0px; font-size: 14px; color: #fff;">
-                                <strong><?= $dataConf['direccion'] ?></strong>
-                            </p>
-                        </div>
-                        <div class="mr-3">
-                            <!--
-                            <select name="countries" class="custome_select">
-                                <option value='USD' data-title="USD">USD</option>
-                                <option value='EUR' data-title="EUR">EUR</option>
-                                <option value='GBR' data-title="GBR">GBR</option>
-                            </select>-->
-                        </div>
-                        <ul class="contact_detail text-center text-lg-left">
-                            <!--
-                            <li><i class="ti-mobile"></i><span>994 009 195</span></li>-->
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center text-md-right">
-                        <ul class="header_list">
-
-                            <?php
-                            if ($isSesionUser) {
-                                if ($perfilUser != 'usuario') {
-                                    if ($perfilUser == 'vendedor') {
-                                        echo '<li><a href="../admin/pedidos.php" class="text-white"><i class="ti-control-shuffle"></i><span>Administrar</span></a></li>';
-                                    } else {
-                                        echo '<li><a href="../admin/" class="text-white"><i class="ti-control-shuffle"></i><span>Administrar</span></a></li>';
-                                    }
-                                }
-                                echo '<li><a href="./my-account.php" class="text-white"><i class="ti-agenda"></i><span>Mi Cuenta</span></a></li>';
-                                echo '<li><a href="../auth/logout.php" class="text-white"><i class="ti-user"></i><span>Cerrar Sesi&oacute;n</span></a></li>';
-                            } else {
-                                echo '<li><a href="./login.php" class="text-white"><i class="ti-user"></i><span>Iniciar Sesi&oacute;n</span></a></li>';
-                            }
-                            ?>
-
-                        </ul>
-                    </div>
-                </div>
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="top-address">
+                    <i class="ti-location-pin"></i>
+                    <?= htmlspecialchars($dataConf['direccion'] ?? '') ?>
+                </span>
+                <ul class="header_list">
+                    <?php if ($isSesionUser): ?>
+                        <?php if ($perfilUser !== 'usuario'): ?>
+                            <?php if ($perfilUser === 'vendedor'): ?>
+                                <li><a href="../admin/pedidos.php"><i class="ti-control-shuffle"></i> Administrar</a></li>
+                            <?php else: ?>
+                                <li><a href="../admin/"><i class="ti-control-shuffle"></i> Administrar</a></li>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                        <li><a href="./my-account.php"><i class="ti-agenda"></i> Mi Cuenta</a></li>
+                        <li><a href="../auth/logout.php"><i class="ti-user"></i> Cerrar Sesión</a></li>
+                    <?php else: ?>
+                        <li><a href="./login.php"><i class="ti-user"></i> Iniciar Sesión</a></li>
+                    <?php endif; ?>
+                    <li style="color:rgba(255,255,255,0.5); font-size:12px; align-self:center;">
+                        <i class="ti-exchange-vertical" style="color:#ece6a3;"></i> TC: <strong style="color:#ece6a3;"><?= $tc ?></strong>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
@@ -213,78 +196,70 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
     }
     $_menuNav = $dataConf['menu_nav'] ?? [];
     ?>
-    <div class="bottom_header main_menu_uppercase" style="background:#c7161d;">
+    <div class="bottom_header">
         <div class="container">
             <nav class="navbar navbar-expand-lg">
-                <a style="width: 30%;" class="navbar-brand" href="index.php">
-                    <img src="../public/images/cym.png" width="50%" alt="logo" />
+                <a class="navbar-brand" href="index.php">
+                    <img src="../public/images/cym.png" alt="logo" />
                 </a>
-                <button style="color: white;" class="navbar-toggler side_navbar_toggler" type="button"
-                    data-toggle="collapse" data-target="#navbarSidetoggleE" aria-expanded="false">
+                <button class="navbar-toggler side_navbar_toggler" type="button"
+                    data-toggle="collapse" data-target="#navbarSidetoggleE" aria-expanded="false"
+                    style="color:white; border-color:rgba(255,255,255,0.4);">
                     <span class="ion-android-menu"></span>
                 </button>
-                <!--<div class="pr_search_icon">
-                                <a href="javascript:void(0);" style="color: white;" class="nav-link pr_search_trigger"><i class="linearicons-magnifier"></i></a>
-                            </div>-->
                 <div class="collapse navbar-collapse mobile_side_menu" id="navbarSidetoggleE">
-                    <ul class="navbar-nav" <?= $body_class == 'desktop' ? ' style="background:#c7161d;" ' : ' style="background:#232323;"' ?>>
-
-
-                        <li>
-                            <a class="nav-link nav-options" href="index.php"><span><span>INICIO</span></a>
-                        </li>
+                    <ul class="navbar-nav">
 
                         <?php foreach ($_menuNav as $_item): ?>
-                        <?php if (($_item['estado'] ?? '1') === '1'): ?>
-                        <li class="nav-options-i">
-                            <a class="nav-link nav-options" href="<?= htmlspecialchars($_item['url']) ?>"><?= htmlspecialchars($_item['titulo']) ?></a>
+                        <?php if (($_item['estado'] ?? '1') === '1'):
+                            $_hijos = $_item['hijos'] ?? [];
+                        ?>
+                        <li class="nav-options-i<?= count($_hijos) ? ' dropdown' : '' ?>">
+                            <a class="nav-link nav-options" href="<?= htmlspecialchars($_item['url']) ?>"><?= htmlspecialchars($_item['titulo']) ?><?= count($_hijos) ? ' <i class="fa fa-caret-down" style="font-size:10px;"></i>' : '' ?></a>
+                            <?php if (count($_hijos)): ?>
+                            <div class="dropdown-menu">
+                                <ul>
+                                    <?php foreach ($_hijos as $_hijo): ?>
+                                    <li><a class="dropdown-item" href="<?= htmlspecialchars($_hijo['url']) ?>"><?= htmlspecialchars($_hijo['titulo']) ?></a></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                            <?php endif; ?>
                         </li>
                         <?php endif; ?>
                         <?php endforeach; ?>
-                        <li class="dropdown  nav-options-i">
-                            <a class="nav-link   " href="#">DISTRIBUCION</a>
+
+                        <li class="nav-options-i">
+                            <a class="nav-link nav-options" href="#">DISTRIBUCIÓN</a>
                             <div class="dropdown-menu">
                                 <ul>
                                     <?php
-                                    $vipUrl = '';
-
-                                    // Determinar si el usuario tiene acceso VIP
                                     if ($isSesionUser && $perfilUser != 'usuario') {
                                         $vipUrl = 'shop-list-vip.php?search=+&type=last+&v=vp';
-                                        $textLink = '';  // Texto alertas
+                                        $textLink = '';
                                     } elseif ($isSesionUser == "") {
                                         $vipUrl = 'login.php?v=vp';
                                         $textLink = '';
                                     } elseif (($perfilUser == 'usuario' || $perfilUser == 'Usuario') && $vip_status == 'SI') {
                                         $vipUrl = 'shop-list-vip.php?search=+&type=last+&v=vp';
-                                        $textLink = '';     //
+                                        $textLink = '';
                                     } else {
                                         $vipUrl = '#';
                                         $textLink = 'alertavip';
                                     }
                                     ?>
-
-                                    <li style="list-style: none; font-size: 14px;"><a class="dropdown-item nav_item"
-                                            style="background-color:#fff; color:#000;" href="<?= $vipUrl ?>"
-                                            id="<?= $textLink ?>">Precio VIP </a></li>
-                                    <li style="list-style: none; font-size: 14px;"><a class="dropdown-item nav-item "
-                                            style="background-color:#fff;  color:#000;"
-                                            href="shop-list-distri.php?search=+&type=last+&v=dt">Precio
-                                            Distribuci&oacute;n</a></li>
+                                    <li><a class="dropdown-item" href="<?= $vipUrl ?>" id="<?= $textLink ?>">Precio VIP</a></li>
+                                    <li><a class="dropdown-item" href="shop-list-distri.php?search=+&type=last+&v=dt">Precio Distribución</a></li>
                                 </ul>
                             </div>
+                        </li>
 
-                        </li>
-                        <li class="">
-                            <a class="nav-link nav-options" href="./contact.php">CONTACTANOS</a>
-                        </li>
-                        <li class="ifmobile" style="background-color:red;">
+                        <li class="ifmobile" style="background:#b01018;">
                             <a class="nav-link nav-options" href="#"
                                 onclick="document.getElementById('navbarSidetoggleE').classList.remove('show'); return false;">
-                                <span class="fa fa-close" style="max-width: 20px; font-size: 20px;"></span> CERRAR
+                                <i class="fa fa-close"></i> CERRAR
                             </a>
                         </li>
-
 
                     </ul>
                 </div>

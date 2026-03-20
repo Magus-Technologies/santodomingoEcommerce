@@ -137,6 +137,46 @@ order by ped.pedido_id desc ";
                 $sql = "DELETE FROM carrito_compra where  usuario_id='{$_SESSION['usuario']}'";
                 $conexion->query($sql);
 
+                // Crear cotizaciÃ³n vÃ­a API interna de Laravel
+                try {
+                    require_once "../config.php"; // API_URL
+                    $productos = [];
+                    foreach ($car_list as $car) {
+                        $productos[] = [
+                            'producto_id' => (int)$car['prod'],
+                            'nombre'      => $car['nombre_prod'],
+                            'cantidad'    => (float)$car['cantidad'],
+                            'precio'      => (float)$car['precio'],
+                        ];
+                    }
+                    $payload = json_encode([
+                        'secret'             => 'ecomm_cym_2026_secret',
+                        'pedido_id'          => $pedido_id,
+                        'cliente_documento'  => $_POST['ndoc'] ?? '',
+                        'cliente_nombre'     => $_GET['nomc'] ?? '',
+                        'direccion'          => $_POST['direccion'] ?? '',
+                        'total'              => (float)($_GET['total'] ?? 0),
+                        'productos'          => $productos,
+                    ]);
+                    $ch = curl_init(API_URL . '/api/internal/pedido-a-cotizacion');
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                    curl_setopt($ch, CURLOPT_POST, true);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+                    $apiResp = curl_exec($ch);
+                    curl_close($ch);
+                    $apiData = json_decode($apiResp, true);
+                    if (!empty($apiData['cotizacion_id'])) {
+                        $respuesta['cotizacion_id'] = $apiData['cotizacion_id'];
+                    } elseif (!empty($apiData['message'])) {
+                        $respuesta['cotizacion_error'] = $apiData['message'];
+                    }
+                } catch (Exception $e) {
+                    // No bloquea el pedido si falla la cotizaciÃ³n
+                    $respuesta['cotizacion_error'] = $e->getMessage();
+                }
+
                 function avisarCliente($correoSus, $monedaUsada, $totalTransacc, $basehost)
                 {
                     /* echo "avisar CLIENTE"; */
@@ -220,7 +260,7 @@ order by ped.pedido_id desc ";
     <td style="font-size: 0; line-height: 0;" height="10">&nbsp;</td>
   </tr>
   <td align="center" bgcolor="#000000" style="padding: 40px 0 30px 0;">
-    <img src="https://viñasantodomingo.com/public_html/public/images/logo-white.png"
+    <img src="https://viï¿½asantodomingo.com/public_html/public/images/logo-white.png"
          alt="Creating Email Magic" width="300" style="display: block;"/>
   </td>
   <tr>
@@ -228,7 +268,7 @@ order by ped.pedido_id desc ";
       <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
           <td style="text-align: center; color: black">
-            <h2><strong>Te saluda VIÑASANTODOMINGO</strong></h2>
+            <h2><strong>Te saluda VIï¿½ASANTODOMINGO</strong></h2>
           </td>
         </tr>
         <tr>
@@ -241,7 +281,7 @@ order by ped.pedido_id desc ";
         </tr>
         <tr>
           <td style="padding: 20px 0 30px 0; color: black">
-          Hola  ' . $correoSus . ' te saluda VIÑASANTODOMINGO, tu cotizacion se esta procesando <br><br>
+          Hola  ' . $correoSus . ' te saluda VIï¿½ASANTODOMINGO, tu cotizacion se esta procesando <br><br>
           </td>
         </tr>
         <tr>
@@ -251,7 +291,7 @@ order by ped.pedido_id desc ";
         </tr>
         <tr>
             <td style="padding: 20px 0 30px 0; color: black">
-                Para ver el detalle de su pedido haga click en el botón<br><br>
+                Para ver el detalle de su pedido haga click en el botï¿½n<br><br>
             </td>
       </tr>
         <tr>
@@ -274,7 +314,7 @@ order by ped.pedido_id desc ";
       <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
           <td style="color: white" width="75%">
-            &reg; VIÑASANTODOMINGO <br/>
+            &reg; VIï¿½ASANTODOMINGO <br/>
             Los mejores en hardware.
           </td>
           <td align="right">
@@ -292,11 +332,11 @@ order by ped.pedido_id desc ";
 
                     //$_SESSION['emaail']='1994.brunoalva@gmail.com';
                     //ob_start();
-                    $ressss = $email->de(USER_SMTP, "VIÑASANTODOMINGO")
-                        ->addEmail($_SESSION['email'], "VIÑASANTODOMINGO")
+                    $ressss = $email->de(USER_SMTP, "VIï¿½ASANTODOMINGO")
+                        ->addEmail($_SESSION['email'], "VIï¿½ASANTODOMINGO")
                         //->addEmail("1994.brunoalva@gmail.com", "ACEADVANCE")
                         ->setasunto("Compra Cliente")
-                        ->cuerpo(avisarCliente($_SESSION['email'], "$", $_GET['total'], 'https://viñasantodomingo.com/public_html/CYM/lista_pedidos_cliente.php/' . $pedido_id))
+                        ->cuerpo(avisarCliente($_SESSION['email'], "$", $_GET['total'], 'https://viï¿½asantodomingo.com/public_html/CYM/lista_pedidos_cliente.php/' . $pedido_id))
                         /*      ->cuerpo(avisarCliente($_SESSION['emaail'], $monedaUsada, $totalTransacc, 'http://localhost/compuvision2/CYM/lista_compras_cliente.php/' . $compra_id)) */
                         ->enviar();
                     //ob_end_clean();

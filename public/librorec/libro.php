@@ -1,468 +1,375 @@
 <?php
-    $hoy = date("Y-m-d");
+    $hoy   = date("Y-m-d");
     $anual = date("Y");
     include "BD.php";
-    $sql0 = "SELECT (CASE  WHEN COUNT(lib_id) = 0 THEN 1 ELSE COUNT(lib_id)+1  END) as codirec
-    FROM libro_reclamacion";
-    $res0 = mysqli_query($con,$sql0);
-    $arr0 = mysqli_fetch_array($res0,MYSQLI_ASSOC);
-    $numerec = $arr0['codirec'];
-    $codigorec = '00000000'.$numerec.'-'.$anual;
+
+    // Config del sitio
+    $tsconfig = [];
+    $tsPath = __DIR__ . '/../../tsconfig.json';
+    if (file_exists($tsPath)) {
+        $tsconfig = json_decode(file_get_contents($tsPath), true) ?? [];
+    }
+    $nombreEmpresa = $tsconfig['empresa_nombre'] ?? 'VIÑASANTODOMINGO';
+    $rucEmpresa    = $tsconfig['empresa_ruc']    ?? '';
+    $dirEmpresa    = $tsconfig['empresa_dir']    ?? '';
+
+    $sql0 = "SELECT (CASE WHEN COUNT(lib_id)=0 THEN 1 ELSE COUNT(lib_id)+1 END) AS codirec
+             FROM libro_reclamacion";
+    $res0      = mysqli_query($con, $sql0);
+    $arr0      = mysqli_fetch_array($res0, MYSQLI_ASSOC);
+    $numerec   = $arr0['codirec'];
+    $codigorec = str_pad($numerec, 8, '0', STR_PAD_LEFT) . '-' . $anual;
 ?>
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <title>Ace Advance Group S.a.C. - Libro de Reclamaciones Virtual</title>
-    <link type="text/css" media="all" href="bootstrap_libro.css" rel="stylesheet">
-    <link type="text/css" media="all" href="custom_lib.css" rel="stylesheet">
-    <link type="text/css" media="all" href="print_lib.css" rel="stylesheet">
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?= htmlspecialchars($nombreEmpresa) ?> — Libro de Reclamaciones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="librorec.css">
+    <link rel="stylesheet" href="print_lib.css">
 </head>
-
-<script type="text/javascript" src="jquery-1.12.3.min.js"></script>
 <body>
-<div class="container" style="margin-top: 10px; margin-bottom: 20px">
-    <div class="row">
-        <div class="col-md-12 text-center" style="margin-bottom: 0px">
-            <h3>Ace Advance Group S.a.C. RUC N°: 20613235168</h3>
-	<br>
-            <div class="row">
-              <div class="col-sm-2">&nbsp;</div>
-             <div class="col-sm-4">Por favor ingrese sus DNI / CE:</div>
-             <div class="input-group col-sm-4">
-              <input type="text" class="form-control" id="numfil">
-                <span class="input-group-btn">
-                <button class="btn btn-primary" id="btnFiltro" type="button"> Buscar</button>
-                </span>
-             </div>          
-             <div class="col-sm-2">&nbsp;</div>
-           </div>
+
+<!-- ── HERO ── -->
+<header class="lr-hero">
+    <div class="lr-hero-inner">
+        <div class="lr-badge">Documento Oficial</div>
+        <h1>Libro de<span>Reclamaciones</span></h1>
+        <p class="lr-hero-sub">Código de Protección y Defensa del Consumidor — Ley N° 29571</p>
+    </div>
+    <div class="lr-wave">
+        <svg viewBox="0 0 1440 50" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,25 C360,50 1080,0 1440,25 L1440,50 L0,50 Z" fill="#f4f6f9"/>
+        </svg>
+    </div>
+</header>
+
+<!-- ── BUSCADOR DNI ── -->
+<div class="lr-dni-bar">
+    <label>Autocompletar con DNI / CE:</label>
+    <input type="text" id="numfil" placeholder="Ingrese DNI (8) o RUC (11)" maxlength="11">
+    <button class="lr-btn-buscar" id="btnFiltro" type="button">Buscar</button>
+    <span id="dni-msg"></span>
+</div>
+
+<!-- ── FORMULARIO ── -->
+<div class="lr-main">
+<form id="asForm" autocomplete="off">
+
+    <!-- META: Negocio / Fecha / N° -->
+    <div class="lr-meta-card">
+        <div class="lr-meta-item" style="flex:2; min-width:200px;">
+            <label>Establecimiento</label>
+            <input type="text" id="negocio" name="negocio" value="<?= htmlspecialchars($nombreEmpresa) ?>" readonly>
         </div>
-                    
+        <?php if ($rucEmpresa): ?>
+        <div class="lr-meta-item" style="flex:1;">
+            <label>RUC</label>
+            <input type="text" value="<?= htmlspecialchars($rucEmpresa) ?>" readonly>
+        </div>
+        <?php endif; ?>
+        <div class="lr-meta-item" style="flex:2; min-width:160px;">
+            <label>Dirección</label>
+            <input type="text" id="tienda" name="tienda" value="<?= htmlspecialchars($dirEmpresa) ?>" readonly>
+        </div>
+        <div class="lr-meta-item" style="flex:1; min-width:130px;">
+            <label>Fecha</label>
+            <input type="date" id="fecharec" value="<?= $hoy ?>" readonly>
+        </div>
+        <div class="lr-meta-item" style="flex:1; min-width:130px;">
+            <label>N° de hoja</label>
+            <input type="text" id="numrecla" name="numrecla" value="<?= htmlspecialchars($codigorec) ?>" readonly>
+        </div>
+    </div>
 
-            <div class="col-md-12" style="border: 2px solid black">
-                <form id="asForm" class="form-horizontal">
-                <div class="form-group form-libro">
-           
-                    <!--<span style="font-size: 0.85em">Av. Garcilazo de la Vega 1251, Tienda #123, Lima, Lima</span> <label for="fecha" class="col-sm-1 control-label" style="text-align: left">FECHA:</label>
-                    
-                        <input type="text" class="form-control input-sm as_required" id="fecha" name="fecha"
-                               placeholder="">
-                    </div> -->
-                    <div class="col-md-8" style="background-color: #bebebe; border: 1px solid #bebebe;">
-                       <h4 class="text-center">LIBRO DE RECLAMACIONES </h4> 
-                    </div>
-                    <div class="col-md-4" style="border: 1px solid #bebebe;">
-                       <h4 class="text-center">HOJA DE RECLAMACI&Oacute;N </h4> 
-                    </div>
-                    <div class="col-md-8" style="border: 1px solid #bebebe;">
-                    <label for="fechaemi" class="col-sm-3 control-label" style="text-align: left; margin-left:-10px;">FECHA:</label>
-                    <div class="col-sm-3">
-                        <input type="date" id="fecharec" class="form-control input-sm" value="<?=$hoy;?>" placeholder="" disabled>
-                    </div>
-                    </div>
-                    <div class="col-md-4" style="border: 1px solid #bebebe;">
-                        <label for="numrecla" class="col-sm-2 control-label" style="text-align: left;">N°: </label>
-                        <div class="col-sm-10">
-                        <input type="text" class="form-control input-sm" id="numrecla" name="numrecla"
-                               placeholder="" value="<?=$codigorec;?>" disabled>
-                        </div>
-                    </div>
-                     <!--
-                    -->
-                    <div class="clearfix"></div><div class="clearfix"></div>
+    <!-- SECCIÓN 1 -->
+    <div class="lr-section">
+        <div class="lr-section-header">
+            <div class="lr-section-num">1</div>
+            <p class="lr-section-title">Identificación del Consumidor Reclamante</p>
+        </div>
+        <div class="lr-section-body">
 
-
-                    <label for="negocio" class="col-sm-2 control-label" style="text-align: left">NEGOCIO:</label>
-                    <div class="col-sm-3">
-                        <input type="text" class="form-control input-sm as_required" id="negocio" 
-                        name="negocio" placeholder="" value="Ace Advance Group S.A.C." disabled>
-                    </div>
-                    <label for="tienda" class="col-sm-2 control-label" style="text-align: left">TIENDA:</label>
-                    <div class="col-sm-5">
-                        <input type="text" class="form-control input-sm as_required text-uppercase" id="tienda" 
-                        name="tienda" placeholder="" value="CAL. OCTAVIO MU&Ntilde;OZ NAJAR NRO 223 INT. 103 URB. CERCADO" disabled>
-                    </div>
-                    
-                    <div class="clearfix"></div>
-                    <div class="col-md-12" style="background-color: #bebebe">
-                        1. IDENTIFICACIÓN DEL CONSUMIDOR RECLAMANTE
-                    </div>
-                    <label for="nombre" class="col-sm-2 control-label" style="text-align: left">NOMBRE:</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control input-sm as_required" id="nombre" name="nombre"
-                               placeholder="" disabled>
-                    </div>
-                    <label for="domicilio" class="col-sm-2 control-label" style="text-align: left">DOMICILIO:</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control input-sm as_required" id="domicilio" name="domicilio"
-                               placeholder="" disabled>
-                    </div>
-                    <label for="dni" class="col-sm-2 control-label" style="text-align: left">DNI / CE:</label>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control input-sm as_required number" id="dni" name="dni"
-                               placeholder="" maxlength="11" disabled>
-                    </div>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control input-sm as_required number" id="telefono"
-                               name="telefono"
-                               placeholder="" maxlength="9">
-                    </div>
-                    <label for="email" class="col-sm-1 control-label" style="text-align: left">EMAIL:</label>
-                    <div class="col-sm-4">
-                        <input type="email" class="form-control input-sm as_required" id="email" name="email"
-                               placeholder="">
-                    </div>
-                    <label for="menor" class="col-sm-2 control-label" style="text-align: left">MENOR DE EDAD:</label>
-                    <div class="col-sm-10">
-                    <input type="checkbox"
-                               class=""
-                               id="menor"
-                               name="menor"
-                               value="1">
-                        <span style="font-size: 12px;clear: both;"> <small> [LLENAR INFORMACIÓN DEL APODERADO]</small></span>
-                    </div>
-               
-                    
-                    <div class="clearfix"></div>
-                    <div class="col-sm-12">
-                    <label for="menor" class="col-sm-4 control-label" style="text-align: left">
-                       
-                        
-                    </div>
-                    <label for="nombre_padre" class="col-sm-2 control-label" style="text-align: left">NOMBRE:</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control input-sm" id="nombre_padre" name="nombre_padre"
-                               placeholder="" disabled="disabled">
-                    </div>
-                    <label for="domicilio_padre" class="col-sm-2 control-label"
-                           style="text-align: left">DOMICILIO:</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control input-sm" id="domicilio_padre" name="domicilio_padre"
-                               placeholder="" disabled="disabled">
-                    </div>
-                    <label for="dni_padre" class="col-sm-2 control-label" style="text-align: left">DNI / CE:</label>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control input-sm number" id="dni_padre" name="dni_padre"
-                               placeholder="" maxlength="11" disabled="disabled">
-                    </div>
-                    <label for="telefono_padre" class="col-sm-1 control-label" style="text-align: left">TELEF:</label>
-                    <div class="col-sm-2">
-                        <input type="text" class="form-control input-sm number" id="telefono_padre"
-                               name="telefono_padre" maxlength="9"
-                               placeholder="" disabled="disabled">
-                    </div>
-                    <label for="email_padre" class="col-sm-1 control-label" style="text-align: left">EMAIL:</label>
-                    <div class="col-sm-4">
-                        <input type="text" class="form-control input-sm" id="email_padre" name="email_padre"
-                               placeholder="" disabled="disabled">
-                    </div>
-                    <div class="clearfix"></div>
-                    <div class="col-md-12" style="background-color: #bebebe">
-                        2. IDENTIFICACIÓN DEL BIEN CONTRATADO
-                    </div>
-                    <label for="producto" class="col-sm-2 control-label" style="text-align: left">
-                        <input type="radio" class="as_required" id="producto" name="tipo_bien" value="producto"> PRODUCTO
-                    </label>
-                    <label for="monto" class="col-sm-3 control-label" style="text-align: left">MONTO RECLAMADO:</label>
-                    <div class="col-sm-3">
-                        <input type="text" class="form-control input-sm as_required number" id="monto" name="monto"
-                               placeholder="">
-                    </div>
-                    <div class="clearfix"></div>
-                    <label for="servicio" class="col-sm-2 control-label" style="text-align: left">
-                        <input type="radio" class="as_required" id="servicio" name="tipo_bien" value="servicio"> SERVICIO
-                    </label>
-                    <label for="descripcion" class="col-sm-3 control-label"
-                           style="text-align: left">DESCRIPCIÓN:</label>
-                    <div class="col-sm-7">
-                        <input type="text" class="form-control input-sm as_required" id="descripcion" name="descripcion"
-                               placeholder="">
-                    </div>
-                    <div class="clearfix"></div>
-                    <div class="col-md-8" style="background-color: #bebebe">
-                        3. DETALLE DE LA RECLAMACIÓN Y PEDIDO DEL CONSUMIDOR
-                    </div>
-                    <label for="reclamo" class="col-sm-2 control-label" style="text-align: left">
-                        <input type="radio" class="as_required" id="reclamo" name="tipo_reclamo" value="reclamo">
-                        RECLAMO
-                    </label>
-                    <label for="queja" class="col-sm-2 control-label" style="text-align: left">
-                        <input type="radio" class="as_required" id="queja" name="tipo_reclamo" value="queja"> QUEJA
-                    </label>
-
-                    <div class="col-sm-12">
-                        <textarea class="form-control input-sm as_required" id="detalle" name="detalle" rows="10"
-                                  placeholder="DETALLE.."></textarea>
-                    </div>
-                    <div class="col-sm-12">
-                        <textarea class="form-control input-sm as_required" id="pedido" name="pedido" rows="8"
-                                  placeholder="PEDIDO.."></textarea>
-                    </div>
-                    <div class="clearfix"></div>
-                    <div class="form-group col-md-12">
-                        <div class="text-right">
-                            <button type="button" class="btn btn-primary btn-sm as_btn_print"><i
-                                        class="fa fa-print"></i> Imprimir
-                            </button>
-                            <button type="button" type="submit" class="btn btn-coolbox btn-sm as_btn_save">Enviar</button>
-                        </div>
-                    </div>
-                    <!-- READONLY -->
-                    <div class="col-md-12" style="background-color: #bebebe">
-                        4. OBSERVACIONES Y ACCIONES ADOPTADAS POR EL PROVEEDOR
-                    </div>
-                    <label for="fecha" class="col-sm-5 control-label" style="text-align: left">FECHA DE COMUNICACIÓN DE
-                        LA RESPUESTA:</label>
-                    <div class="col-sm-3">
-                        <input type="date" id="fecres" class="form-control input-sm" readonly
-                               placeholder="">
-                    </div>
-                    <div class="col-sm-12">
-                        <textarea readonly class="form-control input-sm" rows="5" id="respuesta"
-                                  placeholder=""></textarea>
-                    </div>
-                    <div class="col-sm-4 text-center" style="font-size: 12px">
-                        <strong>RECLAMO:</strong> Disconformidad relacionada a los productos o servicios.
-                    </div>
-                    <div class="col-sm-8 text-center" style="font-size: 12px">
-                        <strong>QUEJA:</strong> Disconformidad no relacionada a los productos o servicios, o, malestar o
-                        descontento respecto
-                        a la atención al público.
-                    </div>
-
-                    </form>
-
-                    
+            <div class="lr-row">
+                <div class="lr-field full">
+                    <label>Nombre completo *</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Nombre y apellidos">
                 </div>
             </div>
-            <div class="col-md-12" style="margin-bottom: 20px">
-                
-                <p style="font-size: 11px">* La formulación del reclamo no impide acudir a otras vias de solución de
-                    controversias ni es requisito
-                    previo para interponer una denuncia ante el INDECOPI.<br/>
-                    * El proveedor deberá dar respuesta a los reclamos y las quejas que se consignen en un plazo no mayor a quince (30) días calendario, improrrogables.</p>
-
+            <div class="lr-row">
+                <div class="lr-field full">
+                    <label>Domicilio *</label>
+                    <input type="text" id="domicilio" name="domicilio" placeholder="Dirección completa">
+                </div>
+            </div>
+            <div class="lr-row">
+                <div class="lr-field">
+                    <label>DNI / CE *</label>
+                    <input type="text" id="dni" name="dni" placeholder="Número de documento" maxlength="11">
+                </div>
+                <div class="lr-field">
+                    <label>Teléfono *</label>
+                    <input type="text" id="telefono" name="telefono" placeholder="9XXXXXXXX" maxlength="9">
+                </div>
+                <div class="lr-field" style="flex:2;">
+                    <label>Correo electrónico *</label>
+                    <input type="email" id="email" name="email" placeholder="correo@ejemplo.com">
+                </div>
             </div>
 
+            <!-- Menor de edad -->
+            <label class="lr-check-label">
+                <input type="checkbox" id="menor" name="menor" value="1">
+                Menor de edad (completar datos del apoderado)
+            </label>
+
+            <div id="bloque-apoderado">
+                <div class="lr-row">
+                    <div class="lr-field full">
+                        <label>Nombre del apoderado</label>
+                        <input type="text" id="nombre_padre" name="nombre_padre" placeholder="Nombre completo del apoderado" disabled>
+                    </div>
+                </div>
+                <div class="lr-row">
+                    <div class="lr-field full">
+                        <label>Domicilio del apoderado</label>
+                        <input type="text" id="domicilio_padre" name="domicilio_padre" placeholder="Dirección del apoderado" disabled>
+                    </div>
+                </div>
+                <div class="lr-row">
+                    <div class="lr-field">
+                        <label>DNI / CE</label>
+                        <input type="text" id="dni_padre" name="dni_padre" maxlength="11" disabled>
+                    </div>
+                    <div class="lr-field">
+                        <label>Teléfono</label>
+                        <input type="text" id="telefono_padre" name="telefono_padre" maxlength="9" disabled>
+                    </div>
+                    <div class="lr-field" style="flex:2;">
+                        <label>Correo electrónico</label>
+                        <input type="text" id="email_padre" name="email_padre" disabled>
+                    </div>
+                </div>
             </div>
-   
-    
-    <script>
-      $("#btnFiltro").click(function(e){
-      opcion = 9;  
-      numfil = $.trim($('#numfil').val());
-      let ncarc = numfil.length;
-      if (ncarc == 8) { tipo ='dni'; }
-      if (ncarc == 11) { tipo ='ruc'; }
-      e.preventDefault();
-      if (ncarc == 8 || ncarc == 11) {
-      $.ajax({    
-          url:  "libroreclama.php",
-          type: "POST",
-          datatype:"json",
-          data:  {opcion:opcion,numfil:numfil,tipo:tipo},
-          success: function(resp)
-          {
-            resp = JSON.parse(resp);
-            let data = JSON.parse(resp)
-            console.log(data);
-            //
-            if (data.res) {
-                if (ncarc == 11) {
-                if (data.data.direccion.length=11) {
-                    $("#domicilio").val(data.data.direccion);  
-                    $("#domicilio").prop('disabled',true);      
-                } else {
-                    $("#domicilio").val("");      
-                    $("#domicilio").prop('disabled',false);      
-                }
-                    $("#nombre").val(data.data.razon_social);  
-                }
-                if (ncarc == 8) {
-                    let nombres = data.data.nombres + ' ' + data.data.apellido_paterno + ' ' + data.data.apellido_materno;
-                    $("#nombre").val(nombres);  
-                    $("#domicilio").val("");      
-                    $("#domicilio").prop('disabled',false);
-                }
-                 
-                $("#dni").val(numfil);               
-            } else {
-                $("#domicilio").val("");      
-                $("#nombre").val("");               
-                $("#dni").val("");
-            }
-          }
-        });
-      } else { alert('numero correcto de caracteres.');}  
-    });
 
-        setTimeout(function () {
-            $("#msg").fadeOut(3000, function () {
-                $(this).remove();
-            });
-        }, 5000);
+        </div>
+    </div>
 
+    <!-- SECCIÓN 2 -->
+    <div class="lr-section">
+        <div class="lr-section-header">
+            <div class="lr-section-num">2</div>
+            <p class="lr-section-title">Identificación del Bien Contratado</p>
+        </div>
+        <div class="lr-section-body">
 
-       
-        $('#numrecla').keypress(function(event){
-            var keycode = (event.keyCode ? event.keyCode : event.which);
-            if(keycode == '13'){
-                var numrecla = $(this).val();
-            CargaDatos(numrecla);
-             }
-            });
+            <div class="lr-radio-group">
+                <label class="lr-radio-opt">
+                    <input type="radio" name="tipo_bien" id="producto" value="producto">
+                    <span><strong>Producto</strong><small>Bien adquirido</small></span>
+                </label>
+                <label class="lr-radio-opt">
+                    <input type="radio" name="tipo_bien" id="servicio" value="servicio">
+                    <span><strong>Servicio</strong><small>Servicio contratado</small></span>
+                </label>
+            </div>
 
-        function CargaDatos(numerorec){
-            opcion = 2;
-            //e.preventDefault();
-            $.ajax({    
-                    url:  "libroreclama.php",
-                    type: "POST",
-                    datatype:"json",
-                    data:  {opcion:opcion,numerorec:numerorec},
-                    success: function(data)
-                    {
-                    ///alert('Solo datos encontrados');
-                    var cadena = data;
-                    let ObjetoJS = JSON.parse(cadena);
-                    //RECORRER OBJETO
-                    for (let item of ObjetoJS){
-                        var fecharec  = item.lib_date;
-                        var nombre =  item.lib_cliente;
-                        var domicilio =  item.lib_domicilio;
-                        var dni = item.lib_DNI;
-                        var telefono =  item.lib_telecli;
-                        var email =  item.lib_emailcli;
-                        var monto =   item.lib_montorec;
-                        var descripcion =  item.lib_serdesc;
-                        var detalle =  item.lib_detalle;
-                        var pedido =  item.lib_pedido;
-                        var respuesta = item.lib_respuesta;
-                        var fecres = item.lib_fecres;
-                    }
-                    $("#fecharec").val(fecharec);
-                    $("#nombre").val(nombre);
-                    $("#domicilio").val(domicilio);
-                    $("#dni").val(dni);
-                    $("#telefono").val(telefono);
-                    $("#email").val(email);
-                    $("#monto").val(monto);
-                    $("#descripcion").val(descripcion);
-                    $("#detalle").val(detalle);
-                    $("#pedido").val(pedido);
-                    $("#respuesta").val(respuesta);
-                    $("#fecres").val(fecres);
+            <div class="lr-row">
+                <div class="lr-field" style="flex:2;">
+                    <label>Descripción del producto o servicio *</label>
+                    <input type="text" id="descripcion" name="descripcion" placeholder="Describa el bien o servicio">
+                </div>
+                <div class="lr-field" style="flex:1;">
+                    <label>Monto reclamado (S/)</label>
+                    <input type="text" id="monto" name="monto" placeholder="0.00">
+                </div>
+            </div>
 
-                    }
-                });
+        </div>
+    </div>
 
+    <!-- SECCIÓN 3 -->
+    <div class="lr-section">
+        <div class="lr-section-header">
+            <div class="lr-section-num">3</div>
+            <p class="lr-section-title">Detalle de la Reclamación y Pedido del Consumidor</p>
+        </div>
+        <div class="lr-section-body">
 
-        }
+            <div class="lr-radio-group">
+                <label class="lr-radio-opt">
+                    <input type="radio" name="tipo_reclamo" id="reclamo" value="reclamo">
+                    <span>
+                        <strong>Reclamo</strong>
+                        <small>Disconformidad relacionada al producto o servicio</small>
+                    </span>
+                </label>
+                <label class="lr-radio-opt">
+                    <input type="radio" name="tipo_reclamo" id="queja" value="queja">
+                    <span>
+                        <strong>Queja</strong>
+                        <small>Malestar o descontento respecto a la atención</small>
+                    </span>
+                </label>
+            </div>
 
+            <div class="lr-row">
+                <div class="lr-field full">
+                    <label>Detalle del reclamo / queja *</label>
+                    <textarea id="detalle" name="detalle" rows="5" placeholder="Describa con detalle el motivo de su reclamo o queja..."></textarea>
+                </div>
+            </div>
+            <div class="lr-row">
+                <div class="lr-field full">
+                    <label>Pedido del consumidor *</label>
+                    <textarea id="pedido" name="pedido" rows="4" placeholder="Indique qué solución espera recibir..."></textarea>
+                </div>
+            </div>
 
-        $("body").on("change", "#menor", function () {
+            <div class="lr-actions">
+                <button type="button" class="lr-btn lr-btn-outline" onclick="window.print()">
+                    &#128438; Imprimir
+                </button>
+                <button type="submit" class="lr-btn lr-btn-primary" id="btnEnviar">
+                    &#9993; Enviar reclamación
+                </button>
+            </div>
 
-            if ($(this).prop("checked")) {
+        </div>
+    </div>
 
-                $("#nombre_padre").removeAttr('disabled');
-                $("#domicilio_padre").removeAttr('disabled');
-                $("#dni_padre").removeAttr('disabled');
-                $("#telefono_padre").removeAttr('disabled');
-                $("#email_padre").removeAttr('disabled');
+    <!-- SECCIÓN 4 — Solo lectura -->
+    <div class="lr-section">
+        <div class="lr-section-header">
+            <div class="lr-section-num">4</div>
+            <p class="lr-section-title">Observaciones y Acciones del Proveedor</p>
+        </div>
+        <div class="lr-section-body">
+            <div class="lr-row">
+                <div class="lr-field">
+                    <label>Fecha de comunicación de respuesta</label>
+                    <input type="date" id="fecres" readonly>
+                </div>
+            </div>
+            <div class="lr-row">
+                <div class="lr-field full">
+                    <label>Respuesta del proveedor</label>
+                    <textarea id="respuesta" rows="4" readonly placeholder="(Será completado por el proveedor en un plazo máximo de 30 días)"></textarea>
+                </div>
+            </div>
+            <p class="lr-resp-nota">Esta sección es completada exclusivamente por el proveedor.</p>
+        </div>
+    </div>
 
-                $("#nombre_padre").addClass('as_required');
-                $("#domicilio_padre").addClass('as_required');
-                $("#dni_padre").addClass('as_required');
-                $("#telefono_padre").addClass('as_required');
-                $("#email_padre").addClass('as_required');
+    <!-- Nota legal -->
+    <div class="lr-legal">
+        &#9432; La formulación del reclamo no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI.<br>
+        &#9432; El proveedor deberá dar respuesta en un plazo no mayor a <strong>30 días calendario</strong>, improrrogables.
+    </div>
 
-            } else {
-
-                $("#nombre_padre").attr('disabled', 'disabled');
-                $("#domicilio_padre").attr('disabled', 'disabled');
-                $("#dni_padre").attr('disabled', 'disabled');
-                $("#telefono_padre").attr('disabled', 'disabled');
-                $("#email_padre").attr('disabled', 'disabled');
-
-                $("#nombre_padre").removeClass('as_required');
-                $("#domicilio_padre").removeClass('as_required');
-                $("#dni_padre").removeClass('as_required');
-                $("#telefono_padre").removeClass('as_required');
-                $("#email_padre").removeClass('as_required');
-            }
-
-        });
-
-        $('#asForm').submit(function(e){
-            opcion =11;
-            fecharec  = $.trim($('#fecharec').val());
-            numrecla = $.trim($('#numrecla').val());  
-            negocio = $.trim($('#negocio').val());
-            tienda =  $.trim($('#tienda').val()); 
-            
-	nombre = $.trim($('#nombre').val()); 
-            	nombre = nombre.replace(/[^\w\s]/gi, '');
-            domicilio = $.trim($('#domicilio').val());
-	            domicilio = domicilio.replace(/[^\w\s]/gi, '');
-            dni = $.trim($('#dni').val());
-            	dni = dni.replace(/[^\w\s]/gi, '');
-
-            telefono = $.trim($('#telefono').val());
-		telefono = telefono.replace(/[^\w\s]/gi, '');
-
-            email = $.trim($('#email').val());
-            menor = $('input:checkbox[name=menor]:checked').val();
-
-            nombre_padre = $.trim($('#nombre_padre').val());
-	  	nombre_padre = nombre_padre.replace(/[^\w\s]/gi, '');
-            domicilio_padre = $.trim($('#domicilio_padre').val());
-		domicilio_padre = domicilio_padre.replace(/[^\w\s]/gi, '');
-            dni_padre =  $.trim($('#dni_padre').val());
-		 dni_padre = dni_padre.replace(/[^\w\s]/gi, '');
-            telefono_padre = $.trim($('#telefono_padre').val()); 
-		telefono_padre = telefono_padre.replace(/[^\w\s]/gi, '');
-            email_padre = $.trim($('#email_padre').val());
-            producto = $('input:radio[name=tipo_bien]:checked').val();
-            monto =  $.trim($('#monto').val());
-            descripcion = $.trim($('#descripcion').val());
-		descripcion = descripcion.replace(/[^\w\s]/gi, '');
-            reclamo =  $('input:radio[name=tipo_reclamo]:checked').val();
-
-            detalle = $.trim($('#detalle').val());
-		detalle = detalle.replace(/[^\w\s]/gi, '');
-            pedido = $.trim($('#pedido').val());
-		pedido = pedido.replace(/[^\w\s]/gi, '');
-            e.preventDefault();
-
-            $.ajax({    
-                    url:  "libroreclama.php",
-                    type: "POST",
-                    datatype:"json",
-                    data:  {opcion:opcion,fecharec:fecharec,numrecla:numrecla,negocio:negocio,tienda:tienda,
-                        nombre:nombre,domicilio:domicilio,dni:dni,telefono:telefono,email:email,menor:menor,
-                        nombre_padre:nombre_padre,domicilio_padre:domicilio_padre,dni_padre:dni_padre,
-                        telefono_padre:telefono_padre,email_padre:email_padre,producto:producto,
-                        monto:monto,descripcion:descripcion,reclamo:reclamo,detalle:detalle,pedido:pedido},
-                    success: function(data)
-                    {
-                    alert('Solo datos han sido guardados correctamente')
-                    $("#asForm").trigger("reset");
-                    refresh();
-                    }
-                });
-            });
-
-            
-        function refresh() {
-            setTimeout(function () {
-                location.reload()
-            }, 1500);
-        }
-    </script>
-    
-    <script src="bootstrap.js"></script>
-    <script src="as_form.js"></script>
+</form>
 </div>
-</body>
 
+<!-- Toasts -->
+<div class="lr-toast lr-toast-ok"  id="toast-ok">&#10003; &nbsp;¡Reclamación enviada correctamente!</div>
+<div class="lr-toast lr-toast-err" id="toast-err">&#10005; &nbsp;Error al enviar. Intente nuevamente.</div>
+
+<script src="jquery-1.12.3.min.js"></script>
+<script src="as_form.js"></script>
+<script>
+function showToast(id) {
+    var el = document.getElementById(id);
+    el.style.display = 'block';
+    setTimeout(function() { el.style.display = 'none'; }, 3500);
+}
+
+// ── Búsqueda DNI / RUC ────────────────────────────────────────
+document.getElementById('btnFiltro').addEventListener('click', function() {
+    var numfil = document.getElementById('numfil').value.trim();
+    var ncarc  = numfil.length;
+    var tipo   = ncarc === 8 ? 'dni' : (ncarc === 11 ? 'ruc' : '');
+    var msg    = document.getElementById('dni-msg');
+
+    if (!tipo) { msg.textContent = 'Ingrese 8 dígitos (DNI) o 11 (RUC).'; return; }
+    msg.textContent = 'Buscando...';
+
+    $.post('libroreclama.php', { opcion: 9, numfil: numfil, tipo: tipo }, function(resp) {
+        try {
+            var outer = JSON.parse(resp);
+            var data  = JSON.parse(outer);
+            if (data && data.res) {
+                if (tipo === 'ruc') {
+                    document.getElementById('nombre').value   = data.data.razon_social || '';
+                    document.getElementById('domicilio').value = data.data.direccion && data.data.direccion.length > 4 ? data.data.direccion : '';
+                } else {
+                    var nom = ((data.data.nombres || '') + ' ' + (data.data.apellido_paterno || '') + ' ' + (data.data.apellido_materno || '')).trim();
+                    document.getElementById('nombre').value   = nom;
+                    document.getElementById('domicilio').value = '';
+                }
+                document.getElementById('dni').value = numfil;
+                msg.textContent = '';
+            } else {
+                document.getElementById('dni').value = numfil;
+                msg.textContent = 'No encontrado. Complete manualmente.';
+            }
+        } catch(e) {
+            document.getElementById('dni').value = numfil;
+            msg.textContent = 'Complete el formulario manualmente.';
+        }
+    }).fail(function() { msg.textContent = 'Error de conexión.'; });
+});
+
+// ── Menor de edad ─────────────────────────────────────────────
+document.getElementById('menor').addEventListener('change', function() {
+    var bloque = document.getElementById('bloque-apoderado');
+    var inputs = bloque.querySelectorAll('input');
+    bloque.style.display = this.checked ? 'block' : 'none';
+    inputs.forEach(function(inp) { inp.disabled = !this.checked; }.bind(this));
+});
+
+// ── Envío ─────────────────────────────────────────────────────
+document.getElementById('asForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('btnEnviar');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    $.post('libroreclama.php', {
+        opcion        : 11,
+        fecharec      : document.getElementById('fecharec').value,
+        numrecla      : document.getElementById('numrecla').value,
+        negocio       : document.getElementById('negocio').value,
+        tienda        : document.getElementById('tienda').value,
+        nombre        : document.getElementById('nombre').value,
+        domicilio     : document.getElementById('domicilio').value,
+        dni           : document.getElementById('dni').value,
+        telefono      : document.getElementById('telefono').value,
+        email         : document.getElementById('email').value,
+        menor         : document.querySelector('input[name=menor]:checked') ? 1 : 0,
+        nombre_padre  : document.getElementById('nombre_padre').value,
+        domicilio_padre: document.getElementById('domicilio_padre').value,
+        dni_padre     : document.getElementById('dni_padre').value,
+        telefono_padre: document.getElementById('telefono_padre').value,
+        email_padre   : document.getElementById('email_padre').value,
+        producto      : (document.querySelector('input[name=tipo_bien]:checked') || {}).value || '',
+        monto         : document.getElementById('monto').value,
+        descripcion   : document.getElementById('descripcion').value,
+        reclamo       : (document.querySelector('input[name=tipo_reclamo]:checked') || {}).value || '',
+        detalle       : document.getElementById('detalle').value,
+        pedido        : document.getElementById('pedido').value
+    }, function() {
+        showToast('toast-ok');
+        document.getElementById('asForm').reset();
+        document.getElementById('bloque-apoderado').style.display = 'none';
+        setTimeout(function() { location.reload(); }, 2200);
+    }).fail(function() {
+        showToast('toast-err');
+        btn.disabled = false;
+        btn.textContent = '✉ Enviar reclamación';
+    });
+});
+</script>
+</body>
 </html>

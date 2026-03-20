@@ -45,6 +45,7 @@ if (!(isset($_SESSION['usuario']) && ($validate['perfil'] == 'admin' || $validat
         .page-title { border-left:4px solid #c7161d; padding-left:12px; margin-bottom:24px; }
         .btn-rojo { background:#c7161d; border-color:#c7161d; color:#fff; }
         .btn-rojo:hover { background:#a01018; border-color:#a01018; color:#fff; }
+        .pagina-row:hover { background:#f0f4ff; }
     </style>
 </head>
 
@@ -73,11 +74,16 @@ if (!(isset($_SESSION['usuario']) && ($validate['perfil'] == 'admin' || $validat
             <small class="text-muted ml-2">— Usa el ID para construir la URL del menú: <code>shop-list-ctg.php?ctg=<strong>{id}</strong></code></small>
         </div>
         <div class="card-body p-0">
+            <div class="px-3 pt-2 pb-1">
+                <input v-model="buscarCat" type="text" class="form-control form-control-sm"
+                    placeholder="Buscar categoría..." style="max-width:300px;">
+            </div>
             <div v-if="loadingCats" class="text-center py-3"><i class="fas fa-spinner fa-spin text-secondary"></i></div>
-            <table v-else class="table table-sm table-hover mb-0">
+            <div v-else style="max-height:200px; overflow-y:auto;">
+            <table class="table table-sm table-hover mb-0">
                 <thead><tr><th style="width:80px">ID</th><th>Nombre Categoría</th><th>URL para el menú</th><th style="width:110px"></th></tr></thead>
                 <tbody>
-                    <tr v-for="cat in categorias" :key="cat.id">
+                    <tr v-for="cat in categoriasFiltradas" :key="cat.id">
                         <td class="align-middle"><span class="badge badge-secondary">{{ cat.id }}</span></td>
                         <td class="align-middle font-weight-bold">{{ cat.nombre }}</td>
                         <td class="align-middle text-muted" style="font-size:13px;">shop-list-ctg.php?ctg={{ cat.id }}</td>
@@ -88,11 +94,12 @@ if (!(isset($_SESSION['usuario']) && ($validate['perfil'] == 'admin' || $validat
                             </button>
                         </td>
                     </tr>
-                    <tr v-if="categorias.length === 0">
-                        <td colspan="4" class="text-center text-muted py-3">No se pudo cargar las categorías. Verifica que Laravel esté corriendo.</td>
+                    <tr v-if="categoriasFiltradas.length === 0">
+                        <td colspan="4" class="text-center text-muted py-3">No se encontraron categorías.</td>
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 
@@ -123,7 +130,12 @@ if (!(isset($_SESSION['usuario']) && ($validate['perfil'] == 'admin' || $validat
                         <td class="drag-handle text-center align-middle">
                             <i class="fas fa-grip-vertical"></i>
                         </td>
-                        <td class="align-middle font-weight-bold">{{ item.titulo }}</td>
+                        <td class="align-middle font-weight-bold">
+                            {{ item.titulo }}
+                            <span v-if="item.hijos && item.hijos.length" class="badge badge-info ml-1" style="font-size:10px;">
+                                <i class="fas fa-caret-down"></i> {{ item.hijos.length }} sub-items
+                            </span>
+                        </td>
                         <td class="align-middle text-muted" style="font-size:13px;">{{ item.url }}</td>
                         <td class="align-middle">
                             <span :class="item.estado === '1' ? 'badge-active' : 'badge-inactive'">
@@ -159,31 +171,69 @@ if (!(isset($_SESSION['usuario']) && ($validate['perfil'] == 'admin' || $validat
 
     <!-- Modal agregar/editar -->
     <div class="modal fade" id="modal-item" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header" style="background:#c7161d; color:#fff;">
                     <h5 class="modal-title">{{ modoEditar ? 'Editar ítem' : 'Agregar ítem al menú' }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label class="font-weight-bold">Título <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" v-model="form.titulo"
-                               placeholder="Ej: VINO TINTO">
-                        <small class="text-muted">Se mostrará en mayúsculas en el menú.</small>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Título <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" v-model="form.titulo" placeholder="Ej: VINO TINTO">
+                                <small class="text-muted">Se mostrará en mayúsculas en el menú.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">URL</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" v-model="form.url"
+                                        :placeholder="(form.hijos && form.hijos.length) ? 'Usa # si tiene sub-items' : 'Ej: shop-list-ctg.php?ctg=001'">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-secondary" @click="abrirSelectorPagina('principal')" title="Seleccionar página">
+                                            <i class="fas fa-folder-open"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="text-muted">Ruta relativa desde CYM/ (usa <code>#</code> si tiene sub-items)</small>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="font-weight-bold">URL <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" v-model="form.url"
-                               placeholder="Ej: shop-list-ctg.php?ctg=001">
-                        <small class="text-muted">Ruta relativa desde la carpeta CYM/</small>
-                    </div>
-                    <div class="form-group mb-0">
                         <label class="font-weight-bold">Estado</label>
                         <select class="form-control" v-model="form.estado">
                             <option value="1">Activo (visible en menú)</option>
                             <option value="0">Oculto</option>
                         </select>
+                    </div>
+
+                    <!-- SUB-ITEMS -->
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="font-weight-bold mb-0"><i class="fas fa-caret-down mr-1 text-info"></i>Sub-items (dropdown)</label>
+                        <button type="button" class="btn btn-sm btn-outline-info" @click="agregarHijo">
+                            <i class="fas fa-plus mr-1"></i> Agregar sub-item
+                        </button>
+                    </div>
+                    <div v-if="!form.hijos || form.hijos.length === 0" class="text-muted text-center py-2" style="font-size:13px; background:#f9f9f9; border-radius:6px;">
+                        Sin sub-items — aparecerá como enlace directo
+                    </div>
+                    <div v-for="(hijo, hi) in form.hijos" :key="hi" class="d-flex align-items-center mb-2" style="gap:6px;">
+                        <input type="text" class="form-control form-control-sm" v-model="hijo.titulo" placeholder="Título" style="flex:1;">
+                        <div class="input-group input-group-sm" style="flex:2;">
+                            <input type="text" class="form-control form-control-sm" v-model="hijo.url" placeholder="URL">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" @click="abrirSelectorPagina('hijo', hi)" title="Seleccionar página">
+                                    <i class="fas fa-folder-open"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger" @click="quitarHijo(hi)" title="Eliminar">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -191,6 +241,43 @@ if (!(isset($_SESSION['usuario']) && ($validate['perfil'] == 'admin' || $validat
                     <button class="btn btn-rojo" @click="guardarItem" :disabled="guardando">
                         {{ guardando ? 'Guardando...' : 'Guardar' }}
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal selector de páginas -->
+    <div class="modal fade" id="modal-paginas" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header" style="background:#343a40; color:#fff;">
+                    <h5 class="modal-title"><i class="fas fa-folder-open mr-2"></i>Seleccionar página</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="p-3 border-bottom">
+                        <input type="text" class="form-control" v-model="buscarPagina" placeholder="Buscar página...">
+                    </div>
+                    <div style="max-height:400px; overflow-y:auto;">
+                        <div v-for="grupo in paginasFiltradas" :key="grupo.grupo">
+                            <div class="px-3 py-2" style="background:#f8f9fa; font-size:11px; font-weight:700; color:#6c757d; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #e9ecef;">
+                                {{ grupo.grupo }}
+                            </div>
+                            <div v-for="pag in grupo.items" :key="pag.url"
+                                 class="d-flex align-items-center px-3 py-2 pagina-row"
+                                 style="cursor:pointer; border-bottom:1px solid #f0f0f0;"
+                                 @click="seleccionarPagina(pag)">
+                                <i class="fas fa-file-code mr-3 text-secondary" style="font-size:18px;"></i>
+                                <div>
+                                    <div class="font-weight-bold" style="font-size:14px;">{{ pag.label }}</div>
+                                    <div class="text-muted" style="font-size:11px;">{{ pag.url }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="paginasFiltradas.length === 0" class="text-center text-muted py-4">
+                            No se encontraron páginas
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -244,9 +331,75 @@ new Vue({
         guardando: false,
         modoEditar: false,
         editIdx: -1,
-        form: { titulo: '', url: '', estado: '1' },
+        form: { titulo: '', url: '', estado: '1', hijos: [] },
         categorias: [],
-        loadingCats: true
+        loadingCats: true,
+        buscarCat: '',
+        buscarPagina: '',
+        selectorTarget: 'principal', // 'principal' o índice de hijo
+        selectorHijoIdx: -1,
+        paginas: [
+            { grupo: 'Tienda', items: [
+                { label: 'Todos los productos', url: 'shop-list-prod.php' },
+                { label: 'Productos por categoría', url: 'shop-list-ctg.php?ctg=' },
+                { label: 'Productos por marca', url: 'shop-list-prod-mac.php?marc=' },
+                { label: 'Ofertas', url: 'shop-list-prod-ofertas.php' },
+                { label: 'Productos en remate', url: 'shop-list-prod-remate.php' },
+                { label: 'Productos exclusivos', url: 'shop-list-prod-exclu.php' },
+                { label: 'Precios VIP', url: 'shop-list-vip.php?search=+&type=last+&v=vp' },
+                { label: 'Precios distribución', url: 'shop-list-distri.php?search=+&type=last+&v=dt' },
+                { label: 'Marcas', url: 'marcas.php' },
+                { label: 'Detalle de producto', url: 'shop-product-detail.php' },
+            ]},
+            { grupo: 'Carrito y pedidos', items: [
+                { label: 'Carrito', url: 'shop-cart.php' },
+                { label: 'Checkout / Pagar', url: 'checkout.php' },
+                { label: 'Mis pedidos', url: 'lista_pedidos_cliente.php' },
+                { label: 'Mis compras', url: 'lista_compras_cliente.php' },
+                { label: 'Pedido completado', url: 'order-completed.php' },
+            ]},
+            { grupo: 'Información', items: [
+                { label: 'Inicio', url: 'index.php' },
+                { label: 'Nosotros / About', url: 'about.php' },
+                { label: 'Contacto', url: 'contact.php' },
+                { label: 'Delivery / Envíos', url: 'delivery.php' },
+                { label: 'Métodos de pago (Bancos)', url: 'banks.php' },
+                { label: 'Delivery a Cañete / Oficina', url: 'office.php' },
+                { label: 'Términos y condiciones', url: 'term.php' },
+                { label: 'Banners promocionales', url: 'banners-promocionales.php' },
+            ]},
+            { grupo: 'Cuenta', items: [
+                { label: 'Mi cuenta', url: 'my-account.php' },
+                { label: 'Iniciar sesión', url: 'login.php' },
+                { label: 'Registro', url: 'signup.php' },
+            ]},
+            { grupo: 'Especiales', items: [
+                { label: 'Arma tu PC', url: 'arma-tu-pc.php' },
+                { label: 'Comparar productos', url: 'shop-compare.php' },
+                { label: 'Enlace externo / sin destino', url: '#' },
+            ]}
+        ]
+    },
+    computed: {
+        paginasFiltradas: function() {
+            var q = this.buscarPagina.toLowerCase().trim();
+            if (!q) return this.paginas;
+            return this.paginas.map(function(grupo) {
+                return {
+                    grupo: grupo.grupo,
+                    items: grupo.items.filter(function(p) {
+                        return p.label.toLowerCase().indexOf(q) !== -1 || p.url.toLowerCase().indexOf(q) !== -1;
+                    })
+                };
+            }).filter(function(g) { return g.items.length > 0; });
+        },
+        categoriasFiltradas: function() {
+            var q = this.buscarCat.toLowerCase().trim();
+            if (!q) return this.categorias;
+            return this.categorias.filter(function(c) {
+                return c.nombre.toLowerCase().indexOf(q) !== -1 || String(c.id).indexOf(q) !== -1;
+            });
+        }
     },
     mounted: function() {
         this.cargarMenu();
@@ -283,24 +436,59 @@ new Vue({
         abrirNuevo: function() {
             this.modoEditar = false;
             this.editIdx = -1;
-            this.form = { titulo: '', url: '', estado: '1' };
+            this.form = { titulo: '', url: '#', estado: '1', hijos: [] };
             $('#modal-item').modal('show');
         },
         abrirEditar: function(idx) {
             this.modoEditar = true;
             this.editIdx = idx;
-            this.form = Object.assign({}, this.items[idx]);
+            var item = this.items[idx];
+            this.form = {
+                titulo: item.titulo || '',
+                url: item.url || '#',
+                estado: item.estado || '1',
+                hijos: JSON.parse(JSON.stringify(item.hijos || []))
+            };
             $('#modal-item').modal('show');
         },
+        abrirSelectorPagina: function(target, hijoIdx) {
+            this.selectorTarget = target;
+            this.selectorHijoIdx = hijoIdx !== undefined ? hijoIdx : -1;
+            this.buscarPagina = '';
+            $('#modal-paginas').modal('show');
+        },
+        seleccionarPagina: function(pag) {
+            if (this.selectorTarget === 'principal') {
+                this.form.url = pag.url;
+            } else {
+                this.form.hijos[this.selectorHijoIdx].url = pag.url;
+            }
+            $('#modal-paginas').modal('hide');
+        },
+        agregarHijo: function() {
+            if (!this.form.hijos) this.$set(this.form, 'hijos', []);
+            this.form.hijos.push({ titulo: '', url: '' });
+        },
+        quitarHijo: function(hi) {
+            this.form.hijos.splice(hi, 1);
+        },
         guardarItem: function() {
-            if (!this.form.titulo.trim() || !this.form.url.trim()) {
-                alert('El título y la URL son obligatorios.');
+            if (!this.form.titulo.trim()) {
+                alert('El título es obligatorio.');
                 return;
             }
+            var hijos = (this.form.hijos || []).filter(function(h) {
+                return h.titulo.trim() && h.url.trim();
+            }).map(function(h) {
+                return { titulo: h.titulo.trim().toUpperCase(), url: h.url.trim() };
+            });
+            var url = this.form.url.trim() || (hijos.length ? '#' : '');
+            if (!url) { alert('La URL es obligatoria.'); return; }
             var item = {
                 titulo: this.form.titulo.trim().toUpperCase(),
-                url: this.form.url.trim(),
-                estado: this.form.estado
+                url: url,
+                estado: this.form.estado,
+                hijos: hijos
             };
             if (this.modoEditar) {
                 this.$set(this.items, this.editIdx, item);

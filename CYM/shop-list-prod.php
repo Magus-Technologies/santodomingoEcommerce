@@ -153,6 +153,19 @@ $listaGrupos = $conexion->query($sql);
     .on-click-cont:hover {
         cursor: pointer;
     }
+    .product_img {
+        height: 220px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f9f9f9;
+    }
+    .product_img img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
 </style>
 </head>
 
@@ -251,7 +264,7 @@ $listaGrupos = $conexion->query($sql);
                                 <div class="product">
                                     <div class="product_img">
                                         <a :href="'shop-product-detail.php?prod='+item.prod_id">
-                                            <img :src="item.imagen1 ? '<?= API_URL ?>/storage/'+item.imagen1 : ''" :alt="item.nombre">
+                                            <img :src="item.imagen1 ? (item.imagen1.startsWith('http') ? item.imagen1 : '<?= API_URL ?>/storage/'+item.imagen1) : ''" :alt="item.nombre">
                                         </a>
                                         <div class="product_action_box">
                                             <ul class="list_none pr_action_btn">
@@ -383,15 +396,14 @@ $listaGrupos = $conexion->query($sql);
                                         <!-- Rango de Precio -->
                                         <div class="widget">
                                             <h5 class="widget_title">Rango de Precio (S/.)</h5>
-                                            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-                                                <input type="number" v-model.number="valueUSDMin" min="0" placeholder="Min"
-                                                    class="form-control form-control-sm" style="width:80px;">
-                                                <span>-</span>
-                                                <input type="number" v-model.number="valueUSDMax" min="0" placeholder="Max"
-                                                    class="form-control form-control-sm" style="width:80px;">
-                                                <button @click="getFiltrar()" class="btn btn-sm" style="background:#c7161d;color:white;">
-                                                    <i class="fa fa-search"></i>
-                                                </button>
+                                            <div class="price_filter">
+                                                <div id="price_first" style="margin-bottom:10px;"></div>
+                                                <div class="price_slider_amount" style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                                                    <span style="font-size:13px;">S/. <span id="slider_min">0</span> — S/. <span id="slider_max">5000</span></span>
+                                                    <button onclick="APP_PROD.getFiltrar()" class="btn btn-sm" style="background:#c7161d;color:white;">
+                                                        <i class="fa fa-search"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -820,9 +832,20 @@ $listaGrupos = $conexion->query($sql);
         //APP_PROD.getDataProdListaPag2()
         APP_PROD.cargarCategorias()
         APP_PROD.cargarMarcas()
-        $('#price_first').on('input', function (e) {
-            console.log("assss")
-            APP_PROD.getFiltrar();
+        $("#price_first").slider({
+            range: true,
+            min: 0,
+            max: 5000,
+            values: [0, 5000],
+            slide: function(event, ui) {
+                APP_PROD._data.valueUSDMin = ui.values[0];
+                APP_PROD._data.valueUSDMax = ui.values[1];
+                $("#slider_min").text(ui.values[0]);
+                $("#slider_max").text(ui.values[1]);
+            },
+            stop: function(event, ui) {
+                APP_PROD.getFiltrar();
+            }
         });
 
         setTimeout(function () {

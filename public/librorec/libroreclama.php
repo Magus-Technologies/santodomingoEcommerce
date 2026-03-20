@@ -57,7 +57,16 @@ switch ($opc) {
       break;
 
       
-    case '2': // 
+    case '1': // LISTAR TODAS
+        $sql0 = "SELECT lib_id, lib_code, lib_date, lib_cliente, lib_DNI, lib_emailcli,
+                        lib_tiporec, lib_tiposer, lib_detalle, lib_fecres, lib_respuesta
+                 FROM libro_reclamacion ORDER BY lib_id DESC";
+        $res0 = mysqli_query($con, $sql0);
+        while ($row = mysqli_fetch_assoc($res0)) { $data[] = $row; }
+        if (empty($data)) $data = [];
+      break;
+
+    case '2': //
         $numerorec= $_POST['numerorec'];
         $sql0 = "SELECT * FROM libro_reclamacion WHERE lib_code='$numerorec'";
         $res0 = mysqli_query($con,$sql0);

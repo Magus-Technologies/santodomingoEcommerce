@@ -13,8 +13,8 @@ $listaRamByCat = $productoDao->getDataRandonE();
 
 $listaGrupos =$grupoCategoriaDao->getListaCate();
 $listProdBan = $productoDao->getRandomInfo(2);
-$grupo =$_GET['grp'];
-$marca =$_GET['mrc'];
+$grupo = $_GET['grp'] ?? '';
+$marca = $_GET['mrc'] ?? '';
 
 $dataConf = $tools->getConfiguracion();
 

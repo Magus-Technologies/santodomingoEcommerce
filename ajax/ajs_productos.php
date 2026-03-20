@@ -1,5 +1,6 @@
 <?php
 session_start();
+require "../config.php";
 require "../dao/ProductoDao.php";
 require "../dao/MarcaSeleccionDao.php";
 require "../dao/CategoriaSeleccionDao.php";
@@ -24,39 +25,69 @@ if ($tipo == 'count_prod') {
     $sql = "DELETE FROM carrito_compra WHERE usuario_id = '{$_SESSION['usuario']}';";
     $productoDao->exeSQL($sql);
     foreach ($listaCrrito as $car) {
+        // Validar en compuvision primero, luego en Laravel DB
         $chk = $productoDao->exeSQL("SELECT prod_id FROM producto WHERE prod_id='{$car['prod']}'");
-        if ($chk && $chk->num_rows > 0) {
+        $validProduct = $chk && $chk->num_rows > 0;
+        if (!$validProduct) {
+            $chkLr = $productoDao->exeSQL("SELECT id_producto FROM factura_santod3.productos WHERE id_producto='{$car['prod']}'");
+            $validProduct = $chkLr && $chkLr->num_rows > 0;
+        }
+        if ($validProduct) {
             $sql = "INSERT INTO carrito_compra SET usuario_id='{$_SESSION['usuario']}',prod_id='{$car['prod']}',cantidad='{$car['cantidad']}'";
             $productoDao->exeSQL($sql);
         }
     }
 } elseif ($tipo == 'usr_crd_lts') {
     $productosApi = new ProductosApi();
-    $sql = "select p.prod_cod,cr.cantidad,cr.carrito_id,cr.prod_id,p.nombre from carrito_compra as cr 
-    join producto p on p.prod_id = cr.prod_id where usuario_id='{$_SESSION['usuario']}'";
+    // LEFT JOIN para soportar productos de compuvision Y de Laravel (factura_santod3)
+    $sql = "SELECT cr.cantidad, cr.carrito_id, cr.prod_id,
+               COALESCE(p.prod_cod, '') AS prod_cod,
+               COALESCE(p.nombre, lp.nombre, '') AS nombre
+            FROM carrito_compra AS cr
+            LEFT JOIN producto p ON p.prod_id = cr.prod_id
+            LEFT JOIN factura_santod3.productos lp ON lp.id_producto = cr.prod_id
+            WHERE cr.usuario_id='{$_SESSION['usuario']}'";
     $result = $productoDao->exeSQL($sql);
     $respuesta = [];
-    $precioDescuento = 0;
     foreach ($result as $row) {
-        $conRay = $productosApi->getDataProd($row['prod_cod'], "");
-        $row['precio'] = $conRay['precio_venta'];
-        $row['stock'] = $conRay['stock'];
-
-        $sql2 = "SELECT * FROM ofertas_productos WHERE fecha_termino >= NOW() and producto_id = " . $row['prod_id'];
+        // Intentar precio/stock desde ERP legacy (compuvision)
+        $conRay = !empty($row['prod_cod']) ? $productosApi->getDataProd($row['prod_cod'], "") : [];
+        if (!empty($conRay)) {
+            $row['precio'] = $conRay['precio_venta'];
+            $row['stock']  = $conRay['stock'];
+        } else {
+            // Fallback: precio y stock desde Laravel DB
+            $sqlLr = "SELECT precio, cantidad FROM factura_santod3.productos WHERE id_producto = '{$row['prod_id']}'";
+            $resLr = $productoDao->exeSQL($sqlLr);
+            if ($rowLr = $resLr->fetch_assoc()) {
+                $row['precio'] = $rowLr['precio'];
+                $row['stock']  = $rowLr['cantidad'];
+            } else {
+                $row['precio'] = 0;
+                $row['stock']  = 0;
+            }
+        }
+        // Oferta vigente (compuvision)
+        $sql2 = "SELECT * FROM ofertas_productos WHERE fecha_termino >= NOW() AND producto_id = " . $row['prod_id'];
         $result3 = $productoDao->exeSQL($sql2);
         if ($result3->num_rows > 0) {
             foreach ($result3 as $nuevoPrecioOferta) {
                 $row['precio'] = $nuevoPrecioOferta['precio_oferta'];
             }
         }
-        $sql = "select * from producto_foto where prod_id = '{$row['prod_id']}' limit 1";
-        $result2 = $productoDao->exeSQL($sql);
+        // Imagen: primero compuvision, luego Laravel storage
+        $result2 = $productoDao->exeSQL("SELECT * FROM producto_foto WHERE prod_id = '{$row['prod_id']}' LIMIT 1");
         $row['imagen'] = '';
-
         if ($img = $result2->fetch_assoc()) {
             $row['imagen'] = $img['imagen_url'];
         }
-
+        if (empty($row['imagen'])) {
+            $sqlImg = "SELECT imagen FROM factura_santod3.productos WHERE id_producto = '{$row['prod_id']}'";
+            $resImg = $productoDao->exeSQL($sqlImg);
+            if ($rowImg = $resImg->fetch_assoc()) {
+                $row['imagen'] = $rowImg['imagen'] ? API_URL . '/storage/' . $rowImg['imagen'] : '';
+            }
+        }
         $respuesta[] = $row;
     }
 } elseif ($tipo == 'pag-search2PMarcas') {

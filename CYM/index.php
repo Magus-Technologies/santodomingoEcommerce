@@ -877,54 +877,6 @@ if ($body_class == 'desktop') { ?>
                             <div class="collapse navbar-collapse mobile_side_menu" id="navbarSidetoggle">
                                 <ul class="navbar-nav" <?= $body_class == 'desktop' ? ' style="background:#232323; display: flex; align-items: center; margin: 0; padding: 0; list-style: none;" ' : ' style="background:#232323;"' ?>>
                                     
-                                    <!-- NAVBAR SECUNDARIO DESDE API -->
-                                    <?php
-                                    $navItems = [];
-                                    try {
-                                        $responseNav = @file_get_contents(API_URL . '/api/public/nav-menu');
-                                        if ($responseNav !== false) {
-                                            $dataNav = json_decode($responseNav, true);
-                                            if (isset($dataNav['success']) && $dataNav['success']) {
-                                                $navItems = $dataNav['data'];
-                                            }
-                                        }
-                                    } catch (Exception $e) {}
-                                    
-                                    foreach ($navItems as $item):
-                                        $tieneHijos = !empty($item['hijos']);
-                                    ?>
-                                        <li class="nav-item <?= $tieneHijos ? 'dropdown' : '' ?>" style="display: inline-block; margin-right: 30px;">
-                                            <a
-                                                <?= $tieneHijos ? 'data-toggle="dropdown"' : '' ?>
-                                                class="nav-link"
-                                                href="<?= htmlspecialchars($item['url'] ?? '#') ?>"
-                                                target="<?= htmlspecialchars($item['target'] ?? '_self') ?>"
-                                                style="color: white; font-weight: 500; padding: 0; display: inline-block; text-decoration: none;"
-                                            >
-                                                <?= htmlspecialchars($item['label']) ?>
-                                            </a>
-                                            <?php if ($tieneHijos): ?>
-                                                <div class="dropdown-menu" style="background-color: #232323; border: none;">
-                                                    <ul style="list-style: none; padding: 0; margin: 0;">
-                                                        <?php foreach ($item['hijos'] as $hijo): ?>
-                                                            <li>
-                                                                <a class="dropdown-item"
-                                                                   href="<?= htmlspecialchars($hijo['url'] ?? '#') ?>"
-                                                                   target="<?= htmlspecialchars($hijo['target'] ?? '_self') ?>"
-                                                                   style="color: white; padding: 10px 20px; text-decoration: none;">
-                                                                    <?= htmlspecialchars($hijo['label']) ?>
-                                                                </a>
-                                                            </li>
-                                                        <?php endforeach; ?>
-                                                    </ul>
-                                                </div>
-                                            <?php endif; ?>
-                                        </li>
-                                    <?php endforeach; ?>
-                                    
-                                    <!-- SEPARADOR -->
-                                    <li style="display: inline-block; margin: 0 20px; color: white; font-weight: 500;">|</li>
-                                    
                                     <!-- MARCAS DROPDOWN -->
                                     <li class="dropdown dropdown-mega-menu nav-options-i" style="display: inline-block;">
                                         <a class="dropdown-toggle nav-link menu-var" href="#"
@@ -969,9 +921,19 @@ if ($body_class == 'desktop') { ?>
                                     $_menuNav2 = $dataConf['menu_nav'] ?? [];
                                     foreach ($_menuNav2 as $_item2):
                                         if (($_item2['estado'] ?? '1') !== '1') continue;
+                                        $_hijos2 = $_item2['hijos'] ?? [];
                                     ?>
-                                    <li class="nav-options-i">
-                                        <a class="nav-link menu-var" href="<?= htmlspecialchars($_item2['url']) ?>"><?= htmlspecialchars($_item2['titulo']) ?></a>
+                                    <li class="nav-options-i<?= count($_hijos2) ? ' dropdown' : '' ?>" style="display:inline-block;">
+                                        <a class="nav-link menu-var" href="<?= htmlspecialchars($_item2['url']) ?>" <?= count($_hijos2) ? 'data-toggle="dropdown"' : '' ?>><?= htmlspecialchars($_item2['titulo']) ?><?= count($_hijos2) ? ' <i class="fa fa-caret-down" style="font-size:10px;"></i>' : '' ?></a>
+                                        <?php if (count($_hijos2)): ?>
+                                        <div class="dropdown-menu" style="background:#232323; border:none;">
+                                            <ul style="list-style:none; padding:0; margin:0;">
+                                                <?php foreach ($_hijos2 as $_hijo2): ?>
+                                                <li><a class="dropdown-item" href="<?= htmlspecialchars($_hijo2['url']) ?>" style="color:#fff; padding:10px 20px;"><?= htmlspecialchars($_hijo2['titulo']) ?></a></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                        <?php endif; ?>
                                     </li>
                                     <?php endforeach; ?>
                                     <li class="nav-options-i ifmobile">

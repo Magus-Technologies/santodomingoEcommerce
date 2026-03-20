@@ -47,6 +47,7 @@ $dataConf = $tools->getConfiguracion();
 <!-- Style CSS -->
 <link rel="stylesheet" href="../public/assets/css/style.css">
 <link rel="stylesheet" href="../public/assets/css/responsive.css">
+<link rel="stylesheet" href="../public/assets/css/pages/nosotros.css">
     <link rel="stylesheet" href="../public/plugin/sweetalert2/sweetalert2.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <style>
@@ -88,26 +89,6 @@ $dataConf = $tools->getConfiguracion();
 <?php include "../fragment/head_secon.php";?>
 <!-- END HEADER -->
 
-<!-- START SECTION BREADCRUMB -->
-<div class="breadcrumb_section bg_gray page-title-mini">
-    <div class="container"><!-- STRART CONTAINER -->
-        <div class="row align-items-center">
-        	<div class="col-md-6">
-                <div class="page-title">
-            		<h1>Sobre nosotros</h1>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <ol class="breadcrumb justify-content-md-end">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                    <li class="breadcrumb-item active">Sobre nosotros</li>
-                </ol>
-            </div>
-        </div>
-    </div><!-- END CONTAINER-->
-</div>
-<!-- END SECTION BREADCRUMB -->
 
 <!-- START MAIN CONTENT -->
 <div class="main_content">

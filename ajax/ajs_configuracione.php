@@ -170,6 +170,28 @@ elseif ($tipo=='banner_extra_IN'){
         $tools->guardarConfiguarion($configuracion);
         echo 'ok';
     }
+} elseif ($tipo === 'terminos_S') {
+    echo json_encode($configuracion['terminos'] ?? []);
+} elseif ($tipo === 'terminos_IN') {
+    $data = json_decode($_POST['data'], true);
+    if ($data) {
+        $configuracion['terminos'] = $data;
+        $tools->guardarConfiguarion($configuracion);
+        echo json_encode(['res' => true]);
+    } else {
+        echo json_encode(['res' => false]);
+    }
+} elseif ($tipo === 'nosotros_S') {
+    echo json_encode($configuracion['nosotros'] ?? []);
+} elseif ($tipo === 'nosotros_IN') {
+    $data = json_decode($_POST['data'], true);
+    if ($data) {
+        $configuracion['nosotros'] = $data;
+        $tools->guardarConfiguarion($configuracion);
+        echo json_encode(['res' => true]);
+    } else {
+        echo json_encode(['res' => false, 'msg' => 'Datos inválidos']);
+    }
 }
 
 

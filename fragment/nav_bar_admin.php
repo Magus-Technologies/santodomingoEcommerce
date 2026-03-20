@@ -91,6 +91,11 @@ if ($isSesionUser) {
                                         </li>
                                         <li><a class="dropdown-item nav-link nav_item" href="./menu.php">Men&uacute; de Navegaci&oacute;n</a>
                                         </li>
+                                        <li><a class="dropdown-item nav-link nav_item" href="./librorec.php">Libro de Reclamaciones</a></li>
+                                        <li><a class="dropdown-item nav-link nav_item" href="./nosotros.php">P&aacute;gina Nosotros</a>
+                                        </li>
+                                        <li><a class="dropdown-item nav-link nav_item" href="./terminos.php">T&eacute;rminos y Condiciones</a>
+                                        </li>
                                         <li><a class="dropdown-item nav-link nav_item" href="./conf_seleccion.php">Nuestra Selecci&oacute;n</a>
                                         </li>
                                         <li><a class="dropdown-item nav-link nav_item" href="./usuarios.php">Usuarios

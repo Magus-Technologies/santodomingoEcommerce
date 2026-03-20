@@ -175,29 +175,59 @@
     },
     "menu_nav": [
         {
+            "titulo": "INICIO",
+            "url": "index.php",
+            "estado": "1",
+            "hijos": []
+        },
+        {
             "titulo": "PRODUCTOS",
             "url": "shop-list-ctg.php?ctg=001",
-            "estado": "1"
+            "estado": "1",
+            "hijos": []
         },
         {
-            "titulo": "VINO BLANCO",
-            "url": "shop-list-ctg.php?ctg=002",
-            "estado": "0"
+            "titulo": "INFORMACI\u00d3N",
+            "url": "#",
+            "estado": "1",
+            "hijos": [
+                {
+                    "titulo": "SOBRE NOSOTROS",
+                    "url": "about.php"
+                },
+                {
+                    "titulo": "T\u00c9RMINOS Y CONDICIONES",
+                    "url": "term.php"
+                },
+                {
+                    "titulo": "PREGUNTAS FRECUENTES",
+                    "url": "faq.html"
+                }
+            ]
         },
         {
-            "titulo": "VINO ROSADO",
-            "url": "shop-list-ctg.php?ctg=003",
-            "estado": "0"
+            "titulo": "CONTACTANOS",
+            "url": "contact.php",
+            "estado": "1",
+            "hijos": []
         },
         {
-            "titulo": "ESPUMANTE",
-            "url": "shop-list-ctg.php?ctg=004",
-            "estado": "0"
+            "titulo": "NOSOTROS",
+            "url": "about.php",
+            "estado": "1",
+            "hijos": []
         },
         {
-            "titulo": "PISCO",
-            "url": "shop-list-prod-exclu.php",
-            "estado": "0"
+            "titulo": "TERMINOS Y CONDICIONES",
+            "url": "term.php",
+            "estado": "1",
+            "hijos": []
+        },
+        {
+            "titulo": "LIBRO DE RECLAMACION",
+            "url": "ibro.php",
+            "estado": "1",
+            "hijos": []
         }
     ],
     "suscripcion_titulo": "Somos VI\u00d1ASANTODOMINGO los mejores en VINOS Y PISCO",
@@ -263,21 +293,21 @@
     "footer_metodos_pago": [
         {
             "nombre": "visa",
-            "imagen": "../public/assets/images/visa.png"
+            "imagen": "..\/public\/assets\/images\/visa.png"
         },
         {
             "nombre": "discover",
-            "imagen": "../public/assets/images/discover.png"
+            "imagen": "..\/public\/assets\/images\/discover.png"
         },
         {
             "nombre": "master_card",
-            "imagen": "../public/assets/images/master_card.png"
+            "imagen": "..\/public\/assets\/images\/master_card.png"
         }
     ],
     "footer_copyright": {
         "texto": "Todos los derechos reservados por",
         "empresa": "MAGUS TECHNOLOGIES",
-        "url": "https://magustechnologies.com/"
+        "url": "https:\/\/magustechnologies.com\/"
     },
     "banner_extra_remate": [
         {
@@ -302,5 +332,118 @@
             "estado": "1",
             "url": ""
         }
-    ]
+    ],
+    "nosotros": {
+        "titulo": "Sobre Nosotros",
+        "subtitulo": "Conoce nuestra historia",
+        "descripcion": "Somos una empresa comprometida con ofrecer productos de alta calidad y una experiencia \u00fanica a nuestros clientes. Desde nuestros inicios, nos hemos enfocado en la innovaci\u00f3n, la confianza y la satisfacci\u00f3n de quienes nos eligen.",
+        "imagen_principal": "https:\/\/encrypted-tbn0.gstatic.com\/images?q=tbn:ANd9GcTU3HFVnkYFJ_OIogo__Qv58bmhwRqZJcQhOA&s",
+        "cta_texto": "Ver productos",
+        "cta_url": "shop-list-prod.php",
+        "historia": "Somos una marca apasionada por brindar soluciones que realmente marcan la diferencia. Desde nuestros comienzos, hemos trabajado con dedicaci\u00f3n para construir una relaci\u00f3n cercana con nuestros clientes.\n\nCreemos en la calidad, la innovaci\u00f3n y el servicio personalizado. Cada producto que ofrecemos refleja nuestro compromiso con la excelencia.\n\nNuestra misi\u00f3n: Ofrecer productos que mejoren la vida de las personas.\nNuestra visi\u00f3n: Ser una marca reconocida por su calidad y confianza.\nNuestros valores: Responsabilidad, compromiso y pasi\u00f3n por lo que hacemos.",
+        "mision": "Nuestra misi\u00f3n es ofrecer productos de alta calidad que aporten valor real a nuestros clientes, brindando una experiencia confiable, innovadora y accesible.",
+        "mision_icono": "fas fa-rocket",
+        "vision": "Nuestra visi\u00f3n es convertirnos en una marca l\u00edder y reconocida, destacando por nuestra excelencia, compromiso y cercan\u00eda con nuestros clientes.",
+        "vision_icono": "fas fa-eye",
+        "valores": "Nuestros valores se basan en la responsabilidad, la honestidad, la innovaci\u00f3n y la pasi\u00f3n por mejorar continuamente en todo lo que hacemos.",
+        "valores_icono": "fas fa-star",
+        "stats": [
+            {
+                "icono": "fas fa-calendar-alt",
+                "valor": "10+",
+                "label": "A\u00f1os de experiencia"
+            },
+            {
+                "icono": "fas fa-users",
+                "valor": "500+",
+                "label": "Clientes satisfechos"
+            },
+            {
+                "icono": "fas fa-box",
+                "valor": "1000+",
+                "label": "Productos disponibles"
+            },
+            {
+                "icono": "fas fa-truck",
+                "valor": "24h",
+                "label": "Despacho r\u00e1pido"
+            }
+        ],
+        "equipo": [
+            {
+                "nombre": "Juan P\u00e9rez",
+                "cargo": "Gerente General",
+                "imagen": "https:\/\/encrypted-tbn0.gstatic.com\/images?q=tbn:ANd9GcRXert6ekqTL1J7LVWNAhs65_GeostayFqh6A&s",
+                "descripcion": "Profesional con amplia experiencia en liderazgo y gesti\u00f3n empresarial, enfocado en impulsar el crecimiento de la empresa y garantizar la satisfacci\u00f3n de nuestros clientes mediante innovaci\u00f3n y excelencia."
+            },
+            {
+                "nombre": "Mar\u00eda L\u00f3pez",
+                "cargo": "Jefa de Marketing",
+                "imagen": "https:\/\/static.wixstatic.com\/media\/d913d7_49ff253b093947999bad8b351c7cc7cc~mv2.jpg\/v1\/fill\/w_677,h_677,al_c,lg_1,q_85\/d913d7_49ff253b093947999bad8b351c7cc7cc~mv2.jpg",
+                "descripcion": "Especialista en estrategias digitales y posicionamiento de marca, enfocada en conectar con los clientes y potenciar el crecimiento del negocio."
+            },
+            {
+                "nombre": "Carlos Ram\u00edrez",
+                "cargo": "Encargado de Operaciones",
+                "imagen": "https:\/\/i.pinimg.com\/originals\/6b\/5f\/45\/6b5f45abf37640f616b6e348173b73e5.jpg",
+                "descripcion": "Responsable de optimizar procesos internos y garantizar la eficiencia en cada \u00e1rea, asegurando un servicio \u00e1gil y de calidad."
+            },
+            {
+                "nombre": "Luis Fern\u00e1ndez",
+                "cargo": "Director de Tecnolog\u00eda",
+                "imagen": "https:\/\/encrypted-tbn0.gstatic.com\/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+                "descripcion": "Experto en desarrollo e innovaci\u00f3n tecnol\u00f3gica, encargado de liderar proyectos digitales y asegurar soluciones eficientes y modernas para la empresa."
+            }
+        ]
+    },
+    "terminos": {
+        "heroFontSize": 2.6,
+        "heroPaddingV": 35,
+        "intro": "Bienvenido. Al acceder o utilizar nuestro sitio web y servicios, usted acepta quedar vinculado por los presentes T\u00e9rminos y Condiciones. Si no est\u00e1 de acuerdo con alguna parte de estos t\u00e9rminos, le rogamos que no utilice nuestros servicios.",
+        "titulo": "T\u00e9rminos y Condiciones",
+        "subtitulo": "Lea atentamente antes de usar nuestro sitio",
+        "fecha": "2026-03-20",
+        "secciones": [
+            {
+                "titulo": "Aceptaci\u00f3n de T\u00e9rminos",
+                "contenido": "Al acceder y utilizar este sitio web, usted confirma que tiene al menos 18 a\u00f1os de edad o que cuenta con el consentimiento de un tutor legal, y que acepta cumplir con estos T\u00e9rminos y Condiciones en su totalidad.\n\nNos reservamos el derecho de modificar estos t\u00e9rminos en cualquier momento. Los cambios entrar\u00e1n en vigor inmediatamente despu\u00e9s de su publicaci\u00f3n en el sitio. El uso continuado del servicio tras la publicaci\u00f3n de modificaciones constituye su aceptaci\u00f3n de los nuevos t\u00e9rminos."
+            },
+            {
+                "titulo": "Uso del Servicio",
+                "contenido": "Usted se compromete a utilizar nuestros servicios \u00fanicamente con fines l\u00edcitos y de manera que no infrinja los derechos de terceros. Queda expresamente prohibido:\n\n- Transmitir contenido ilegal, difamatorio, obsceno o fraudulento.\n- Intentar acceder sin autorizaci\u00f3n a sistemas o redes inform\u00e1ticas.\n- Interrumpir o interferir con la seguridad o disponibilidad del servicio.\n- Recopilar datos de otros usuarios sin su consentimiento expreso.\n- Utilizar el servicio con fines comerciales sin autorizaci\u00f3n previa por escrito."
+            },
+            {
+                "titulo": "Cuentas y Registro",
+                "contenido": "Para acceder a determinadas funcionalidades es necesario crear una cuenta. Usted es responsable de mantener la confidencialidad de sus credenciales de acceso y de todas las actividades realizadas bajo su cuenta.\n\nProporcionar informaci\u00f3n veraz, precisa y actualizada durante el registro.\nNotificar de inmediato cualquier uso no autorizado de su cuenta.\nNo compartir sus credenciales con terceros.\nMantener su direcci\u00f3n de correo electr\u00f3nico activa y v\u00e1lida."
+            },
+            {
+                "titulo": "Propiedad Intelectual",
+                "contenido": "Todo el contenido disponible en este sitio web \u2014incluyendo, sin limitaci\u00f3n, textos, gr\u00e1ficos, logotipos, im\u00e1genes, dise\u00f1os y software\u2014 es propiedad exclusiva de la empresa o de sus licenciantes y est\u00e1 protegido por las leyes de propiedad intelectual aplicables.\n\nSe otorga al usuario una licencia limitada, no exclusiva e intransferible para acceder y utilizar el contenido \u00fanicamente para uso personal y no comercial. Queda prohibida la reproducci\u00f3n, distribuci\u00f3n o modificaci\u00f3n sin autorizaci\u00f3n escrita previa."
+            },
+            {
+                "titulo": "Privacidad y Datos",
+                "contenido": "El tratamiento de sus datos personales se rige por nuestra Pol\u00edtica de Privacidad, la cual forma parte integrante de estos T\u00e9rminos y Condiciones. Al utilizar el servicio, usted consiente el tratamiento de sus datos conforme a dicha pol\u00edtica.\n\nSus datos no ser\u00e1n vendidos a terceros sin su consentimiento expl\u00edcito.\nImplementamos medidas t\u00e9cnicas y organizativas para proteger su informaci\u00f3n.\nTiene derecho a acceder, rectificar y eliminar sus datos personales.\nPuede revocar su consentimiento en cualquier momento mediante solicitud escrita."
+            },
+            {
+                "titulo": "Responsabilidades",
+                "contenido": "Los servicios se proporcionan \"tal cual\" y \"seg\u00fan disponibilidad\". No garantizamos que el servicio sea ininterrumpido, libre de errores ni seguro en todo momento.\n\n! En ning\u00fan caso la empresa ser\u00e1 responsable de da\u00f1os indirectos, incidentales, especiales, consecuentes o punitivos derivados del uso o la imposibilidad de uso del servicio. \nLa responsabilidad total de la empresa hacia el usuario, por cualquier concepto, no exceder\u00e1 el importe pagado por el usuario durante los tres (3) meses previos al evento que origin\u00f3 la reclamaci\u00f3n."
+            },
+            {
+                "titulo": "Pagos y Facturaci\u00f3n",
+                "contenido": "Los precios de nuestros servicios est\u00e1n expresados en la moneda indicada en el momento de la compra e incluyen los impuestos aplicables conforme a la legislaci\u00f3n vigente.\n\n- El pago debe realizarse mediante los m\u00e9todos habilitados en la plataforma.\n- Los cargos por suscripci\u00f3n se renuevan autom\u00e1ticamente salvo cancelaci\u00f3n previa.\n- Las solicitudes de reembolso deben formularse dentro de los 14 d\u00edas siguientes a la transacci\u00f3n.\n- Nos reservamos el derecho de modificar precios con previo aviso de 30 d\u00edas."
+            },
+            {
+                "titulo": "Terminaci\u00f3n",
+                "contenido": "Podemos suspender o cancelar su acceso al servicio, con o sin previo aviso, si consideramos que ha incumplido estos T\u00e9rminos y Condiciones o si su uso representa un riesgo para la seguridad o integridad de la plataforma.\n\nUsted puede dar de baja su cuenta en cualquier momento desde los ajustes de su perfil o mediante solicitud a nuestro equipo de soporte. La cancelaci\u00f3n no generar\u00e1 derecho a reembolso de periodos ya facturados."
+            },
+            {
+                "titulo": "Ley Aplicable",
+                "contenido": "Estos T\u00e9rminos y Condiciones se regir\u00e1n e interpretar\u00e1n de conformidad con la legislaci\u00f3n peruana vigente. Cualquier disputa derivada del uso del servicio se someter\u00e1 a la jurisdicci\u00f3n exclusiva de los tribunales competentes de Lima, Per\u00fa.\n\nLas partes se comprometen a intentar resolver cualquier controversia de forma amistosa antes de iniciar acciones legales formales."
+            },
+            {
+                "titulo": "Contacto",
+                "contenido": "Si tiene preguntas, comentarios o inquietudes sobre estos T\u00e9rminos y Condiciones, no dude en ponerse en contacto con nosotros:\n\n- Correo electr\u00f3nico: legal@suempresa.com\n- Direcci\u00f3n postal: Av. Principal 123, Lima, Per\u00fa\n- Tel\u00e9fono: +51 1 234-5678\n- Horario de atenci\u00f3n: Lunes a Viernes, 9:00 \u2013 18:00 (hora de Lima)"
+            }
+        ]
+    }
 }

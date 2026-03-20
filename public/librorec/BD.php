@@ -1,7 +1,7 @@
 <?php
-    define('DB_HOST','localhost');
+    define('DB_HOST','localhost:33068');
 	define('DB_USER','root');
-	define('DB_PASS','c4p1cu4%%$$');
+	define('DB_PASS','7616');
 	define('DB_NAME','compuvision');
 	# conectare la base de datos
     $con=@mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
