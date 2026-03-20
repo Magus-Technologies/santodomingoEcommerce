@@ -226,7 +226,7 @@ const CARRITO = new Vue({
                         prod: jsn.prod_id,
                         stock: parseInt(jsn.stock),
                         imagen: jsn.imagen1,
-                        nombre_prod: jsn.nom_prod,
+                        nombre_prod: jsn.nom_prod || jsn.nombre || '',
                         cantidad: 1,
                         precio: parseFloat(jsn.precio),
                     })

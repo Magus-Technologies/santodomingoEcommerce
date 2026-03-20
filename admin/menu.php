@@ -66,6 +66,36 @@ if (!(isset($_SESSION['usuario']) && ($validate['perfil'] == 'admin' || $validat
 
     <h4 class="page-title"><i class="fas fa-bars mr-2"></i>Menú de Navegación</h4>
 
+    <!-- CATEGORÍAS DE FACTURA — referencia para construir URLs del menú -->
+    <div class="card mb-4" style="border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,.08); border:none;">
+        <div class="card-header bg-white py-3" style="border-bottom:2px solid #6c757d; border-radius:10px 10px 0 0;">
+            <span class="font-weight-bold"><i class="fas fa-list mr-2 text-secondary"></i>Categorías del Sistema de Facturación</span>
+            <small class="text-muted ml-2">— Usa el ID para construir la URL del menú: <code>shop-list-ctg.php?ctg=<strong>{id}</strong></code></small>
+        </div>
+        <div class="card-body p-0">
+            <div v-if="loadingCats" class="text-center py-3"><i class="fas fa-spinner fa-spin text-secondary"></i></div>
+            <table v-else class="table table-sm table-hover mb-0">
+                <thead><tr><th style="width:80px">ID</th><th>Nombre Categoría</th><th>URL para el menú</th><th style="width:110px"></th></tr></thead>
+                <tbody>
+                    <tr v-for="cat in categorias" :key="cat.id">
+                        <td class="align-middle"><span class="badge badge-secondary">{{ cat.id }}</span></td>
+                        <td class="align-middle font-weight-bold">{{ cat.nombre }}</td>
+                        <td class="align-middle text-muted" style="font-size:13px;">shop-list-ctg.php?ctg={{ cat.id }}</td>
+                        <td class="align-middle">
+                            <button class="btn btn-sm btn-outline-secondary" title="Copiar URL"
+                                @click="copiarUrl('shop-list-ctg.php?ctg=' + cat.id)">
+                                <i class="fas fa-copy mr-1"></i>Copiar URL
+                            </button>
+                        </td>
+                    </tr>
+                    <tr v-if="categorias.length === 0">
+                        <td colspan="4" class="text-center text-muted py-3">No se pudo cargar las categorías. Verifica que Laravel esté corriendo.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="card" style="border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,.08); border:none;">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3"
              style="border-bottom:2px solid #c7161d; border-radius:10px 10px 0 0;">
@@ -214,10 +244,13 @@ new Vue({
         guardando: false,
         modoEditar: false,
         editIdx: -1,
-        form: { titulo: '', url: '', estado: '1' }
+        form: { titulo: '', url: '', estado: '1' },
+        categorias: [],
+        loadingCats: true
     },
     mounted: function() {
         this.cargarMenu();
+        this.cargarCategorias();
     },
     methods: {
         cargarMenu: function() {
@@ -286,6 +319,22 @@ new Vue({
             if (!confirm('¿Eliminar "' + this.items[idx].titulo + '" del menú?')) return;
             this.items.splice(idx, 1);
             this.guardarTodo();
+        },
+        cargarCategorias: function() {
+            var self = this;
+            $.post('../ajax/ajs_shop_factura.php', { tipo: 'categorias' }, function(res) {
+                self.loadingCats = false;
+                if (res && res.success && res.data) {
+                    self.categorias = res.data;
+                }
+            }, 'json').fail(function() { self.loadingCats = false; });
+        },
+        copiarUrl: function(url) {
+            navigator.clipboard.writeText(url).then(function() {
+                alert('URL copiada: ' + url);
+            }).catch(function() {
+                prompt('Copia esta URL:', url);
+            });
         },
         guardarTodo: function() {
             var self = this;

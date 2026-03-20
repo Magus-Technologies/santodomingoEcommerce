@@ -311,7 +311,7 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
                                     <a href="#" @click="eliminarProdCarrito(index)" class="item_remove"><i
                                             class="ion-close"></i></a>
                                     <a href="#"><img style="max-width: 80px;max-height: 80px"
-                                            :src="'../public/img/productos/'+item.imagen"
+                                            :src="item.imagen && (item.imagen.startsWith('http') || item.imagen.indexOf('/') !== -1) ? item.imagen : '../public/img/productos/'+item.imagen"
                                             alt="cart_thumb1">{{item.nombre_prod}}</a>
                                     <span class="cart_quantity" style="color:#fff;"> {{item.cantidad}} x <span
                                             class="cart_amount"> <span

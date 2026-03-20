@@ -73,9 +73,9 @@
             }
         ]
     },
-    "direccion": "Ub\u00edcanos en Fdo. Santa Adela - Nuevo Imperial - Ca\u00f1ete",
-    "email": "ventas@vi\u00f1asantodomingo.com",
-    "numero_central": "930 570 018",
+    "direccion": "JR. ANDAHUAYLAS NRO. 1049 INT. 109",
+    "email": "contacto@ilidesava.com",
+    "numero_central": "054-123456",
     "titulo": "VI\u00d1ASANTODOMINGO | Tienda de Vino y Pisco",
     "descripcion": "VI\u00d1ASANTODOMINGO | Somos tu mejor opci\u00f3n en  Vino y Pisco",
     "telefonos": [
@@ -198,6 +198,48 @@
             "titulo": "PISCO",
             "url": "shop-list-prod-exclu.php",
             "estado": "0"
+        }
+    ],
+    "suscripcion_titulo": "Somos VI\u00d1ASANTODOMINGO ",
+    "suscripcion_parrafo": "Recibe las mejores Ofertas en Vino ",
+    "suscripcion_imagen": "",
+    "footer_tagline": "Los mejores en Vino y Pisco",
+    "footer_logo": "",
+    "footer_imagen": "https:\/\/i0.wp.com\/placeres.pe\/wp-content\/uploads\/2025\/01\/vino.jpg?fit=1200%2C800&ssl=1",
+    "footer_productos": [
+        {
+            "nombre": "Prodcutos",
+            "url": "shop-list-ctg.php?ctg=001"
+        },
+        {
+            "nombre": "Vino Blanco",
+            "url": "shop-list-ctg.php?ctg=001"
+        },
+        {
+            "nombre": "Vino Rosado",
+            "url": "shop-list-ctg.php?ctg=001"
+        },
+        {
+            "nombre": "Espumante",
+            "url": "shop-list-ctg.php?ctg=001"
+        },
+        {
+            "nombre": "Pisco",
+            "url": "shop-list-ctg.php?ctg=001"
+        }
+    ],
+    "footer_servicios": [
+        {
+            "titulo": "Contamos con Delivery de 7.",
+            "descripcion": "Consultar al Whatsapp 926703231"
+        },
+        {
+            "titulo": "Contamos con super descuentos y promociones.",
+            "descripcion": "Siempre Conserve su Boleta o Factura de Compra"
+        },
+        {
+            "titulo": "Contamos con Soporte T\u00e9cnico",
+            "descripcion": "Especialistas en hardware y mantenimiento"
         }
     ],
     "banner_extra_remate": [

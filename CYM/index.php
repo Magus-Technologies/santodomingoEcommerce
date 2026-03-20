@@ -1848,9 +1848,10 @@ if ($body_class == 'desktop') { ?>
                     <div class="col-lg-4 col-md-12 col-sm-12">
                         <div class="widget">
                             <div class="footer_logo">
-                                <a href="./"><img src="../public/logo.svg" alt="logo" style="width: 280px;" /></a>
+                                <?php $fLogo = !empty($dataConf['footer_logo']) ? (str_starts_with($dataConf['footer_logo'],'http') ? $dataConf['footer_logo'] : '../public/img/banner/'.$dataConf['footer_logo']) : '../public/logo.svg'; ?>
+                                <a href="./"><img src="<?= $fLogo ?>" alt="logo" style="width: 280px;" /></a>
                             </div>
-                            <p class="mb-3">Los mejores en Vino y Pisco</p>
+                            <p class="mb-3"><?= htmlspecialchars($dataConf['footer_tagline'] ?? 'Los mejores en Vino y Pisco') ?></p>
                             <ul class="contact_info">
                                 <li>
                                     <i class="ti-location-pin"></i>
@@ -1891,20 +1892,16 @@ if ($body_class == 'desktop') { ?>
                         <div class="widget">
                             <h6 class="widget_title">Productos</h6>
                             <ul class="widget_links">
-                                <li><a href="./shop-list-ctg.php?ctg=002">Vino Tinto</a></li>
-                                <li><a href="./shop-list-ctg.php?ctg=002">Vino Blanco</a></li>
-                                <li><a href="./shop-list-ctg.php?ctg=002">Vino Rosado</a></li>
-                                <li><a href="./shop-list-ctg.php?ctg=002">Espumante</a></li>
-                                <li><a href="./shop-list-ctg.php?ctg=002">Pisco</a></li>
-                               
+                                <?php foreach ($dataConf['footer_productos'] ?? [] as $fp): ?>
+                                <li><a href="./<?= htmlspecialchars($fp['url']) ?>"><?= htmlspecialchars($fp['nombre']) ?></a></li>
+                                <?php endforeach; ?>
                             </ul>
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-4 col-sm-12">
                         <div class="widget">
-
-                            <img src="https://i0.wp.com/placeres.pe/wp-content/uploads/2025/01/vino.jpg?fit=1200%2C800&ssl=1"
-                                class="img-fluid">
+                            <?php $fImg = $dataConf['footer_imagen'] ?? ''; if (!empty($fImg) && !str_starts_with($fImg,'http')) $fImg = '../public/img/banner/'.$fImg; ?>
+                            <?php if (!empty($fImg)): ?><img src="<?= htmlspecialchars($fImg) ?>" class="img-fluid"><?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -1916,39 +1913,21 @@ if ($body_class == 'desktop') { ?>
                     <div class="col-12">
                         <div class="shopping_info">
                             <div class="row justify-content-center">
+                                <?php
+                                $icons = ['flaticon-shipped','flaticon-money-back','flaticon-support'];
+                                foreach (($dataConf['footer_servicios'] ?? []) as $k => $srv):
+                                $icon = $icons[$k] ?? 'flaticon-support';
+                                ?>
                                 <div class="col-md-4">
                                     <div class="icon_box icon_box_style2">
-                                        <div class="icon">
-                                            <i class="flaticon-shipped"></i>
-                                        </div>
+                                        <div class="icon"><i class="<?= $icon ?>"></i></div>
                                         <div class="icon_box_content">
-                                            <h5>Contamos con Delivery.</h5>
-                                            <p>Consultar al Whatsapp 930 570 018</p>
+                                            <h5><?= htmlspecialchars($srv['titulo']) ?></h5>
+                                            <p><?= htmlspecialchars($srv['descripcion']) ?></p>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="icon_box icon_box_style2">
-                                        <div class="icon">
-                                            <i class="flaticon-money-back"></i>
-                                        </div>
-                                        <div class="icon_box_content">
-                                            <h5>Contamos con super descuentos y promociones.</h5>
-                                            <p>Siempre Conserve su Boleta o Factura de Compra</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="icon_box icon_box_style2">
-                                        <div class="icon">
-                                            <i class="flaticon-support"></i>
-                                        </div>
-                                        <div class="icon_box_content">
-                                            <h5>Contamos con Atención</h5>
-                                            <p>Comunicate con nuestros asesores</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>

@@ -34,7 +34,25 @@ const APP = new Vue({
                 youtube: "#",
                 instagram: "",
                 whatsapp: []
-            }
+            },
+            suscripcion_titulo: '',
+            suscripcion_parrafo: '',
+            suscripcion_imagen: '',
+            footer_tagline: '',
+            footer_logo: '',
+            footer_imagen: '',
+            footer_productos: [
+                {nombre:'Vino Tinto',  url:'shop-list-ctg.php?ctg=001'},
+                {nombre:'Vino Blanco', url:'shop-list-ctg.php?ctg=001'},
+                {nombre:'Vino Rosado', url:'shop-list-ctg.php?ctg=001'},
+                {nombre:'Espumante',   url:'shop-list-ctg.php?ctg=001'},
+                {nombre:'Pisco',       url:'shop-list-ctg.php?ctg=001'}
+            ],
+            footer_servicios: [
+                {titulo:'Contamos con Delivery.',                       descripcion:'Consultar al Whatsapp 930 570 018'},
+                {titulo:'Contamos con super descuentos y promociones.', descripcion:'Siempre Conserve su Boleta o Factura de Compra'},
+                {titulo:'Contamos con Soporte Técnico',                 descripcion:'Especialistas en hardware y mantenimiento'}
+            ]
         }
     },
     methods:{
@@ -159,3 +177,75 @@ const APP = new Vue({
 $( document ).ready(function() {
     APP.cargarData();
 });
+
+function previewFooterLogo(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) { $('#preview_footer_logo').attr('src', e.target.result); };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function previewFooterImg(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) { $('#preview_footer_img').attr('src', e.target.result); };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function guardarFooterLogo() {
+    var file = $('#fill_footer_logo')[0];
+    if (!file.files.length) { swal('Selecciona una imagen primero','','warning'); return; }
+    var fd = new FormData();
+    fd.append('file', file.files[0]);
+    $.ajax({
+        type:'POST', url:'../ajax/upload_img_banner.php', data:fd,
+        contentType:false, cache:false, processData:false,
+        success: function(resp) {
+            resp = JSON.parse(resp);
+            APP._data.dataConf.footer_logo = resp.dstos;
+            APP.cargarGuardar();
+        }
+    });
+}
+
+function previewSuscImg(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) { $('#preview_suscripcion_img').attr('src', e.target.result); };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function guardarSuscImg() {
+    var file = $('#fill_suscripcion_img')[0];
+    if (!file.files.length) { swal('Selecciona una imagen primero','','warning'); return; }
+    var fd = new FormData();
+    fd.append('file', file.files[0]);
+    $.ajax({
+        type:'POST', url:'../ajax/upload_img_banner.php', data:fd,
+        contentType:false, cache:false, processData:false,
+        success: function(resp) {
+            resp = JSON.parse(resp);
+            APP._data.dataConf.suscripcion_imagen = resp.dstos;
+            APP.cargarGuardar();
+        }
+    });
+}
+
+function guardarFooterImagen() {
+    var file = $('#fill_footer_imagen')[0];
+    if (!file.files.length) { swal('Selecciona una imagen primero','','warning'); return; }
+    var fd = new FormData();
+    fd.append('file', file.files[0]);
+    $.ajax({
+        type:'POST', url:'../ajax/upload_img_banner.php', data:fd,
+        contentType:false, cache:false, processData:false,
+        success: function(resp) {
+            resp = JSON.parse(resp);
+            APP._data.dataConf.footer_imagen = resp.dstos;
+            APP.cargarGuardar();
+        }
+    });
+}

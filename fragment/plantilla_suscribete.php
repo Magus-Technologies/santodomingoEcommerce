@@ -1,6 +1,7 @@
 <!-- START SECTION SUBSCRIBE NEWSLETTER -->
 <div class="section bg_default small_pt small_pb" style="background-color:#880107 !important;">
-    <img class="d-none d-lg-block" src="../public/images/wine.png" alt="bg_newsletter" style="position: absolute;
+    <?php $suscImg = $dataConf['suscripcion_imagen'] ?? ''; if (!empty($suscImg) && !str_starts_with($suscImg,'http')) $suscImg = '../public/img/banner/'.$suscImg; ?>
+    <img class="d-none d-lg-block" src="<?= !empty($suscImg) ? htmlspecialchars($suscImg) : '../public/images/wine.png' ?>" alt="bg_newsletter" style="position: absolute;
   width: 276px;
   top: -110px;
   left: 25px;">
@@ -8,8 +9,8 @@
         <div class="row align-items-center">
             <div class="col-md-6">
                 <div class="newsletter_text text_white">
-                    <h3>Somos VIÑASANTODOMINGO los mejores en VINOS Y PISCO</h3>
-                    <p>Recibe las mejores Ofertas en Vino y Pisco SUSCRÍBETE</p>
+                    <h3><?= htmlspecialchars($dataConf['suscripcion_titulo'] ?? 'Somos VIÑASANTODOMINGO los mejores en VINOS Y PISCO') ?></h3>
+                    <p><?= htmlspecialchars($dataConf['suscripcion_parrafo'] ?? 'Recibe las mejores Ofertas en Vino y Pisco SUSCRÍBETE') ?></p>
                 </div>
             </div>
             <div class="col-md-6">
