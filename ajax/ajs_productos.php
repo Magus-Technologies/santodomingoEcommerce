@@ -24,8 +24,11 @@ if ($tipo == 'count_prod') {
     $sql = "DELETE FROM carrito_compra WHERE usuario_id = '{$_SESSION['usuario']}';";
     $productoDao->exeSQL($sql);
     foreach ($listaCrrito as $car) {
-        $sql = "INSERT INTO carrito_compra SET usuario_id='{$_SESSION['usuario']}',prod_id='{$car['prod']}',cantidad='{$car['cantidad']}'";
-        $productoDao->exeSQL($sql);
+        $chk = $productoDao->exeSQL("SELECT prod_id FROM producto WHERE prod_id='{$car['prod']}'");
+        if ($chk && $chk->num_rows > 0) {
+            $sql = "INSERT INTO carrito_compra SET usuario_id='{$_SESSION['usuario']}',prod_id='{$car['prod']}',cantidad='{$car['cantidad']}'";
+            $productoDao->exeSQL($sql);
+        }
     }
 } elseif ($tipo == 'usr_crd_lts') {
     $productosApi = new ProductosApi();

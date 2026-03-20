@@ -74,7 +74,7 @@
         ]
     },
     "direccion": "JR. ANDAHUAYLAS NRO. 1049 INT. 109",
-    "email": "contacto@ilidesava.com",
+    "email": "contacto123@ilidesava.com",
     "numero_central": "054-123456",
     "titulo": "VI\u00d1ASANTODOMINGO | Tienda de Vino y Pisco",
     "descripcion": "VI\u00d1ASANTODOMINGO | Somos tu mejor opci\u00f3n en  Vino y Pisco",
@@ -200,12 +200,12 @@
             "estado": "0"
         }
     ],
-    "suscripcion_titulo": "Somos VI\u00d1ASANTODOMINGO ",
-    "suscripcion_parrafo": "Recibe las mejores Ofertas en Vino ",
-    "suscripcion_imagen": "",
-    "footer_tagline": "Los mejores en Vino y Pisco",
-    "footer_logo": "",
-    "footer_imagen": "https:\/\/i0.wp.com\/placeres.pe\/wp-content\/uploads\/2025\/01\/vino.jpg?fit=1200%2C800&ssl=1",
+    "suscripcion_titulo": "Somos VI\u00d1ASANTODOMINGO los mejores en VINOS Y PISCO",
+    "suscripcion_parrafo": "Recibe las mejores Ofertas en Vino y Pisco SUSCR\u00cdBETE",
+    "suscripcion_imagen": "tdw29x4tP3MYvCizq5IO27UGqHzMHXTuzyCdOH1q0aqUeZEFoKaZmbTu1WmlRG64aYeLyPW5SoXjgfTP.png",
+    "footer_tagline": "Los mejores en Vino y Pisco y cerveza",
+    "footer_logo": "pji5WGl9McUECqwx0jaL80cs3ipMWI4Dqp620u22RgERsh9cuNh6wWEKaKataxCzplhbFFc5XJ6wwEgX.png",
+    "footer_imagen": "X46cbtWaCsCKC5WJdgCfkZ8oPwgTOmfeiRlyHTygjFxpIoTwRUrXBBgpNXOgjAQfduEe5n1a2iIhKIke.png",
     "footer_productos": [
         {
             "nombre": "Prodcutos",
@@ -230,16 +230,16 @@
     ],
     "footer_servicios": [
         {
-            "titulo": "Contamos con Delivery de 7.",
+            "titulo": "Contamos con Delivery la 24 horas .",
             "descripcion": "Consultar al Whatsapp 926703231"
         },
         {
-            "titulo": "Contamos con super descuentos y promociones.",
-            "descripcion": "Siempre Conserve su Boleta o Factura de Compra"
+            "titulo": "Contamos con super descuentos y promociones 12.",
+            "descripcion": "Siempre Conserve "
         },
         {
-            "titulo": "Contamos con Soporte T\u00e9cnico",
-            "descripcion": "Especialistas en hardware y mantenimiento"
+            "titulo": "Contamos con Soporte T\u00e9cnico 124",
+            "descripcion": "Especialistas"
         }
     ],
     "footer_empresa_links": [

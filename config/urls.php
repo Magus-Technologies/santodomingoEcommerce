@@ -24,7 +24,7 @@ define('API_FACTURA_URL', 'https://magustechnologies.com/factura_santodomingo/da
 // En local usa: php artisan serve (puerto 8000) o Apache XAMPP
 define('LARAVEL_API_URL', $isLocal
     ? 'http://localhost:8000/api'
-    : 'https://viñasantodomingo.com/facturacion/api');
+    : 'http://84.247.162.204/facturaD/api');
 
 // Emails
 define('EMAIL_EMPRESA', 'ventas@viñasantodomingo.com');

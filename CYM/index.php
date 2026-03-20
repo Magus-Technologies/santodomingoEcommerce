@@ -1039,6 +1039,23 @@ if ($body_class == 'desktop') { ?>
                 background-repeat: no-repeat;
             }
         }
+
+        /* Altura fija para tarjetas de Remate y Tendencia */
+        #owl-productos-remate .product_img,
+        #owl-productos-tendencia .product_img {
+            height: 220px;
+            overflow: hidden;
+        }
+
+        #owl-productos-remate .product_img img,
+        #owl-productos-tendencia .product_img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            max-width: none !important;
+            max-height: none !important;
+        }
     </style>
     <!-- START SECTION BANNER -->
     <div class=" py-3 staggered-animation-wrap"
@@ -2993,9 +3010,8 @@ if ($body_class == 'desktop') { ?>
             }
             var stockHtml;
             var s = parseInt(r.stock);
-            if (s <= 0)      stockHtml = "<span style='color:#d70000'>Sin Stock</span>";
-            else if (s > 10) stockHtml = "<span style='color:#03ad01'>+ de 10 en Stock</span>";
-            else             stockHtml = "<span style='color:#03ad01'>" + s + " en Stock</span>";
+            if (s <= 0) stockHtml = "<span style='color:#d70000'>Sin Stock</span>";
+            else        stockHtml = "<span style='color:#03ad01'>" + s + " en Stock</span>";
 
             return '<div class="item">' +
                 '<div class="product_wrap">' +
@@ -3035,9 +3051,7 @@ if ($body_class == 'desktop') { ?>
             var s = parseInt(p.stock);
             var stockHtml = s <= 0
                 ? "<span style='font-weight:lighter;color:#d70000'>Sin Stock</span>"
-                : s > 10
-                    ? "<span style='font-weight:lighter;color:#03ad01'>+ de 10 en Stock</span>"
-                    : "<span style='font-weight:lighter;color:#03ad01'>" + s + " en Stock</span>";
+                : "<span style='font-weight:lighter;color:#03ad01'>" + s + " en Stock</span>";
 
             var imgHtml = p.imagen_url
                 ? '<img src="' + p.imagen_url + '" alt="' + p.nombre + '" style="max-width:540px;max-height:600px;"' +

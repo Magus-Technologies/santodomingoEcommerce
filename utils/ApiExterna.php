@@ -1,4 +1,5 @@
 <?php
+if (!defined('API_URL')) require_once __DIR__ . '/../config.php';
 
 class ApiExterna
 {
@@ -7,7 +8,7 @@ class ApiExterna
 
     public function __construct()
     {
-        $this->baseUrl = 'http://localhost:8000/api/public';
+        $this->baseUrl = API_URL . '/api/public';
         $this->timeout = 10;
     }
 

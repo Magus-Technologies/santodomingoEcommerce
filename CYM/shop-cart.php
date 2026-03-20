@@ -165,7 +165,7 @@ $dataConf = $tools->getConfiguracion();
                         </thead>
                         <tbody>
                         	<tr  v-for="(item, index) in listaCarrito">
-                            	<td class="product-thumbnail"><a href="#"><img :src="'../public/img/productos/'+item.imagen" alt="product1"></a></td>
+                            	<td class="product-thumbnail"><a href="#"><img :src="item.imagen && item.imagen.startsWith('http') ? item.imagen : '../public/img/productos/'+item.imagen" alt="product1"></a></td>
                                 <td class="product-name" data-title="Producto"><a href="#">{{item.nombre_prod}}</a></td>
                                 <td class="product-price" data-title="Precio">S/{{item.precio}}</td>
                                 <td class="product-quantity" data-title="Cantidad"><div class="quantity">
@@ -250,43 +250,6 @@ $dataConf = $tools->getConfiguracion();
 <!-- START FOOTER -->
 <?php include "../fragment/footer_gen.php"?>
 <!-- END FOOTER -->
-
-<a href="#" class="scrollup" style="display: none;"><i class="ion-ios-arrow-up"></i></a> 
-
-<!-- Latest jQuery --> 
-<script src="../public/assets/js/jquery-1.12.4.min.js"></script> 
-<!-- jquery-ui --> 
-<script src="../public/assets/js/jquery-ui.js"></script>
-<!-- popper min js -->
-<script src="../public/assets/js/popper.min.js"></script>
-<!-- Latest compiled and minified Bootstrap --> 
-<script src="../public/assets/bootstrap/js/bootstrap.min.js"></script> 
-<!-- owl-carousel min js  --> 
-<script src="../public/assets/owlcarousel/js/owl.carousel.min.js"></script> 
-<!-- magnific-popup min js  --> 
-<script src="../public/assets/js/magnific-popup.min.js"></script> 
-<!-- waypoints min js  --> 
-<script src="../public/assets/js/waypoints.min.js"></script> 
-<!-- parallax js  --> 
-<script src="../public/assets/js/parallax.js"></script> 
-<!-- countdown js  --> 
-<script src="../public/assets/js/jquery.countdown.min.js"></script> 
-<!-- imagesloaded js --> 
-<script src="../public/assets/js/imagesloaded.pkgd.min.js"></script>
-<!-- isotope min js --> 
-<script src="../public/assets/js/isotope.min.js"></script>
-<!-- jquery.dd.min js -->
-<script src="../public/assets/js/jquery.dd.min.js"></script>
-<!-- slick js -->
-<script src="../public/assets/js/slick.min.js"></script>
-<!-- elevatezoom js -->
-<script src="../public/assets/js/jquery.elevatezoom.js"></script>
-<!-- scripts js --> 
-<script src="../public/assets/js/scripts.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
-<script src="../public/js/main.js?v=2"></script>
-<script src="../public/js/tools.js"></script>
-<script src="../public/plugin/sweetalert2/vue-swal.js"></script>
 
 </body>
 
