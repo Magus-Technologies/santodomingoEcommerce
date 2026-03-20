@@ -164,8 +164,12 @@ const APP = new Vue({
                 success: function (resp) {
                     resp = JSON.parse(resp);
                     console.log(resp);
+                    if (!resp || typeof resp !== 'object') {
+                        console.warn('tsconfig.json vacío o inválido, usando defaults');
+                        return;
+                    }
                     // Merge para no perder valores por defecto si faltan claves en el JSON
-                    var defaults = APP._data.dataConf;
+                    var defaults = JSON.parse(JSON.stringify(APP._data.dataConf));
                     Object.keys(defaults).forEach(function(key) {
                         if (resp[key] === undefined || resp[key] === null) {
                             resp[key] = defaults[key];

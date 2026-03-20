@@ -285,6 +285,7 @@ if (strlen($dataConf['banercentarl3']['prod']) > 0) {
                     </button>
                 </div>
                 <div class="modal-body">
+                    <template v-if="dataConf.redessociales && dataConf.redessociales.whatsapp && dataConf.redessociales.whatsapp[itemselect]">
                     <div class="form-group">
                         <label for="recipient-name" class="col-form-label">Nombre:</label>
                         <input placeholder="" v-model="dataConf.redessociales.whatsapp[itemselect].nombre" type="text"
@@ -381,6 +382,7 @@ if (strlen($dataConf['banercentarl3']['prod']) > 0) {
                         <input placeholder="" v-model="dataConf.redessociales.whatsapp[itemselect].mensaje" type="text"
                                class="form-control recipient-name-prod">
                     </div>
+                    </template>
 
                 </div>
                 <div class="modal-footer">
