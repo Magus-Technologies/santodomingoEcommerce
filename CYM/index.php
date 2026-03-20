@@ -318,7 +318,9 @@ $_empDescripcion = !empty($_empresaApi['descripcion']) ? $_empresaApi['descripci
 $_empDireccion   = !empty($_empresaApi['direccion'])   ? $_empresaApi['direccion']   : ($dataConf['direccion'] ?? '');
 $_empEmail       = !empty($_empresaApi['email'])       ? $_empresaApi['email']       : ($dataConf['email']     ?? '');
 $_empTelefonos   = !empty($_empresaApi['telefonos'])   ? $_empresaApi['telefonos']   : ($dataConf['telefonos'] ?? []);
-$_empLogo        = !empty($_empresaApi['logo_url'])    ? $_empresaApi['logo_url']    : null;
+$_empLogoApi     = !empty($_empresaApi['logo_url'])    ? $_empresaApi['logo_url']    : null;
+$_empLogoLocal   = !empty($dataConf['footer_logo'])   ? '../public/img/banner/' . $dataConf['footer_logo'] : null;
+$_empLogo        = $_empLogoApi ?: $_empLogoLocal;
 
 // Footer config desde API (newsletter banner)
 $_footerApi = [];
