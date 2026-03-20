@@ -155,30 +155,7 @@ const CARRITO = new Vue({
                 this.guardarCarritousr();
                 localStorage.setItem('cmp-vsn-car', '');
             } else {
-                let carritoData = JSON.parse(JSON.stringify(this.listaCarrito))
-                /* console.log(carritoData);
-                console.log(carritoData.length); */
-                if (carritoData.length !== 0) {
-                    let car_data = JSON.stringify(this.listaCarrito);
-                    $.ajax({
-                        type: "POST",
-                        url: "../ajax/ajs_productos.php",
-                        data: { tipo: 'actualizar_producto_oferta_nossession', data: car_data },
-                        success: function (resp) {
-                            console.log(resp);
-                            car_data = JSON.parse(car_data)
-                            var lastItem = car_data.pop();
-                            let carrito_no_session = car_data
-                            resp = JSON.parse(resp);
-                            carrito_no_session.push(resp)
-                            carrito_no_session = JSON.stringify(carrito_no_session)
-                            localStorage.setItem('cmp-vsn-car', carrito_no_session);
-                            console.log(carrito_no_session);
-                        }
-                    });
-                } else {
-                    localStorage.setItem('cmp-vsn-car', '');
-                }
+                localStorage.setItem('cmp-vsn-car', JSON.stringify(this.listaCarrito));
                 /*  $.ajax({
                      type: "POST",
                      url: "../ajax/ajs_productos.php",

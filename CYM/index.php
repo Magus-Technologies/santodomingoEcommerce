@@ -729,6 +729,23 @@ if ($body_class == 'desktop') { ?>
                 background-repeat: no-repeat;
             }
         }
+
+        /* Altura fija para tarjetas de Remate y Tendencia */
+        #owl-productos-remate .product_img,
+        #owl-productos-tendencia .product_img {
+            height: 220px;
+            overflow: hidden;
+        }
+
+        #owl-productos-remate .product_img img,
+        #owl-productos-tendencia .product_img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            max-width: none !important;
+            max-height: none !important;
+        }
     </style>
     <!-- START SECTION BANNER -->
     <div class=" py-3 staggered-animation-wrap"
@@ -1581,11 +1598,9 @@ if ($body_class == 'desktop') { ?>
                                                         }
                                                         ?>
                                                         <a href="<?= $url_detalle ?>">
-                                                            <img style="max-width: 540px; max-height: 600px;"
-                                                                src="../public/img/productos/<?= $remate['imagen1'] ?>"
+                                                            <img src="../public/img/productos/<?= $remate['imagen1'] ?>"
                                                                 alt="el_img3">
-                                                            <img style="max-width: 540px; max-height: 600px;"
-                                                                class="product_hover_img"
+                                                            <img class="product_hover_img"
                                                                 src="../public/img/productos/<?= $remate['imagen2'] ?>"
                                                                 alt="el_hover_img3">
                                                         </a>
@@ -1808,17 +1823,19 @@ if ($body_class == 'desktop') { ?>
         <!-- END SECTION CLIENT LOGO -->
 
         <!-- START SECTION SUBSCRIBE NEWSLETTER -->
-        <div class="section bg_default small_pt small_pb" style="background-color:#880107 !important;">
-            <img class="d-none d-lg-block" src="../public/images/wine.png" alt="bg_newsletter" style="position: absolute;
-  width: 276px;
-  top: -110px;
-  left: 25px;" />
-            <div class="custom-container">
+        <div class="section bg_default small_pt small_pb" style="background-color:#880107 !important; position:relative;">
+            <?php
+            $suscImg = $dataConf['suscripcion_imagen'] ?? '';
+            if (!empty($suscImg) && !str_starts_with($suscImg, 'http')) $suscImg = '../public/img/banner/' . $suscImg;
+            if (empty($suscImg)) $suscImg = '../public/images/wine.png';
+            ?>
+            <img src="<?= htmlspecialchars($suscImg) ?>" alt="bg_newsletter" class="d-none d-lg-block" style="position:absolute; left:0; top:50%; transform:translateY(-50%); height:100%; width:auto; max-height:160px;">
+            <div class="custom-container" style="padding-left:130px;">
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <div class="newsletter_text text_white">
-                            <h3>Somos VIÑASANTODOMINGO los mejores en VINOS Y PISCO</h3>
-                            <p>Recibe las mejores Ofertas en Vino y Pisco SUSCR&Iacute;BETE</p>
+                            <h3><?= htmlspecialchars($dataConf['suscripcion_titulo'] ?? 'Somos VIÑASANTODOMINGO los mejores en VINOS Y PISCO') ?></h3>
+                            <p><?= htmlspecialchars($dataConf['suscripcion_parrafo'] ?? 'Recibe las mejores Ofertas en Vino y Pisco SUSCRÍBETE') ?></p>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -2589,9 +2606,8 @@ if ($body_class == 'desktop') { ?>
             }
             var stockHtml;
             var s = parseInt(r.stock);
-            if (s <= 0)      stockHtml = "<span style='color:#d70000'>Sin Stock</span>";
-            else if (s > 10) stockHtml = "<span style='color:#03ad01'>+ de 10 en Stock</span>";
-            else             stockHtml = "<span style='color:#03ad01'>" + s + " en Stock</span>";
+            if (s <= 0) stockHtml = "<span style='color:#d70000'>Sin Stock</span>";
+            else        stockHtml = "<span style='color:#03ad01'>" + s + " en Stock</span>";
 
             return '<div class="item">' +
                 '<div class="product_wrap">' +
@@ -2631,9 +2647,7 @@ if ($body_class == 'desktop') { ?>
             var s = parseInt(p.stock);
             var stockHtml = s <= 0
                 ? "<span style='font-weight:lighter;color:#d70000'>Sin Stock</span>"
-                : s > 10
-                    ? "<span style='font-weight:lighter;color:#03ad01'>+ de 10 en Stock</span>"
-                    : "<span style='font-weight:lighter;color:#03ad01'>" + s + " en Stock</span>";
+                : "<span style='font-weight:lighter;color:#03ad01'>" + s + " en Stock</span>";
 
             var imgHtml = p.imagen_url
                 ? '<img src="' + p.imagen_url + '" alt="' + p.nombre + '" style="max-width:540px;max-height:600px;"' +

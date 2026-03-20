@@ -3,16 +3,6 @@
  * Proxy para Productos en Remate
  * Acciones: listar, quitar
  */
-session_start();
-require "../dao/Session.php";
-$sessionModel = new Session;
-$validate = $sessionModel->validateSession();
-
-if (!isset($_SESSION['usuario'])) {
-    echo json_encode(['success' => false, 'message' => 'No autorizado']);
-    exit;
-}
-
 header('Content-Type: application/json');
 
 require "../config.php";
