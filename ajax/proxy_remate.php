@@ -9,6 +9,15 @@ require "../config.php";
 
 $accion = $_GET['accion'] ?? $_POST['accion'] ?? 'listar';
 
+// Acciones que modifican datos requieren sesión
+if ($accion !== 'listar') {
+    session_start();
+    if (!isset($_SESSION['usuario'])) {
+        echo json_encode(['success' => false, 'message' => 'No autorizado']);
+        exit;
+    }
+}
+
 if ($accion === 'listar') {
     $url = API_URL . '/api/public/productos-en-remate';
     $ch = curl_init($url);
