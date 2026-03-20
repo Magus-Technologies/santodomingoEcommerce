@@ -34,14 +34,16 @@
                     <div class="widget">
                         <h6 class="widget_title">Empresa</h6>
                         <ul class="widget_links">
-                            <li><a href="about.php">Nosotros</a></li>
-                            <li><a href="contact.php">Contactanos</a></li>
-                            <li><a href="term.php">Terminos y Condiciones</a></li>
+                            <?php foreach ($dataConf['footer_empresa_links'] ?? [] as $link): ?>
+                            <li><a href="<?= htmlspecialchars($link['url']) ?>" target="<?= htmlspecialchars($link['target'] ?? '_self') ?>"><?= htmlspecialchars($link['nombre']) ?></a></li>
+                            <?php endforeach; ?>
+                            <?php if (!empty($dataConf['footer_libro_reclamaciones'])): ?>
                             <li>
                                 <a href="../public/librorec/libro.php" target="_blank">
                                     <img src="../public/librorec/libro2.png" style="filter: brightness(0) invert();"
                                         alt="libro reclamaciones"></a>
                             </li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </div>
@@ -95,9 +97,9 @@
         <div class="custom-container">
             <div class="row">
                 <div class="col-lg-4">
-                    <p class="mb-lg-0 text-center">&copy; <?= date('Y') ?> Todos los derechos reservados por <a
-                            target="_blank" href="https://magustechnologies.com/"><strong>MAGUS
-                                TECHNOLOGIES</strong></a> </p>
+                    <?php $fc = $dataConf['footer_copyright'] ?? []; ?>
+                    <p class="mb-lg-0 text-center">&copy; <?= date('Y') ?> <?= htmlspecialchars($fc['texto'] ?? 'Todos los derechos reservados por') ?> <a
+                            target="_blank" href="<?= htmlspecialchars($fc['url'] ?? 'https://magustechnologies.com/') ?>"><strong><?= htmlspecialchars($fc['empresa'] ?? 'MAGUS TECHNOLOGIES') ?></strong></a> </p>
                 </div>
                 <div class="col-lg-4 order-lg-first">
                     <div class="widget mb-lg-0">
@@ -118,12 +120,9 @@
                 </div>
                 <div class="col-lg-4">
                     <ul class="footer_payment text-center text-lg-right">
-                        <li><a href="#"><img src="../public/assets/images/visa.png" alt="visa"></a></li>
-                        <li><a href="#"><img src="../public/assets/images/discover.png" alt="discover"></a></li>
-                        <li><a href="#"><img src="../public/assets/images/master_card.png" alt="master_card"></a>
-                        </li>
-                        <!--li><a href="#"><img src="../public/assets/images/paypal.png" alt="paypal"></a></li>
-                        <li><a href="#"><img src="../public/assets/images/amarican_express.png" alt="amarican_express"></a></li-->
+                        <?php foreach ($dataConf['footer_metodos_pago'] ?? [] as $mp): ?>
+                        <li><a href="#"><img src="<?= htmlspecialchars($mp['imagen']) ?>" alt="<?= htmlspecialchars($mp['nombre']) ?>"></a></li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
             </div>

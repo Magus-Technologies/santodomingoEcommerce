@@ -789,6 +789,81 @@ if (strlen($dataConf['banercentarl3']['prod']) > 0) {
                 </div>
             </div>
 
+            <!-- ── LINKS EMPRESA ──────────────────────────────────── -->
+            <hr>
+            <div class="col-md-12 text-center"><h5>Links Empresa</h5></div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Links</label>
+                <div class="col-sm-10">
+                    <table class="table table-sm" style="width:100%">
+                        <tr><th>Nombre</th><th>URL</th><th>Target</th><th></th></tr>
+                        <tr v-for="(item, i) in dataConf.footer_empresa_links">
+                            <td><input type="text" v-model="item.nombre" class="form-control form-control-sm"></td>
+                            <td><input type="text" v-model="item.url"    class="form-control form-control-sm" placeholder="about.php"></td>
+                            <td>
+                                <select v-model="item.target" class="form-control form-control-sm">
+                                    <option value="_self">Misma ventana</option>
+                                    <option value="_blank">Nueva ventana</option>
+                                </select>
+                            </td>
+                            <td><button type="button" class="btn btn-danger btn-sm" @click="dataConf.footer_empresa_links.splice(i,1)"><i class="fa fa-trash"></i></button></td>
+                        </tr>
+                    </table>
+                    <button type="button" class="btn btn-success btn-sm" @click="dataConf.footer_empresa_links.push({nombre:'',url:'',target:'_self'})"><i class="fa fa-plus"></i> Agregar link</button>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Libro de Reclamaciones</label>
+                <div class="col-sm-10">
+                    <label class="mr-3"><input type="checkbox" v-model="dataConf.footer_libro_reclamaciones"> Mostrar icono del Libro de Reclamaciones</label>
+                </div>
+            </div>
+
+            <!-- ── MÉTODOS DE PAGO ──────────────────────────────────── -->
+            <hr>
+            <div class="col-md-12 text-center"><h5>Métodos de Pago (iconos footer)</h5></div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Métodos</label>
+                <div class="col-sm-10">
+                    <table class="table table-sm" style="width:100%">
+                        <tr><th>Nombre</th><th>Ruta Imagen</th><th>Vista previa</th><th></th></tr>
+                        <tr v-for="(item, i) in dataConf.footer_metodos_pago">
+                            <td><input type="text" v-model="item.nombre" class="form-control form-control-sm"></td>
+                            <td><input type="text" v-model="item.imagen" class="form-control form-control-sm" placeholder="../public/assets/images/visa.png"></td>
+                            <td><img :src="item.imagen" style="max-height:30px;" :alt="item.nombre"></td>
+                            <td><button type="button" class="btn btn-danger btn-sm" @click="dataConf.footer_metodos_pago.splice(i,1)"><i class="fa fa-trash"></i></button></td>
+                        </tr>
+                    </table>
+                    <button type="button" class="btn btn-success btn-sm" @click="dataConf.footer_metodos_pago.push({nombre:'',imagen:''})"><i class="fa fa-plus"></i> Agregar método</button>
+                </div>
+            </div>
+
+            <!-- ── COPYRIGHT ──────────────────────────────────── -->
+            <hr>
+            <div class="col-md-12 text-center"><h5>Copyright</h5></div>
+
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Texto</label>
+                <div class="col-sm-10">
+                    <input type="text" v-model="dataConf.footer_copyright.texto" class="form-control" placeholder="Todos los derechos reservados por">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">Empresa</label>
+                <div class="col-sm-10">
+                    <input type="text" v-model="dataConf.footer_copyright.empresa" class="form-control" placeholder="MAGUS TECHNOLOGIES">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 col-form-label">URL Empresa</label>
+                <div class="col-sm-10">
+                    <input type="text" v-model="dataConf.footer_copyright.url" class="form-control" placeholder="https://magustechnologies.com/">
+                </div>
+            </div>
+
         </div>
 
 

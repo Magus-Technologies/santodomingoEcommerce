@@ -14,6 +14,7 @@ die(); */
 date_default_timezone_set('America/Lima');
 
 
+require_once "../config.php";
 require "../utils/Tools.php";
 require "../dao/NuevoImgresoDao.php";
 require "../dao/GrupoCategoriaDao.php";

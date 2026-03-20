@@ -242,6 +242,43 @@
             "descripcion": "Especialistas en hardware y mantenimiento"
         }
     ],
+    "footer_empresa_links": [
+        {
+            "nombre": "Nosotros",
+            "url": "about.php",
+            "target": "_self"
+        },
+        {
+            "nombre": "Contactanos",
+            "url": "contact.php",
+            "target": "_self"
+        },
+        {
+            "nombre": "Terminos y Condiciones",
+            "url": "term.php",
+            "target": "_self"
+        }
+    ],
+    "footer_libro_reclamaciones": true,
+    "footer_metodos_pago": [
+        {
+            "nombre": "visa",
+            "imagen": "../public/assets/images/visa.png"
+        },
+        {
+            "nombre": "discover",
+            "imagen": "../public/assets/images/discover.png"
+        },
+        {
+            "nombre": "master_card",
+            "imagen": "../public/assets/images/master_card.png"
+        }
+    ],
+    "footer_copyright": {
+        "texto": "Todos los derechos reservados por",
+        "empresa": "MAGUS TECHNOLOGIES",
+        "url": "https://magustechnologies.com/"
+    },
     "banner_extra_remate": [
         {
             "imagen": "mGfjZnPz5xBCrnJe5JlQoBUya5wbWRyjwAUgUtmRoA7bJvaUqAVB4f7jzfuUV7E3dJWrJAnvQAFpgFlO.png",

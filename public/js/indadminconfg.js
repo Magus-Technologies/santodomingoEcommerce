@@ -52,7 +52,23 @@ const APP = new Vue({
                 {titulo:'Contamos con Delivery.',                       descripcion:'Consultar al Whatsapp 930 570 018'},
                 {titulo:'Contamos con super descuentos y promociones.', descripcion:'Siempre Conserve su Boleta o Factura de Compra'},
                 {titulo:'Contamos con Soporte Técnico',                 descripcion:'Especialistas en hardware y mantenimiento'}
-            ]
+            ],
+            footer_empresa_links: [
+                {nombre:'Nosotros', url:'about.php', target:'_self'},
+                {nombre:'Contactanos', url:'contact.php', target:'_self'},
+                {nombre:'Terminos y Condiciones', url:'term.php', target:'_self'}
+            ],
+            footer_libro_reclamaciones: true,
+            footer_metodos_pago: [
+                {nombre:'visa', imagen:'../public/assets/images/visa.png'},
+                {nombre:'discover', imagen:'../public/assets/images/discover.png'},
+                {nombre:'master_card', imagen:'../public/assets/images/master_card.png'}
+            ],
+            footer_copyright: {
+                texto: 'Todos los derechos reservados por',
+                empresa: 'MAGUS TECHNOLOGIES',
+                url: 'https://magustechnologies.com/'
+            }
         }
     },
     methods:{
