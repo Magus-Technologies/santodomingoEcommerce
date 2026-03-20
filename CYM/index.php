@@ -290,16 +290,16 @@ die();
 ////////////// BANNER LATERAL
 $dataConf = $tools->getConfiguracion();
 //var_dump($dataConf);
-$usarBanner6 = $dataConf['banner_menu_lateral_6'];
+$usarBanner6 = $dataConf['banner_menu_lateral_6'] ?? [];
 $nuevoArray = [];
 foreach ($usarBanner6 as $row) {
-    if ($row['estado'] !== '0') {
+    if (($row['estado'] ?? '0') !== '0') {
         $nuevoArray[] = $row;
     }
 }
 $cantidadIndex = count($nuevoArray);
-$randonIndex = rand(0, $cantidadIndex - 1);
-$banner6Final = $nuevoArray[$randonIndex];
+$randonIndex = $cantidadIndex > 0 ? rand(0, $cantidadIndex - 1) : 0;
+$banner6Final = $nuevoArray[$randonIndex] ?? ['url' => '', 'imagen' => ''];
 
 ////////////// BANNER EXTRA//////////////////////////////////////////////////////////
 $dataConf = $tools->getConfiguracion();
@@ -336,16 +336,16 @@ $_footerSubtitulo = $_footerApi['subtitulo']   ?? 'Recibe las mejores Ofertas SU
 $_footerBoton     = $_footerApi['boton_texto'] ?? 'Suscríbete';
 $_footerImagen    = $_footerApi['imagen_url']  ?? null;
 
-$usarBannerExtra = $dataConf['banner_extra'];
+$usarBannerExtra = $dataConf['banner_extra'] ?? [];
 $nuevoArrayExtra = [];
 foreach ($usarBannerExtra as $row) {
-    if ($row['estado'] !== '0') {
+    if (($row['estado'] ?? '0') !== '0') {
         $nuevoArrayExtra[] = $row;
     }
 }
 $cantidadIndexExtra = count($nuevoArrayExtra);
-$randonIndexExtra = rand(0, $cantidadIndexExtra - 1);
-$banner6FinalExtra = $nuevoArrayExtra[$randonIndexExtra];
+$randonIndexExtra = $cantidadIndexExtra > 0 ? rand(0, $cantidadIndexExtra - 1) : 0;
+$banner6FinalExtra = $nuevoArrayExtra[$randonIndexExtra] ?? ['url' => '', 'imagen' => ''];
 
 $usarBannerExtra2 = isset($dataConf['banner_extra_remate']) ? $dataConf['banner_extra_remate'] : [];
 $nuevoArrayExtra2 = [];
@@ -364,10 +364,10 @@ die();
  */
 
 ////////////////// BANNER INFERIOR///////////
-$usarBanner6 = $dataConf['banner_inferior'];
+$usarBanner6 = $dataConf['banner_inferior'] ?? [];
 $nuevoArrayInferior = [];
 foreach ($usarBanner6 as $row) {
-    if ($row['estado'] !== '0') {
+    if (($row['estado'] ?? '0') !== '0') {
         $nuevoArrayInferior[] = $row;
     }
 }
@@ -415,17 +415,12 @@ if (empty($listaMarcas)) {
 }
 
 $ban1_nombre = '';
-$ban1_url = $dataConf['banner1']['image'];
-/* echo "<pre>"
-var_dump($dataConf);
-die(); */
+$ban1_url = $dataConf['banner1']['image'] ?? '';
 $ban1_ide = 'javascript:void(0)';
 
-//echo strlen($dataConf['banner1']['prod']);
-if (strlen($dataConf['banner1']['prod']) > 0) {
+if (strlen($dataConf['banner1']['prod'] ?? '') > 0) {
     $productoDao->setProdId($dataConf['banner1']['prod']);
     $respPROB1 = $productoDao->getData2();
-    //print_r($respPROB1);
     if (count($respPROB1) > 0) {
         $ban1_nombre = $respPROB1['nombre'];
         $ban1_ide = "shop-product-detail.php?prod=" . $dataConf['banner1']['prod'];
@@ -433,33 +428,33 @@ if (strlen($dataConf['banner1']['prod']) > 0) {
 }
 
 $ban2_nombre = '';
-$ban2_url = $dataConf['banner2']['image'];
+$ban2_url = $dataConf['banner2']['image'] ?? '';
 $ban2_ide = 'javascript:void(0)';
 
-if (strlen($dataConf['banner2']['prod']) > 0) {
+if (strlen($dataConf['banner2']['prod'] ?? '') > 0) {
     $productoDao->setProdId($dataConf['banner2']['prod']);
     $respPROB2 = $productoDao->getData2();
-    //print_r($respPROB1);
-    $ban2_nombre = $respPROB2['nombre'];
-    $ban2_ide = "shop-product-detail.php?prod=" . $dataConf['banner2']['prod'];
+    if (!empty($respPROB2)) {
+        $ban2_nombre = $respPROB2['nombre'];
+        $ban2_ide = "shop-product-detail.php?prod=" . $dataConf['banner2']['prod'];
+    }
 }
 
-$banerCimg1 = $dataConf['banercentarl1']['image'];
+$banerCimg1 = $dataConf['banercentarl1']['image'] ?? '';
 $banerCprod1 = 'javascript:void(0)';
-if (strlen($dataConf['banercentarl1']['prod']) > 0) {
-
+if (strlen($dataConf['banercentarl1']['prod'] ?? '') > 0) {
     $banerCprod1 = "shop-product-detail.php?prod=" . $dataConf['banercentarl1']['prod'];
 }
 
-$banerCimg2 = $dataConf['banercentarl2']['image'];
+$banerCimg2 = $dataConf['banercentarl2']['image'] ?? '';
 $banerCprod2 = 'javascript:void(0)';
-if (strlen($dataConf['banercentarl2']['prod']) > 0) {
+if (strlen($dataConf['banercentarl2']['prod'] ?? '') > 0) {
     $banerCprod2 = "shop-product-detail.php?prod=" . $dataConf['banercentarl2']['prod'];
 }
 
-$banerCimg3 = $dataConf['banercentarl3']['image'];
+$banerCimg3 = $dataConf['banercentarl3']['image'] ?? '';
 $banerCprod3 = 'javascript:void(0)';
-if (strlen($dataConf['banercentarl3']['prod']) > 0) {
+if (strlen($dataConf['banercentarl3']['prod'] ?? '') > 0) {
     $banerCprod3 = "shop-product-detail.php?prod=" . $dataConf['banercentarl3']['prod'];
 }
 
@@ -484,13 +479,16 @@ $RdeliveryP = $productoDao->exeSQL($sqlEXTERNO);
 $sqlINTERNO = "SELECT * FROM delivery_pasos WHERE tipo='I' ";
 $RdeliveryI = $productoDao->exeSQL($sqlINTERNO);
 
-$vusu = $_SESSION['usuario'];
-$sqlf = "SELECT (CASE WHEN vip_estado = '1' THEN 'SI' ELSE 'NO' END) AS vip  FROM usuarios_vip WHERE use_id='$vusu'";
-$resulta = $productoDao->exeSQL($sqlf);
-foreach ($resulta as $rowpd) {
-    $vip = $rowpd['vip'];
+$vusu = $_SESSION['usuario'] ?? null;
+$vip_status = 'NO';
+if ($vusu) {
+    $sqlf = "SELECT (CASE WHEN vip_estado = '1' THEN 'SI' ELSE 'NO' END) AS vip  FROM usuarios_vip WHERE use_id='$vusu'";
+    $resulta = $productoDao->exeSQL($sqlf);
+    foreach ($resulta as $rowpd) {
+        $vip = $rowpd['vip'];
+    }
+    $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO');
 }
-$vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO');
 
 ?>
 <!DOCTYPE html>
@@ -663,7 +661,7 @@ if ($body_class == 'desktop') { ?>
     <div class="fluid-container" style="padding: 11px; width: 100%;overflow: hidden; background-color: #880107;">
 
         <p style="text-align: center; margin: 0px; color: #fff;"><i class="ti-location-pin"></i>
-            <strong><?= $dataConf['direccion'] ?></strong>
+            <strong><?= $dataConf['direccion'] ?? '' ?></strong>
         </p>
     </div>
     <header class="header_wrap">
@@ -1071,7 +1069,7 @@ if ($body_class == 'desktop') { ?>
                                 <?php
                                 $countBan = 1;
                                 $soloVisibles = [];
-                                foreach ($dataConf['banner_pricipal'] as $rowBan) {
+                                foreach (($dataConf['banner_pricipal'] ?? []) as $rowBan) {
 
                                     if ($rowBan['estado'] == '1') {
                                         $soloVisibles[] = $rowBan;
@@ -1292,10 +1290,9 @@ if ($body_class == 'desktop') { ?>
                 <div class="row">
                     <div class="col-xl-3 d-none d-xl-none">
                         <div class="sale-banner">
-                            <?php $usarBanner6 = $dataConf['banner_menu_lateral_6'];
+                            <?php $usarBanner6 = $dataConf['banner_menu_lateral_6'] ?? [];
                             $cantidadIndex = count($usarBanner6);
-                            /* echo "<pre>"; */
-                            $randonIndex = rand(0, $cantidadIndex - 1);
+                            $randonIndex = $cantidadIndex > 0 ? rand(0, $cantidadIndex - 1) : 0;
 
                             /*  var_dump($usarBanner6[$randonIndex]);
                             die(); */ ?>
