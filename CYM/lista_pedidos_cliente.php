@@ -31,8 +31,7 @@ $tools       = new Tools();
 $productoDao = new ProductoDao();
 $productosApi = new ProductosApi();
 
-$explode  = explode('/', $_SERVER['REQUEST_URI']);
-$idPedido = (int) end($explode);
+$idPedido = (int) ($_GET['id'] ?? 0);
 
 $sql = "SELECT pdd.pedido_id,
     CONCAT(pdd.nombre , ' ' , IF(ISNULL(pdd.apellido), '', pdd.apellido)) AS nombre_cliente,

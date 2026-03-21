@@ -152,7 +152,7 @@ $result = $productoDao->exeSQL($sql);
                                 <td class="text-center"><a href="pedidos_vew.php?pd=<?= $row_ped['pedido_id'] ?>" class="btn btn-primary"><i class="fa fa-eye"></i></a></td>
                                 <td>
 
-                                    <a class="btn btn-success" id="btnDescargarPedidos" target="_blank" href="../CYM/lista_pedidos_cliente.php/<?= $row_ped['pedido_id'] ?>"><i class='fa fa-download'></i></a>
+                                    <a class="btn btn-success" id="btnDescargarPedidos" target="_blank" href="../CYM/lista_pedidos_cliente.php?id=<?= $row_ped['pedido_id'] ?>"><i class='fa fa-download'></i></a>
                                 </td>
                             </tr>
                         <?php
