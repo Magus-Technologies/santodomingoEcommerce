@@ -23,7 +23,7 @@ $categoria = $_GET['ctg'] ?? '';
 
 // Nombre de categoría desde factura_santod3
 $catId = (int)$categoria;
-$sqlCat = "SELECT nombre FROM factura_santod3.categorias WHERE id=$catId AND estado='1'";
+$sqlCat = "SELECT nombre FROM factura_santod.categorias WHERE id=$catId AND estado='1'";
 $resCat = $conexion->query($sqlCat);
 $caterogoria_nom = ($resCat && $row = $resCat->fetch_assoc()) ? $row['nombre'] : 'Productos';
 
@@ -46,7 +46,7 @@ $vripo = $_GET['v'] ?? '';
 
 
 // Categorías desde factura_santod3
-$sql = "SELECT id as codi_categoria, nombre FROM factura_santod3.categorias WHERE estado='1' ORDER BY nombre";
+$sql = "SELECT id as codi_categoria, nombre FROM factura_santod.categorias WHERE estado='1' ORDER BY nombre";
 $listaGrupos = $conexion->query($sql);
 
 ?><!DOCTYPE html>

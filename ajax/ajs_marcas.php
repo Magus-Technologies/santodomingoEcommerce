@@ -28,7 +28,7 @@ if ($tipo == "s") {
     }
 } elseif ($tipo == 'marcas_facturacion') {
     // Marcas del sistema de facturación (misma BD en el mismo servidor)
-    $sql = "SELECT cod_marca, nombre_marca FROM factura_santod3.marcra_productos ORDER BY nombre_marca";
+    $sql = "SELECT cod_marca, nombre_marca FROM factura_santod.marcra_productos ORDER BY nombre_marca";
     $res = $conexion->query($sql);
     $respuesta = [];
     if ($res) {

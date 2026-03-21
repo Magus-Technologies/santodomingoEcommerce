@@ -148,10 +148,16 @@ elseif ($tipo=='banner_extra_IN'){
     echo json_encode($configuracion['menu_nav']);
 
 }elseif ($tipo=='menu_nav_IN'){
-    $items = json_decode($_POST['data'], true);
-    $configuracion['menu_nav'] = $items;
-    $tools->guardarConfiguarion($configuracion);
-    echo json_encode(['res' => true]);
+    try {
+        $items = json_decode($_POST['data'], true);
+        $configuracion['menu_nav'] = $items;
+        $tools->guardarConfiguarion($configuracion);
+        echo json_encode(['res' => true]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['res' => false, 'error' => $e->getMessage()]);
+        exit;
+    }
 
 }elseif ($tipo=='seleccion_save'){
     $indice = (int)$_POST['indice'];

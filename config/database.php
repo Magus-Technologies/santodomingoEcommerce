@@ -12,18 +12,20 @@ $isLocal = ($_SERVER['HTTP_HOST'] === 'localhost' || strpos($_SERVER['HTTP_HOST'
 // Configuración por ambiente
 if ($isLocal) {
     // DESARROLLO LOCAL
-    define('DB_HOST', 'localhost:33068');
-    define('DB_USER', 'root');
-    define('DB_PASS', '7616');
-    define('DB_NAME', 'compuvision');
-    define('DB_CHARSET', 'utf8');
+    define('DB_HOST',         'localhost:33068');
+    define('DB_USER',         'root');
+    define('DB_PASS',         '7616');
+    define('DB_NAME',         'compuvision');
+    define('DB_FACTURA_NAME', 'factura_santoD');
+    define('DB_CHARSET',      'utf8');
 } else {
-    // PRODUCCIÓN - Usar variables de entorno
-    define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-    define('DB_USER', getenv('DB_USER') ?: 'root');
-    define('DB_PASS', getenv('DB_PASS') ?: '');
-    define('DB_NAME', getenv('DB_NAME') ?: 'compuvision');
-    define('DB_CHARSET', 'utf8');
+    // PRODUCCIÓN
+    define('DB_HOST',         getenv('DB_HOST') ?: 'localhost');
+    define('DB_USER',         getenv('DB_USER') ?: 'root');
+    define('DB_PASS',         getenv('DB_PASS') ?: 'C4l4b4za$$');
+    define('DB_NAME',         getenv('DB_NAME') ?: 'Ecommerce');
+    define('DB_FACTURA_NAME', getenv('DB_FACTURA_NAME') ?: 'factura_santod');
+    define('DB_CHARSET',      'utf8');
 }
 
 // Validar que las credenciales estén configuradas

@@ -3,8 +3,9 @@
  * Script para crear la tabla ofertas_productos_api sin restricción de clave foránea
  */
 
-$conn = new mysqli('localhost:33068', 'root', '7616', 'compuvision');
-$conn->set_charset('utf8');
+require_once __DIR__ . '/config/database.php';
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+$conn->set_charset(DB_CHARSET);
 
 if ($conn->connect_error) {
     die("Error de conexión: " . $conn->connect_error);

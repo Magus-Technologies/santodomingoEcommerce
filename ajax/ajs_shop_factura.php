@@ -9,7 +9,7 @@
 require "../config/urls.php";
 require "../utils/Conexion.php";
 
-$laravelApi = defined('LARAVEL_API_URL') ? LARAVEL_API_URL : 'http://localhost:8000/api';
+$laravelApi = LARAVEL_API_URL;
 
 // URL base del storage de Laravel para construir URLs de imágenes
 $scheme      = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -78,7 +78,8 @@ if ($tipo === 'productos') {
 } elseif ($tipo === 'marcas') {
     $conexion = (new Conexion())->getConexion();
     $sql = "SELECT cod_marca, nombre_marca
-            FROM factura_santod3.marcra_productos
+            FROM marcra_productos
+            WHERE estado = '1'
             ORDER BY nombre_marca";
 
     $res  = $conexion->query($sql);
@@ -97,10 +98,10 @@ if ($tipo === 'productos') {
 // ── CATEGORÍAS ─────────────────────────────────────────────────────────────
 } elseif ($tipo === 'categorias') {
     $conexion = (new Conexion())->getConexion();
-    $sql = "SELECT id, nombre
-            FROM factura_santod3.categorias
+    $sql = "SELECT cod_marca AS id, nombre_marca AS nombre
+            FROM marcra_productos
             WHERE estado = '1'
-            ORDER BY nombre";
+            ORDER BY nombre_marca";
 
     $res  = $conexion->query($sql);
     $data = [];

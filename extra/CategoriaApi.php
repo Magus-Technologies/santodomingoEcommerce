@@ -21,7 +21,7 @@ class CategoriaApi
      * compatibles con el dropdown del panel admin/categorias.php.
      */
     public function getLista(){
-        $conn = new mysqli('localhost:33068', 'root', '7616', 'factura_santoD');
+        $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_FACTURA_NAME);
         $conn->set_charset('utf8');
         $respuesta = [];
         $res = $conn->query("SELECT id, nombre FROM categorias WHERE estado = '1' ORDER BY nombre ASC");

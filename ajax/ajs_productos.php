@@ -29,7 +29,7 @@ if ($tipo == 'count_prod') {
         $chk = $productoDao->exeSQL("SELECT prod_id FROM producto WHERE prod_id='{$car['prod']}'");
         $validProduct = $chk && $chk->num_rows > 0;
         if (!$validProduct) {
-            $chkLr = $productoDao->exeSQL("SELECT id_producto FROM factura_santod3.productos WHERE id_producto='{$car['prod']}'");
+            $chkLr = $productoDao->exeSQL("SELECT id_producto FROM factura_santod.productos WHERE id_producto='{$car['prod']}'");
             $validProduct = $chkLr && $chkLr->num_rows > 0;
         }
         if ($validProduct) {
@@ -45,7 +45,7 @@ if ($tipo == 'count_prod') {
                COALESCE(p.nombre, lp.nombre, '') AS nombre
             FROM carrito_compra AS cr
             LEFT JOIN producto p ON p.prod_id = cr.prod_id
-            LEFT JOIN factura_santod3.productos lp ON lp.id_producto = cr.prod_id
+            LEFT JOIN factura_santod.productos lp ON lp.id_producto = cr.prod_id
             WHERE cr.usuario_id='{$_SESSION['usuario']}'";
     $result = $productoDao->exeSQL($sql);
     $respuesta = [];
@@ -57,7 +57,7 @@ if ($tipo == 'count_prod') {
             $row['stock']  = $conRay['stock'];
         } else {
             // Fallback: precio y stock desde Laravel DB
-            $sqlLr = "SELECT precio, cantidad FROM factura_santod3.productos WHERE id_producto = '{$row['prod_id']}'";
+            $sqlLr = "SELECT precio, cantidad FROM factura_santod.productos WHERE id_producto = '{$row['prod_id']}'";
             $resLr = $productoDao->exeSQL($sqlLr);
             if ($rowLr = $resLr->fetch_assoc()) {
                 $row['precio'] = $rowLr['precio'];
@@ -82,7 +82,7 @@ if ($tipo == 'count_prod') {
             $row['imagen'] = $img['imagen_url'];
         }
         if (empty($row['imagen'])) {
-            $sqlImg = "SELECT imagen FROM factura_santod3.productos WHERE id_producto = '{$row['prod_id']}'";
+            $sqlImg = "SELECT imagen FROM factura_santod.productos WHERE id_producto = '{$row['prod_id']}'";
             $resImg = $productoDao->exeSQL($sqlImg);
             if ($rowImg = $resImg->fetch_assoc()) {
                 $row['imagen'] = $rowImg['imagen'] ? API_URL . '/storage/' . $rowImg['imagen'] : '';
