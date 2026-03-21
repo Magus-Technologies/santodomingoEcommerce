@@ -3,12 +3,19 @@ session_start();
 
 require "../dao/ProductoDao.php";
 require "../utils/Tools.php";
+require_once "../config.php";
 $conexion = (new Conexion())->getConexion();
 $productoDao = new ProductoDao();
 $tools = new Tools();
 
 $dataConf = $tools->getConfiguracion();
-$idusu=$_SESSION['usuario'];
+
+if (!isset($_SESSION['usuario'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$idusu = $_SESSION['usuario'];
 $sql = "SELECT *, DATE_FORMAT(lib_date,'%d/%m/%Y') AS fecha2 
 	FROM libro_reclamacion rr, usuarios uu 
 	WHERE rr.lib_emailcli = uu.email AND uu.use_id='$idusu'";
@@ -60,6 +67,7 @@ foreach ($result2 as $rowvp) {
 <link rel="stylesheet" href="../public/assets/css/style.css">
 <link rel="stylesheet" href="../public/assets/css/responsive.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../public/assets/css/my-account.css">
 <style>
     .float {
         padding-top: 7px;
@@ -76,6 +84,7 @@ foreach ($result2 as $rowvp) {
         box-shadow: 2px 2px 3px #999;
         z-index: 100;
     }
+
 </style>
 </head>
 
@@ -97,27 +106,6 @@ foreach ($result2 as $rowvp) {
     <?php include "../fragment/head_secon.php"; ?>
     <!-- END HEADER -->
 
-    <!-- START SECTION BREADCRUMB -->
-    <div class="breadcrumb_section bg_gray page-title-mini">
-        <div class="container">
-            <!-- STRART CONTAINER -->
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="page-title">
-                        <h1>Mi cuenta</h1>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <ol class="breadcrumb justify-content-md-end">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                        <li class="breadcrumb-item active">Mi cuenta</li>
-                    </ol>
-                </div>
-            </div>
-        </div><!-- END CONTAINER-->
-    </div>
-    <!-- END SECTION BREADCRUMB -->
 
     <!-- START MAIN CONTENT -->
     <div class="main_content">
@@ -246,6 +234,7 @@ foreach ($result2 as $rowvp) {
                                 </div>
                             </div>
 
+
                             <div class="tab-pane fade" id="reclaim" role="tabpanel" aria-labelledby="orders-tab">
                                 <div class="card">
                                     <div class="card-header">
@@ -341,7 +330,7 @@ foreach ($result2 as $rowvp) {
                                                     </div>
                                                     <div class="col-md-12">
                                                         <button type="submit" class="btn " name="submit" value="Submit" 
-								style="background-color:#232323; color:#fff; !important">Guardar
+								style="background-color:#232323; color:#fff !important">Guardar
                                                         </button>
                                                     </div>
                                                 </div>
@@ -359,7 +348,7 @@ foreach ($result2 as $rowvp) {
                                                     <div class="col-md-12">
 							  <?php if ($vipu=="") : ?>	
                                                         <button type="submit" class="btn " name="submit" value="Submit" 
-								style="background-color:#232323; color:#fff; !important"> Solicitar Acceso
+								style="background-color:#232323; color:#fff !important"> Solicitar Acceso
                                                         </button>
 	   						  <?php endif; ?>
 							   <?php if ($vipu=="1") : ?>
@@ -383,8 +372,7 @@ foreach ($result2 as $rowvp) {
                                                         <input v-model="npasword" required="" class="form-control" name="npassword" type="password">
                                                     </div>
                                                     <div class="col-md-12">
-                                                        <button type="submit" class="btn " name="submit" value="Submit" style="background-color:#232323; color:#fff; !important"
->Guardar
+                                                        <button type="submit" class="btn " name="submit" value="Submit" style="background-color:#232323; color:#fff !important">Guardar
                                                         </button>
                                                     </div>
                                                 </div>
@@ -536,216 +524,7 @@ foreach ($result2 as $rowvp) {
     <script src="../public/js/tools.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-    <script>
-        const APP = new Vue({
-            el: '#contenedor-vue',
-            data: {
-                dat: {
-                    nombre: '',
-                    apellido: '',
-                    num_doc: '',
-                    celular: '',
-                    email: '',
-                    notas: '',
-                    productos: []
-                },
-                npasword: '',
-                lista_pedidos: [],
-                lista_comras:[],
-                lista_comras22:[],
-            },
-            methods: {
-                importe_prodd(cnt, prec) {
-                    return (parseFloat(cnt) * parseFloat(prec)).toFixed(2);
-                },
-                formatNumeberDecimal(num) {
-                    return parseFloat(num + '').toFixed(2);
-                },
-                getPedidosData(pedido) {
-                    $.ajax({
-                        type: "POST",
-                        url: "../ajax/ajs_consulta.php",
-                        data: {
-                            tipo: 'data-pdds-user',
-                            pedido
-                        },
-                        success: function(resp) {
-
-                            resp = JSON.parse(resp);
-                            if (resp.res) {
-                                APP._data.dat.apellido = resp.data.apellido
-                                APP._data.dat.celular = resp.data.celular
-                                APP._data.dat.email = resp.data.email
-                                APP._data.dat.nombre = resp.data.nombre
-                                APP._data.dat.notas = resp.data.notas
-                                APP._data.dat.num_doc = resp.data.nun_doc
-                                APP._data.dat.productos = resp.data.productos
-
-                            }
-
-
-                        }
-                    });
-                },
-                getListaPedidos() {
-                    $.ajax({
-                        type: "POST",
-                        url: "../ajax/ajs_consulta.php",
-                        data: {
-                            tipo: 'lts-pdds-user'
-                        },
-                        success: function(resp) {
-                            resp = JSON.parse(resp);
-                            resp = resp.reverse();
-                            APP._data.lista_comras22 = resp;
-                            APP._data.lista_pedidos = resp;
-                        }
-                    });
-                },
-                getListaCompras() {
-                    $.ajax({
-                        type: "POST",
-                        url: "../ajax/ajs_consulta.php",
-                        data: {
-                            tipo: 'lts-comp-user'
-                        },
-                        success: function(resp) {
-                            resp = JSON.parse(resp);
-                            resp = resp.reverse();
-                            console.log(resp);
-                            APP._data.lista_comras = resp;
-                        }
-                    });
-                },
-                cambiar_pass() {
-                    $.ajax({
-                        type: "POST",
-                        url: "../ajax/ajs_consulta.php",
-                        data: {
-                            tipo: 'chg-pass-user',
-                            npss: this.npasword
-                        },
-                        success: function(resp) {
-                            console.log(resp);
-                            resp = JSON.parse(resp);
-                            if (resp.res) {
-                                APP._data.npasword = '';
-                                alertExito("Contraseña cambiada", "")
-                            } else {
-                                alertAdvertencia("Alerta", "No se pudo cambiar la contraseña")
-                            }
-                        }
-                    });
-
-                },
-                estador(est) {
-                    switch (est) {
-                        case "1":
-                            return 'Preparando';
-                        case "2":
-                            return 'Enviado';
-                        case "3":
-                            return 'Recibido';
-                        case "4":
-                            return 'Vendido';
-                    }
-                },
-            },
-            computed: {
-                temd(){
-                },
-                total_productos() {
-                    var total = 0;
-                   /* for (var i = 0; i < this.dat.productos.length; i++) {
-                        total += parseFloat(this.dat.productos[i].cantidad + "") * parseFloat(this.dat.productos[i].precio + "");
-                    }*/
-                    return total.toFixed(2);
-                }
-            }
-        });
-
-        $(document).ready(function() {
-            //APP.getListaPedidos();
-            //APP.getListaCompras();
-
-	      $('#solicitar_vip').submit(function(e) {
-                e.preventDefault()
-                if ($('#usupermi').val() !== '') {
-                    $.ajax({
-                        type: "POST",
-                        url: "../ajax/ajs_consulta.php",
-                        data: {
-                            tipo: 'chg-vip-user',
-                            name: $('#usupermi').val()
-                        },
-                        success: function(resp) {
-                            console.log(resp);
-                            resp = JSON.parse(resp);
-                            if (resp.res) {
-                                APP._data.npasword = '';
-                                alertExito("Solicitud exitosa, este cambio se vera reflejado cuando el administrador acepte la solicitud", "")
-                            } else {
-                                alertAdvertencia("Alerta", "No se realizar la solicitud")
-                            }
-                        }
-                    });
-                } else {
-                    alertAdvertencia("Alerta", "No puede dejar el nombre en blanco")
-                }
-            })
-
-
-	
-	
-
-
-
-            $('#cambiar_nombre').submit(function(e) {
-                e.preventDefault()
-                if ($('#cambiarName').val() !== '') {
-                    $.ajax({
-                        type: "POST",
-                        url: "../ajax/ajs_consulta.php",
-                        data: {
-                            tipo: 'chg-name-user',
-                            name: $('#cambiarName').val()
-                        },
-                        success: function(resp) {
-                            console.log(resp);
-                            resp = JSON.parse(resp);
-                            if (resp.res) {
-                                APP._data.npasword = '';
-                                alertExito("Cambio exitoso, este cambio se verá reflejado cuando vuelva a iniciar sesion", "")
-                            } else {
-                                alertAdvertencia("Alerta", "No se pudo cambiar la contraseña")
-                            }
-                        }
-                    });
-                } else {
-                    alertAdvertencia("Alerta", "No puede dejar el nombre en blanco")
-                }
-            })
-
-
-
-            $("#btnDescargarPedidos").click(function() {
-                let idCliente = $(this).attr('data-id')
-                console.log(idCliente);
-                $.ajax({
-                    type: "POST",
-                    url: "../CYM/lista_pedidos_cliente.php",
-                    data: {
-                        idCliente: idCliente
-                    },
-                    success: function(resp) {
-                        /*  resp = JSON.parse(resp);
-                         resp = resp.reverse(); */
-                        console.log(resp);
-                    }
-                });
-            })
-        });
-    </script>
+    <script src="../public/js/my-account.js"></script>
 </body>
 
 </html>

@@ -198,6 +198,30 @@ elseif ($tipo=='banner_extra_IN'){
     } else {
         echo json_encode(['res' => false, 'msg' => 'Datos inválidos']);
     }
+} elseif ($tipo === 'save_pdf_config') {
+    $logoPath = $configuracion['pdf_empresa']['logo'] ?? '../public/images/cym.png';
+
+    if (!empty($_FILES['logo']['tmp_name'])) {
+        $ext = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+            $filename = 'logo_pdf_' . time() . '.' . $ext;
+            $dest = __DIR__ . '/../public/img/pdf/' . $filename;
+            if (!is_dir(dirname($dest))) mkdir(dirname($dest), 0775, true);
+            if (move_uploaded_file($_FILES['logo']['tmp_name'], $dest)) {
+                $logoPath = '../public/img/pdf/' . $filename;
+            }
+        }
+    }
+
+    $configuracion['pdf_empresa'] = [
+        'empresa'   => trim($_POST['empresa'] ?? ''),
+        'ruc'       => trim($_POST['ruc'] ?? ''),
+        'direccion' => trim($_POST['direccion'] ?? ''),
+        'garantia'  => trim($_POST['garantia'] ?? '12 meses'),
+        'logo'      => $logoPath,
+    ];
+    $tools->guardarConfiguarion($configuracion);
+    echo json_encode(['res' => true]);
 }
 
 

@@ -107,9 +107,8 @@ if ($isSesionUser) {
                                         <li><a class="dropdown-item nav-link nav_item"
                                                 href="./usuarios_promociones.php">Usuarios
                                                 Suscritos</a></li>
-                                        <li><a class="dropdown-item nav-link nav_item" href="./formas_pago.php">Formas
-                                                de
-                                                Pago</a></li>
+                                        <li><a class="dropdown-item nav-link nav_item" href="./formas_pago.php">Formas de Pago</a></li>
+                                        <li><a class="dropdown-item nav-link nav_item" href="./config_pdf.php">Configuración PDF</a></li>
 
                                     </ul>
 

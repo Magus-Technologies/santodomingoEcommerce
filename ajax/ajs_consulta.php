@@ -95,6 +95,28 @@ order by ped.pedido_id desc ";
             $respuesta[] = $item;
         }
         break;
+    case 'lts-cotiz-user':
+        require_once "../config.php";
+        $rowUsr = $conexion->query("SELECT nun_doc FROM usuarios WHERE use_id='{$_SESSION['usuario']}'")->fetch_assoc();
+        $doc = $rowUsr['nun_doc'] ?? '';
+        if (!$doc) {
+            $lastPed = $conexion->query("SELECT nun_doc FROM pedidos WHERE id_usuario='{$_SESSION['usuario']}' AND nun_doc != '' ORDER BY pedido_id DESC LIMIT 1")->fetch_assoc();
+            $doc = $lastPed['nun_doc'] ?? '';
+        }
+        $respuesta = [];
+        if ($doc) {
+            $secret = 'ecomm_cym_2026_secret';
+            $ch = curl_init(API_URL . '/api/internal/cotizaciones-cliente?secret=' . urlencode($secret) . '&documento=' . urlencode($doc));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            $res = curl_exec($ch);
+            curl_close($ch);
+            $data = json_decode($res, true);
+            if (!empty($data['data'])) {
+                $respuesta = $data['data'];
+            }
+        }
+        break;
        case 'prodce-prod':
         //$sql="DELETE FROM carrito_compra where  usuario_id='{$_SESSION['usuario']}'";
         //$conexion->query($sql);
@@ -131,7 +153,7 @@ order by ped.pedido_id desc ";
                 foreach ($car_list as $car) {
 
                     $sql2 = "insert into pedido_detalles set id_pedido='$pedido_id',id_producto='{$car['prod']}',
-                cantidad='{$car['cantidad']}',precio='{$car['precio']}',estado=1";
+                nombre='{$car['nombre_prod']}',cantidad='{$car['cantidad']}',precio='{$car['precio']}',estado=1";
                     $conexion->query($sql2);
                 }
                 $sql = "DELETE FROM carrito_compra where  usuario_id='{$_SESSION['usuario']}'";
