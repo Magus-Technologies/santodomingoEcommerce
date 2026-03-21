@@ -210,24 +210,6 @@
             "url": "contact.php",
             "estado": "1",
             "hijos": []
-        },
-        {
-            "titulo": "NOSOTROS",
-            "url": "about.php",
-            "estado": "1",
-            "hijos": []
-        },
-        {
-            "titulo": "TERMINOS Y CONDICIONES",
-            "url": "term.php",
-            "estado": "1",
-            "hijos": []
-        },
-        {
-            "titulo": "LIBRO DE RECLAMACION",
-            "url": "ibro.php",
-            "estado": "1",
-            "hijos": []
         }
     ],
     "suscripcion_titulo": "Somos VI\u00d1ASANTODOMINGO los mejores en VINOS Y PISCO",

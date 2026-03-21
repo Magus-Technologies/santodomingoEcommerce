@@ -2,6 +2,7 @@
 
 session_start();
 
+require "../config.php";
 require "../dao/ProductoDao.php";
 require "../dao/GrupoCategoriaDao.php";
 require "../utils/Tools.php";
@@ -21,11 +22,22 @@ $listProdBan = $productoDao->getRandomInfo(1);
 
 $categoria = $_GET['ctg'] ?? '';
 
-// Nombre de categoría desde factura_santod3
 $catId = (int)$categoria;
-$sqlCat = "SELECT nombre FROM factura_santod.categorias WHERE id=$catId AND estado='1'";
-$resCat = $conexion->query($sqlCat);
-$caterogoria_nom = ($resCat && $row = $resCat->fetch_assoc()) ? $row['nombre'] : 'Productos';
+$caterogoria_nom = 'Productos';
+$listaGrupos = [];
+
+$rawCats = @file_get_contents(API_URL . '/api/public/categorias');
+if ($rawCats !== false) {
+    $dataCat = json_decode($rawCats, true);
+    if (isset($dataCat['success']) && $dataCat['success'] && isset($dataCat['data'])) {
+        foreach ($dataCat['data'] as $cat) {
+            $listaGrupos[] = ['codi_categoria' => $cat['id'], 'nombre' => $cat['nombre']];
+            if ((int)$cat['id'] === $catId) {
+                $caterogoria_nom = $cat['nombre'];
+            }
+        }
+    }
+}
 
 $subC = '';
 if (isset($_GET['sub'])) {
@@ -42,12 +54,6 @@ $vh1 = isset($_GET['v']) && isset($tipoPrecios[$_GET['v']])
     : '';
 
 $vripo = $_GET['v'] ?? '';
-
-
-
-// Categorías desde factura_santod3
-$sql = "SELECT id as codi_categoria, nombre FROM factura_santod.categorias WHERE estado='1' ORDER BY nombre";
-$listaGrupos = $conexion->query($sql);
 
 ?><!DOCTYPE html>
 <?php include '../fragment/head_general.php' ?>

@@ -4,7 +4,7 @@ if ($_isLocal) {
     define('DB_HOST', 'localhost:33068');
     define('DB_USER', 'root');
     define('DB_PASS', '7616');
-    define('DB_NAME', 'compuvision');
+    define('DB_NAME', 'Ecommerce');
 } else {
     define('DB_HOST', 'localhost');
     define('DB_USER', 'root');

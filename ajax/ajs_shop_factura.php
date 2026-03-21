@@ -97,19 +97,10 @@ if ($tipo === 'productos') {
 
 // ── CATEGORÍAS ─────────────────────────────────────────────────────────────
 } elseif ($tipo === 'categorias') {
-    $conexion = (new Conexion())->getConexion();
-    $sql = "SELECT cod_marca AS id, nombre_marca AS nombre
-            FROM marcra_productos
-            WHERE estado = '1'
-            ORDER BY nombre_marca";
-
-    $res  = $conexion->query($sql);
-    $data = [];
-    if ($res) {
-        while ($row = $res->fetch_assoc()) {
-            $data[] = ['id' => $row['id'], 'nombre' => $row['nombre']];
-        }
+    $raw = fetchApi($laravelApi . '/public/categorias');
+    if ($raw && isset($raw['data'])) {
+        echo json_encode(['success' => true, 'data' => $raw['data']]);
+    } else {
+        echo json_encode(['success' => true, 'data' => []]);
     }
-
-    echo json_encode(['success' => true, 'data' => $data]);
 }
