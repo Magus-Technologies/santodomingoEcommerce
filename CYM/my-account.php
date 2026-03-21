@@ -21,11 +21,12 @@ $sql = "SELECT *, DATE_FORMAT(lib_date,'%d/%m/%Y') AS fecha2
 	WHERE rr.lib_emailcli = uu.email AND uu.use_id='$idusu'";
 $result = $productoDao->exeSQL($sql);
 
+$vipu = '';
 $sql2 = "SELECT vip_id FROM usuarios_vip WHERE use_id='$idusu'";
 $result2 = $productoDao->exeSQL($sql2);
 foreach ($result2 as $rowvp) {
 	$vipu = $rowvp['vip_id'];
- }
+}
 
 
 
