@@ -670,7 +670,7 @@ FROM
                         },
                         success: function(resp) {
                             resp = JSON.parse(resp)
-                            APP_BANN._data.listaBaner = resp
+                            APP_BANN._data.listaBaner = resp || []
                             console.log(resp);
                         }
                     });

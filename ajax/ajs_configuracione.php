@@ -83,7 +83,7 @@ if ($tipo=='banner1'){
     $tools->guardarConfiguarion($configuracion);
 
 }elseif ($tipo=='bannerP_s'){
-    echo json_encode($configuracion['banner_pricipal']);
+    echo json_encode($configuracion['banner_pricipal'] ?? []);
 }elseif ($tipo=='bannerP_I'){
     $banners=$_POST['data'];
     $configuracion['banner_pricipal']=json_decode($banners);
