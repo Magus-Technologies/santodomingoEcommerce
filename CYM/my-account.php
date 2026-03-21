@@ -180,7 +180,7 @@ foreach ($result2 as $rowvp) {
                                                         <td>{{estador(item.estado)}}</td>
                                                         <td>
 
-                                                            <a class="btn btn-primary" id="btnDescargarPedidos" target="_blank" :href="'../CYM/lista_pedidos_cliente.php/' + item.pedido_id"><i class='fa fa-download'></i></a>
+                                                            <a class="btn btn-primary" id="btnDescargarPedidos" target="_blank" :href="'../CYM/lista_pedidos_cliente.php?id=' + item.pedido_id"><i class='fa fa-download'></i></a>
                                                         </td>
 
                                                     </tr>
