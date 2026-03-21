@@ -24,13 +24,23 @@ if ($tipo == 'count_prod') {
     $listaCrrito = json_decode($_POST['car'], true);
     $sql = "DELETE FROM carrito_compra WHERE usuario_id = '{$_SESSION['usuario']}';";
     $productoDao->exeSQL($sql);
+    $apiProdIds = [];
+    $rawApiProds = @file_get_contents(API_URL . '/api/public/shop-productos?per_page=1000');
+    if ($rawApiProds !== false) {
+        $apiDataProds = json_decode($rawApiProds, true);
+        if (isset($apiDataProds['data'])) {
+            foreach ($apiDataProds['data'] as $p) {
+                $apiProdIds[] = (int)$p['prod_id'];
+            }
+        }
+    }
+
     foreach ($listaCrrito as $car) {
-        // Validar en compuvision primero, luego en Laravel DB
+        // Validar en Ecommerce primero, luego en API de facturación
         $chk = $productoDao->exeSQL("SELECT prod_id FROM producto WHERE prod_id='{$car['prod']}'");
         $validProduct = $chk && $chk->num_rows > 0;
         if (!$validProduct) {
-            $chkLr = $productoDao->exeSQL("SELECT id_producto FROM factura_santod.productos WHERE id_producto='{$car['prod']}'");
-            $validProduct = $chkLr && $chkLr->num_rows > 0;
+            $validProduct = in_array((int)$car['prod'], $apiProdIds);
         }
         if ($validProduct) {
             $sql = "INSERT INTO carrito_compra SET usuario_id='{$_SESSION['usuario']}',prod_id='{$car['prod']}',cantidad='{$car['cantidad']}'";
@@ -39,35 +49,45 @@ if ($tipo == 'count_prod') {
     }
 } elseif ($tipo == 'usr_crd_lts') {
     $productosApi = new ProductosApi();
-    // LEFT JOIN para soportar productos de compuvision Y de Laravel (factura_santod3)
+
+    // Obtener productos de facturación vía API (sin cross-DB)
+    $apiProductos = [];
+    $rawApiLts = @file_get_contents(API_URL . '/api/public/shop-productos?per_page=1000');
+    if ($rawApiLts !== false) {
+        $apiDataLts = json_decode($rawApiLts, true);
+        if (isset($apiDataLts['data'])) {
+            foreach ($apiDataLts['data'] as $p) {
+                $apiProductos[(int)$p['prod_id']] = $p;
+            }
+        }
+    }
+
     $sql = "SELECT cr.cantidad, cr.carrito_id, cr.prod_id,
                COALESCE(p.prod_cod, '') AS prod_cod,
-               COALESCE(p.nombre, lp.nombre, '') AS nombre
+               COALESCE(p.nombre, '') AS nombre
             FROM carrito_compra AS cr
             LEFT JOIN producto p ON p.prod_id = cr.prod_id
-            LEFT JOIN factura_santod.productos lp ON lp.id_producto = cr.prod_id
             WHERE cr.usuario_id='{$_SESSION['usuario']}'";
     $result = $productoDao->exeSQL($sql);
     $respuesta = [];
     foreach ($result as $row) {
-        // Intentar precio/stock desde ERP legacy (compuvision)
+        // Si no tiene nombre en Ecommerce, buscar en API
+        if (empty($row['nombre']) && isset($apiProductos[(int)$row['prod_id']])) {
+            $row['nombre'] = $apiProductos[(int)$row['prod_id']]['nombre'] ?? '';
+        }
+        // Precio/stock desde Ecommerce primero, luego API
         $conRay = !empty($row['prod_cod']) ? $productosApi->getDataProd($row['prod_cod'], "") : [];
         if (!empty($conRay)) {
             $row['precio'] = $conRay['precio_venta'];
             $row['stock']  = $conRay['stock'];
+        } elseif (isset($apiProductos[(int)$row['prod_id']])) {
+            $row['precio'] = $apiProductos[(int)$row['prod_id']]['precio'] ?? 0;
+            $row['stock']  = $apiProductos[(int)$row['prod_id']]['stock'] ?? 0;
         } else {
-            // Fallback: precio y stock desde Laravel DB
-            $sqlLr = "SELECT precio, cantidad FROM factura_santod.productos WHERE id_producto = '{$row['prod_id']}'";
-            $resLr = $productoDao->exeSQL($sqlLr);
-            if ($rowLr = $resLr->fetch_assoc()) {
-                $row['precio'] = $rowLr['precio'];
-                $row['stock']  = $rowLr['cantidad'];
-            } else {
-                $row['precio'] = 0;
-                $row['stock']  = 0;
-            }
+            $row['precio'] = 0;
+            $row['stock']  = 0;
         }
-        // Oferta vigente (compuvision)
+        // Oferta vigente (Ecommerce)
         $sql2 = "SELECT * FROM ofertas_productos WHERE fecha_termino >= NOW() AND producto_id = " . $row['prod_id'];
         $result3 = $productoDao->exeSQL($sql2);
         if ($result3->num_rows > 0) {
@@ -75,18 +95,15 @@ if ($tipo == 'count_prod') {
                 $row['precio'] = $nuevoPrecioOferta['precio_oferta'];
             }
         }
-        // Imagen: primero compuvision, luego Laravel storage
+        // Imagen: primero Ecommerce, luego API
         $result2 = $productoDao->exeSQL("SELECT * FROM producto_foto WHERE prod_id = '{$row['prod_id']}' LIMIT 1");
         $row['imagen'] = '';
         if ($img = $result2->fetch_assoc()) {
             $row['imagen'] = $img['imagen_url'];
         }
-        if (empty($row['imagen'])) {
-            $sqlImg = "SELECT imagen FROM factura_santod.productos WHERE id_producto = '{$row['prod_id']}'";
-            $resImg = $productoDao->exeSQL($sqlImg);
-            if ($rowImg = $resImg->fetch_assoc()) {
-                $row['imagen'] = $rowImg['imagen'] ? API_URL . '/storage/' . $rowImg['imagen'] : '';
-            }
+        if (empty($row['imagen']) && isset($apiProductos[(int)$row['prod_id']])) {
+            $apiImg = $apiProductos[(int)$row['prod_id']]['imagen1'] ?? '';
+            $row['imagen'] = $apiImg ? API_URL . '/storage/' . $apiImg : '';
         }
         $respuesta[] = $row;
     }
@@ -546,8 +563,8 @@ WHERE prod_id = '$prod';";
             }
             $cont++;
         }
-        $row['imagen1'] = strlen($row['imagen1']) > 0 ? $row['imagen1'] : 'sinimagen_mtr_20sba.jpg';
-        $row['imagen2'] = strlen($row['imagen2']) > 0 ? $row['imagen2'] : 'sinimagen_mtr_20sba.jpg';
+        $row['imagen1'] = !empty($row['imagen1']) ? $row['imagen1'] : 'sinimagen_mtr_20sba.jpg';
+        $row['imagen2'] = !empty($row['imagen2']) ? $row['imagen2'] : 'sinimagen_mtr_20sba.jpg';
 
         $respuesta[] = $row;
     }
@@ -593,8 +610,8 @@ WHERE prod_id = '$prod';";
             }
             $cont++;
         }
-        $row['imagen1'] = strlen($row['imagen1']) > 0 ? $row['imagen1'] : 'sinimagen_mtr_20sba.jpg';
-        $row['imagen2'] = strlen($row['imagen2']) > 0 ? $row['imagen2'] : 'sinimagen_mtr_20sba.jpg';
+        $row['imagen1'] = !empty($row['imagen1']) ? $row['imagen1'] : 'sinimagen_mtr_20sba.jpg';
+        $row['imagen2'] = !empty($row['imagen2']) ? $row['imagen2'] : 'sinimagen_mtr_20sba.jpg';
 
         $respuesta[] = $row;
     }
@@ -695,8 +712,8 @@ WHERE prod_id = '$prod';";
             }
             $cont++;
         }
-        $row['imagen1'] = strlen($row['imagen1']) > 0 ? $row['imagen1'] : 'sinimagen_mtr_20sba.jpg';
-        $row['imagen2'] = strlen($row['imagen2']) > 0 ? $row['imagen2'] : 'sinimagen_mtr_20sba.jpg';
+        $row['imagen1'] = !empty($row['imagen1']) ? $row['imagen1'] : 'sinimagen_mtr_20sba.jpg';
+        $row['imagen2'] = !empty($row['imagen2']) ? $row['imagen2'] : 'sinimagen_mtr_20sba.jpg';
 
         $respuesta[] = $row;
     }
