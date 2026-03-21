@@ -36,17 +36,17 @@ if ($tipo == 'count_prod') {
     }
 
     foreach ($listaCrrito as $car) {
-        // Validar en Ecommerce primero, luego en API de facturación
         $chk = $productoDao->exeSQL("SELECT prod_id FROM producto WHERE prod_id='{$car['prod']}'");
-        $validProduct = $chk && $chk->num_rows > 0;
-        if (!$validProduct) {
-            $validProduct = in_array((int)$car['prod'], $apiProdIds);
-        }
+        $inLocal = $chk && $chk->num_rows > 0;
+        $inApi   = in_array((int)$car['prod'], $apiProdIds);
+        // Si la llamada a la API falló ($apiProdIds vacío), permitir igual si viene del frontend
+        $validProduct = $inLocal || $inApi || empty($apiProdIds);
         if ($validProduct) {
             $sql = "INSERT INTO carrito_compra SET usuario_id='{$_SESSION['usuario']}',prod_id='{$car['prod']}',cantidad='{$car['cantidad']}'";
             $productoDao->exeSQL($sql);
         }
     }
+    $respuesta['res'] = true;
 } elseif ($tipo == 'usr_crd_lts') {
     $productosApi = new ProductosApi();
 
@@ -103,10 +103,14 @@ if ($tipo == 'count_prod') {
         }
         if (empty($row['imagen']) && isset($apiProductos[(int)$row['prod_id']])) {
             $apiImg = $apiProductos[(int)$row['prod_id']]['imagen1'] ?? '';
-            $row['imagen'] = $apiImg ? API_URL . '/storage/' . $apiImg : '';
+            if ($apiImg) {
+                $row['imagen'] = str_starts_with($apiImg, 'http') ? $apiImg : API_URL . '/storage/' . $apiImg;
+            }
         }
         $respuesta[] = $row;
     }
+    echo json_encode($respuesta);
+    exit;
 } elseif ($tipo == 'pag-search2PMarcas') {
     $respuesta = $productoDao->getFiltrosProductos3Search($_POST['pal']);
 } elseif ($tipo == 'pag-search2P') {
