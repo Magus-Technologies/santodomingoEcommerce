@@ -19,14 +19,14 @@ $productoDao = new ProductoDao();
 $dataConf = $tools->getConfiguracion();
 //print_r($listaProd);
 
-$sql = "SELECT pd.*,p.nombre,prod_cod,pe.*,u.nombres,te.nombre AS tipoenvio,tp.nombre AS tipopago,
-SUM(precio * cantidad) AS total 
-FROM pedido_detalles AS pd 
-JOIN pedidos AS pe ON pe.pedido_id=pd.id_pedido
-LEFT JOIN tipo_envio AS te ON pe.tipo_envio=te.id_tipo_envio
-LEFT JOIN tipo_pago AS tp ON pe.tipo_pago=tp.id_tipo_pago
+$sql = "SELECT pe.*, u.nombres, te.nombre AS tipoenvio, tp.nombre AS tipopago,
+SUM(pd.precio * pd.cantidad) AS total
+FROM pedidos AS pe
+JOIN pedido_detalles AS pd ON pd.id_pedido = pe.pedido_id
+LEFT JOIN tipo_envio AS te ON pe.tipo_envio = te.id_tipo_envio
+LEFT JOIN tipo_pago AS tp ON pe.tipo_pago = tp.id_tipo_pago
 JOIN usuarios u ON u.use_id = pe.id_usuario
-JOIN producto p ON p.prod_id = pd.id_producto  GROUP BY pd.id_pedido ORDER BY pe.pedido_id DESC ";
+GROUP BY pe.pedido_id ORDER BY pe.pedido_id DESC";
 $result = $productoDao->exeSQL($sql);
 
 ?>

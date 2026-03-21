@@ -344,10 +344,12 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
         }
     });
 
-    window.onload = function () {
-        $('#alertavip').click(function () {
-            alert('Usted no tiene permisos para acceder al area VIP');
-        });
-    };
+    window.addEventListener('load', function () {
+        if (typeof $ !== 'undefined') {
+            $('#alertavip').click(function () {
+                alert('Usted no tiene permisos para acceder al area VIP');
+            });
+        }
+    });
 
 </script>
