@@ -664,7 +664,7 @@ if ($body_class == 'desktop') { ?>
             <strong><?= $dataConf['direccion'] ?? '' ?></strong>
         </p>
     </div>
-    <header class="header_wrap">
+    <header class="header_wrap fixed-top header_with_topbar">
         <?php include "../fragment/navbar.php" ?>
         <div style="background-color: #232323; height: 68px;margin-top:-2px;"
             class="bottom_header dark_skin main_menu_uppercase border-top border-bottom">
