@@ -33,7 +33,7 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
 ?>
 
 <input type="hidden" value="<?= $tc ?>" id="tasa_cambio">
-<header class="header_wrap fixed-top header_with_topbar">
+<div>
     <!-- SECCIÓN ROJA CON LOGO, BUSCADOR Y CARRITO -->
     <div class="middle-header dark_skin" style="background-color: #c7161d; padding: 20px 0;">
         <div class="container">
@@ -113,4 +113,4 @@ $vip_status = empty($rowpd['vip']) ? 'NO' : ($rowpd['vip'] === 'SI' ? 'SI' : 'NO
             </div>
         </div>
     </div>
-</header>
+</div>
