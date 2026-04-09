@@ -10,7 +10,7 @@ $tools = new Tools();
 $dataConf = $tools->getConfiguracion();
 
 
-$tipolink = $_GET['v'];
+$tipolink = $_GET['v'] ?? '';
 if ($tipolink != '') {
     $vmsg = "Para ver nuestro catalogo de precios VIP debe ingresar a nuestro sistema";
 
